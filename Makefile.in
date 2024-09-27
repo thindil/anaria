@@ -1,0 +1,224 @@
+# Makefile for PennMUSH
+
+# - System configuration - #
+
+VERSION=1.8.8
+PATCHLEVEL=0
+
+#
+# This section of the file should be automatically configured by the
+# Configure script. If it doesn't work, you might try reporting your
+# problem (including this Makefile) at
+# https://github.com/pennmush/pennmush/issues
+#
+# If you want to profile the code, add -pg -a -DPROFILING to CCFLAGS
+# and (probably) remove -O
+#
+MAKE=@MAKE@
+CC=@PTHREAD_CC@
+
+SQL_CFLAGS=@MYSQL_CFLAGS@ @POSTGRESQL_CPPFLAGS@
+SQL_LDFLAGS=@MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@
+
+CCFLAGS=@CFLAGS@ -I.. -I../hdrs -include ../config.h -include ../confmagic.h -include ../options.h @PTHREAD_CFLAGS@ @CPPFLAGS@ @ICU_CPPFLAGS@ @OPENSSL_INCLUDES@ @CURL_CFLAGS@
+LDFLAGS=@LDFLAGS@  @OPENSSL_LDFLAGS@
+CLIBS=@PTHREAD_LIBS@ @LIBS@ @ICU_LIBS@ @OPENSSL_LIBS@ @POSTGRESQL_LIBS@ @CURL_LIBS@
+INSTALL=@INSTALL@
+INSTALLDIR=$installdir
+CP=@CP@
+CHMOD=@CHMOD@
+INSTALL_LINKS=@LN_S@ ../src/netmud netmush; @LN_S@ ../src/info_slave info_slave; @LN_S@ ../src/ssl_slave ssl_slave
+
+# stupid SYS V shell
+SHELL=/bin/sh
+# Where to install with 'make globalinstall'
+GLOBAL_INSTALL=@libexecdir@
+
+PCRE2_DIR=pcre2-10.43
+
+
+all: config.h autogen game/mush.cnf
+	@if [ ! -d pcre2 ]; then \
+		echo "Making all in pcre2"; \
+		(cd $(PCRE2_DIR) && make install); \
+	fi
+	@echo "Making all in src."
+	(cd src; @MAKE@ all "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
+	"LDFLAGS=$(LDFLAGS)" "CLIBS=$(CLIBS)" "MAKE=$(MAKE)" \
+	"MAKEFLAGS=$(MAKEFLAGS)" "SQL_CFLAGS=$(SQL_CFLAGS)" \
+	"SQL_LDFLAGS=$(SQL_LDFLAGS)")
+	@echo "If the make was successful, use 'make install' to install links."
+
+config.h: configure
+	@echo "Looks like your configure has been updated."
+	@echo "Run that first. If you did just run configure and"
+	@echo "it said that config.h was unchanged, 'touch config.h'"
+	@echo "to suppress this message and continue compiling."
+	@exit 1
+
+autogen: hdrs/cmds.h hdrs/funs.h hdrs/switches.h hdrs/gitinfo.h src/tests.inc
+
+hdrs/cmds.h: src/cmds.c src/command.c src/cque.c src/extchat.c src/help.c src/set.c src/sql.c Patchlevel
+	@PERL@ utils/mkcmds.pl commands
+
+hdrs/switches.h: src/SWITCHES Patchlevel
+	@PERL@ utils/mkcmds.pl switches
+
+src/switchinc.c: src/SWITCHES Patchlevel
+	@PERL@ utils/mkcmds.pl switches
+
+hdrs/funs.h: src/fun*.c src/bsd.c src/conf.c src/connlog.c src/extmail.c src/help.c src/markup.c src/wiz.c src/sql.c Patchlevel src/cque.c
+	@PERL@ utils/mkcmds.pl functions
+
+src/tests.inc: src/*.c
+	@PERL@ utils/mkcmds.pl tests
+
+hdrs/gitinfo.h: $(wildcard .git/HEAD .git/index)
+	@if [ -f ".git/HEAD" ]; then \
+		echo "#define GIT_REVISION \"$(shell git rev-parse --short HEAD)\"" > $@; \
+	fi
+	@echo "/* Built at `date +%Y%m%d%H%M%S` */" >> hdrs/gitinfo.h
+
+install: localized all
+	@if [ -f game/netmush ]; then rm -f game/netmush; fi
+	@if [ -f game/info_slave ]; then rm -f game/info_slave; fi
+	@if [ -f game/ssl_slave ]; then rm -f game/ssl_slave; fi
+	-(cd game; $(INSTALL_LINKS))
+	(cd game/txt; @MAKE@)
+	@echo "If you plan to run multiple MUSHes, consider running 'make customize'"
+
+netmud:
+	(cd src; @MAKE@ netmud "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
+	"SQL_CFLAGS=$(SQL_CFLAGS)" "SQL_LDFLAGS=$(SQL_LDFLAGS)" \
+	"LDFLAGS=$(LDFLAGS)" "CLIBS=$(CLIBS)" )
+
+access:
+	utils/make_access_cnf.sh game
+
+pennmush.pot:
+	(cd src; make ../po/pennmush.pot)
+
+localized:
+	-echo "Localizing for your locale..."
+	-(cd po; @MAKE@ localized)
+
+portmsg:
+	(cd src; @MAKE@ portmsg "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
+	"LDFLAGS=$(LDFLAGS)" "CLIBS=$(CLIBS)" )
+
+ssl_slave:
+	(cd src; @MAKE@ ssl_slave "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
+	"LDFLAGS=$(LDFLAGS)" "CLIBS=$(CLIBS)" "MAKE=$(MAKE)" \
+	"MAKEFLAGS=$(MAKEFLAGS)")
+
+versions: CHANGES*
+	-@rm -rf CHANGES*~ CHANGES*bak
+	@utils/mkvershlp.pl game/txt/hlp CHANGES*
+
+safety:
+	$(CP) src/*.c /var/pennmush-bak/src
+	$(CP) hdrs/*.h /var/pennmush-bak/hdrs
+	$(CP) * /var/pennmush-bak
+
+distdepend: hdrs/funs.h hdrs/cmds.h
+	(cd src; @MAKE@ depend "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
+	"LDFLAGS=$(LDFLAGS)" "CLIBS=$(CLIBS)" )
+
+local-files:
+	$(CP) -f src/cmdlocal.dst src/cmdlocal.c
+	$(CP) -f src/flaglocal.dst src/flaglocal.c
+	$(CP) -f src/funlocal.dst src/funlocal.c
+	$(CP) -f src/local.dst src/local.c
+
+# REQUIRES GNU INDENT! DON'T INDENT WITH ANYTHING ELSE!
+indent:
+	@(cd src; @MAKE@ indent)
+
+customize: update-conf
+	-@@PERL@ utils/customize.pl
+
+# The default place to find the runtime files is in this directory,
+# but it can be overridden with env variables so people can use
+# other game directories.
+GAMEDIR=game
+
+update-conf: game/mushcnf.dst game/aliascnf.dst game/restrictcnf.dst game/namescnf.dst
+	-@@TOUCH@ game/mushcnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/mush.cnf game/mushcnf.dst
+	-@@TOUCH@ game/aliascnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/alias.cnf game/aliascnf.dst
+	-@@TOUCH@ game/restrictcnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/restrict.cnf game/restrictcnf.dst
+	-@if [ ! -f $(GAMEDIR)/names.cnf ]; then $(CP) game/namescnf.dst $(GAMEDIR)/names.cnf; fi
+
+$(GAMEDIR)/alias.cnf: game/aliascnf.dst
+	-@@TOUCH@ game/aliascnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/alias.cnf game/aliascnf.dst
+
+$(GAMEDIR)/restrict.cnf: game/restrictcnf.dst
+	-@@TOUCH@ game/restrictcnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/restrict.cnf game/restrictcnf.dst
+
+$(GAMEDIR)/names.cnf: game/namescnf.dst
+	if [ ! -f game/names.cnf ]; then \
+		$(CP) game/namescnf.dst $(GAMEDIR)/names.cnf \
+	fi
+
+$(GAMEDIR)/mush.cnf: game/mushcnf.dst
+	-@@TOUCH@ game/mushcnf.dst
+	-@@PERL@ utils/update-cnf.pl $(GAMEDIR)/mush.cnf game/mushcnf.dst
+
+$(GAMEDIR)/restart: game/restart.dst
+	-@if [ ! -f $(GAMEDIR)/restart ]; then $(CP) game/restart.dst $(GAMEDIR)/restart; fi
+
+update: update-conf game/restart
+
+test: netmud
+	(cd test; sh alltests.sh)
+
+clean:
+	(cd $(PCRE2_DIR); @MAKE@ clean)
+	rm -rf pcre2/
+	(cd src; @MAKE@ clean)
+	(cd game; rm -f netmush info_slave)
+
+distclean:
+	(cd hdrs; rm -f *.orig *~ \#* *.rej *.bak funs.h cmds.h gitinfo.h buildinf.h)
+	(cd utils; rm -f *.orig *~ \#* *.rej *.bak mkcmds.sh *.o)
+	(cd game; rm -rf *.log netmush info_slave *.orig *.rej *~ *.bak mush.cnf restart)
+	(cd src; @MAKE@ distclean; rm -f Makefile)
+	(cd game/txt; @MAKE@ clean)
+	(rm -rf .config Makefile config.h config.sh)
+
+totallyclean: distclean
+	(cd hdrs; rm -rf *.rej)
+	(cd src; rm -rf *.rej)
+	-rm -f Makefile
+
+etags:
+	(cd src; @MAKE@ etags)
+
+ctags:
+	(cd src; @MAKE@ ctags)
+
+cscope:
+	cscope *.h hdrs/*.h src/*.c
+
+touchswitches:
+	@@TOUCH@ src/SWITCHES
+
+globalinstall: install
+	(cd game/txt; @MAKE@ clean compose.sh)
+#	$(INSTALLDIR) $(GLOBAL_INSTALL)
+	$(CP) -R game/* $(GLOBAL_INSTALL)
+	rm -f $(GLOBAL_INSTALL)/netmush $(GLOBAL_INSTALL)/info_slave
+	$(INSTALL) config.sh $(GLOBAL_INSTALL)/config.sh
+	$(INSTALL) src/netmud $(GLOBAL_INSTALL)/netmush
+	$(INSTALL) src/info_slave utils/ln-dir.sh $(GLOBAL_INSTALL)
+	$(CHMOD) a+rX -R $(GLOBAL_INSTALL)
+	@echo "** Files installed in $(GLOBAL_INSTALL). Feel free to move them."
+	@echo "** You can run $(GLOBAL_INSTALL)/ln-dir.sh to create a user directory,"
+	@echo "** or symlink that to somewhere easier to run. You may wish to strip them."
+
+htmldoc:
+	cd htmldoc && make

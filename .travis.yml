@@ -1,0 +1,20 @@
+language: c
+compiler: gcc
+before_install:
+  - sudo localedef -f ISO-8859-1 -i en_US en_US.ISO88591
+before_script:
+  - ./configure --disable-ssl_slave
+  - yes "" | make update
+  - make
+script: make test
+env:
+  global:
+    - PERL_MM_USE_DEFAULT=1 # tell CPAN to assume defaults as much as possible
+    - PERL5LIB=/home/travis/perl5/lib/perl5
+addons:
+  apt:
+    packages:
+      - gperf
+      - libwww-perl
+      - libio-socket-ip-perl
+      - valgrind

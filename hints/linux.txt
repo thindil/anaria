@@ -1,0 +1,34 @@
+There are a wide variety of different Linux distributions with a lot
+of variation in what packages are installed by default and what their
+names are. Some common ones have dependencies described below.
+
+* Debian and derived distributions like Ubuntu split libraries up from
+   the other files needed to compile code using them. You'll need to
+   install at a minimum the following packages:
+
+  | build-essentials libssl-dev 
+
+  Installing libevent-openssl-2.0 is highly recommended as well, but not
+  required.  If you want to use SQL, you'll also need the appropriate
+  dev package, like libmariadbclient-dev.
+
+   libcurl4-openssl-dev is another useful one, as is libicu-dev.
+
+* For arch, the mandatory packages are:
+   | openssl
+
+   and highly recommended icu, libevent and libcurl. Some or all of
+   these might already be present as part of a base install.
+
+* RedHat, CentOS and related distributions need the perl-core package
+  installed, as their perl package does not actually provide all of a
+  base perl environment.
+
+* Ubuntu Required packages:
+| build-essential libssl-dev libevent-dev zlib1g-dev 
+* Ubuntu Optional:
+libicu-dev libcurl4-openssl-dev gperf
+
+
+
+

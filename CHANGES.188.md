@@ -1,0 +1,98 @@
+% PennMUSH 1.8.8 Changes
+%
+% Last release: Apr 20 2020
+
+This is the most current changes file for PennMUSH. Please look it over; each version contains new things which might significantly affect the function of your server.  Changes are reported in reverse chronological order (most recent first)
+
+* [SW] is Shawn Wagner, a PennMUSH developer (aka Raevnos), also responsible for most unattributed changes.
+* [GM] is Greg Millam, a PennMUSH developer (aka Walker)
+* [MG] is Mike Griffiths, a PennMUSH developer (aka Talvo)
+* [TK] is Tim Krajcar, a PennMUSH developer (aka Rince)
+* [MT] is Mike Taylor, a PennMUSH developer (aka Qon or Zenithar)
+* [3] refers to code by (or inspired by) TinyMUSH 3.0
+* [MUX] refers to code by (or inspired by) TinyMUX 2.x
+* [Rhost] refers to code by (or inspired by) RhostMUSH
+
+Numbers next to the developer credit refer to Github issue numbers.
+
+-------------------------------------------------------------------------------
+
+Version 1.8.8 patchlevel 1 ??? ?? 202?
+======================================
+
+Minor changes
+-------------
+
+* Sqlite updated to 3.45.1. [SW]
+* cJSON updated to 1.7.17 [SW]
+* PCRE updated to 10.43 [SW]
+* New `--version` option to the netmush binary to display the version and exit. [SW]
+
+Fixes
+-----
+* `udefault` only accepted 12 arguments, not the documented 32. [MG]
+* ``MOGRIFY`FORMAT`` was not being passed the mogrified channel name from ``MOGRIFY`CHANNAME`` as it should. Reported by Xperta [MT]
+* Fixed `MAX_COMMAND_LEN` alteration support, by improving the stability of the chunk system. Patch by Mercutio. [1336]
+* `oob()` failed if used with just two arguments. From a report by Ben Gunderson. [1407, MG]
+* Telnet subnegotations displayed the subnegotation end character (SE) visibly for clients which had negotiated a unicode character set. Reported by Ben Gunderson. [1407, MG]
+
+Version 1.8.8 patchlevel 0 Apr 20 2020
+======================================
+
+WARNING! With the removal of the object queue, please be careful when upgrading that you do not have any infinitely looping triggers without an @wait.
+
+As an example, this used to be a common way to ensure something was executed once per second:
+
+```
+  &gt; &amp;everysecond object=do some ; updates ; @trigger me/everysecond
+```
+
+This will now happen up to several thousand times per second! Add in an @wait 1, and it'll work as expected!
+
+Major Changes
+-------------
+
+* Built-in HTTP server support, see "help http" [GM]
+* A single command queue for players and objects. No more @trigger waits. [GM]
+* A restructuring of bsd.c, to make it easier to reason about Penn's queue cycle. [GM]
+* Millisecond timing in bsd.c for polling waits in prep for subsecond @waits. [GM]
+
+Minor Changes
+-------------
+
+* Sockets commands now inline $-commands, so, e.g: $,* *: chat aliases don't hit queue. [GM]
+* Millisecond timing in bsd.c for polling waits in prep for subsecond @waits. [GM]
+* Sqlite3's `REGEXP` operator is always available and uses pcre regular expressions (previously it depended on libicu and used java style REs). [SW]
+* Update `local.dst` to include example of millisecond callback loop. [MT]
+* Updated to use PCRE2 10.33 for regular expressions. [SW]
+* Wildcard patterns are sometimes converted to regular expressions when matched against many strings. [SW]
+* Add '--disable-socket-quota' option for our test suite. [GM]
+* The list of color definitions used with `ansi()`, `colors()`, etc. is now kept in game/txt/colors.json. [SW]
+* Sqlite3 updated to 3.29. Biggest user-visible change is support for window functions. [SW]
+* Update cJSON to 1.7.10 [SW]
+* @command/restrict will only clear the failure message if a new one is supplied. [MT]
+* @SOCKSET now has a NOQUOTA option which causes that socket to be given the max command input quota per refresh. [MT]
+* --disable-socket-quota is now preserved across reboots. [MT]
+* Improved detection of an already running game. [SW]
+* Support logging through the OS syslog facility. [SW]
+
+Softcode
+--------
+
+* `addrlog()` for searching through list of unique IP addresses that have connected to a game. [SW]
+* `connlog()` can return just a count of matching records. [SW]
+* `formdecode()` for decoding HTTP paths and POST bodies. [GM]
+* `@respond` for manipulating HTTP response codes and headers. [GM]
+* `hmac()` for creating authentication fingerprints. [SW]
+* `@chatformat` and channel mogrifiers are told if `@cemit/silent` is being used. [1267, SW]
+
+Fixes
+-----
+
+* `add_function` in .cnf files was not properly using the upper case'd string. [#1223, MT]
+* Various PCRE calls in the softcode have had CPU time limit watchdogs added. Discovered by Ashen-Shugar. [GM]
+* Fix a file descriptor leak caused by recent OpenSSL versions. [SW]
+* Added GAGGED restrictions that were missing from a few commands, including `@message` and the MUXcomm aliases. [MG]
+* Minor help updates, including clarification of what GAGGED blocks, suggested by Merit. [#1262, MG, MT]
+* Some fixes to extmail.c and chunk.c to fix @mail going forward. [GM]
+* switch() and floating point numbers not working as intended. Reported by Mercutio [#1325, MT]

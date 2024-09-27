@@ -1,0 +1,583 @@
+### autoconf file for PennMUSH
+### This file uses tests from the Autoconf Macro Archive.
+### It is available at http://autoconf-archive.cryp.to/
+### The actual tests used are in ./aclocal.m4. DO NOT AUTO-GENERATE
+### that file with aclocal.
+
+AC_INIT(configure.in)
+AC_CONFIG_HEADERS(config.h)
+AC_CANONICAL_BUILD
+
+if test "x$CFLAGS" = "x"; then
+  DEFAULT_CFLAGS=yes
+else
+  DEFAULT_CFLAGS=no
+fi
+
+AC_LANG(C)
+
+### Programs
+
+AC_PATH_PROG(CAT, cat)
+AC_PROG_CC([gcc clang])
+AC_PATH_PROG(CHMOD, chmod)
+AC_PATH_PROG(CP, cp)
+AC_PATH_PROG(ECHO, echo)
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_CHECK_PROGS(MAKE, [make gmake bmake])
+AC_PATH_PROG(PERL, perl)
+if test -z "${PERL}"; then
+   AC_MSG_ERROR([perl is required to build and run PennMUSH])
+fi
+# In case anbody's still using a truely ancient version of perl that doesn't
+# support things we use.
+AX_PROG_PERL_VERSION([5.10.0])
+
+AC_PATH_PROG(TEST, test)
+AC_PATH_PROG(TOUCH, touch)
+AC_PATH_PROG(RM, rm)
+AC_PATH_PROGS(INDENT, [clang-format clang-format-6.0 clang-format-5.0 clang-format-4.0])
+
+AC_PATH_PROG(CTAGS, ctags)
+AC_PATH_PROG(ETAGS, etags)
+AC_PATH_PROG(EXCTAGS, exctags)
+if test -z "${CTAGS}" -a -n "${EXCTAGS}"; then
+	CTAGS=$EXCTAGS
+fi
+
+if test -z "${ETAGS}" -a -n "${EXCTAGS}"; then
+	ETAGS="$EXCTAGS -e"
+fi
+
+
+AC_PATH_PROG(GPERF, gperf)
+
+# Detects OS
+case "${build_os}" in
+  *freebsd*)
+    USING_FREEBSD=yes
+    ;;
+  *netbsd*)
+    USING_NETBSD=yes
+    ;;
+  *openbsd*)
+    USING_OPENBSD=yes
+    ;;
+  *mingw*)
+    USING_WINDOWS=yes
+    ;;
+  *cygwin*)
+    USING_CYGWIN=yes
+    ;;
+  *aix*)
+    USING_AIX=yes
+    ;;
+esac
+
+# Adds additional paths potentially needed or BSD compilation
+if test "${USING_FREEBSD}" = yes; then
+  CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+  LDFLAGS="$LDFLAGS -L/usr/local/lib"
+fi
+
+if test "${USING_NETBSD}" = yes; then
+   CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
+   LDFLAGS="$LDFLAGS -L/usr/pkg/lib -Wl,-R/usr/pkg/lib"
+fi
+
+if test "${USING_OPENBSD}" = yes; then
+   CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+   LDFLAGS="$LDFLAGS -L/usr/local/lib"
+fi
+
+# Set debug, optimizer, warnings and security options
+AX_IS_RELEASE([always])
+# Hack to make clang error on unknown flags when testing.
+AX_APPEND_COMPILE_FLAGS([-Werror=unknown-warning-option], [CLANGFLAGS])
+AX_APPEND_COMPILE_FLAGS([-pipe -Og -march=native], [CFLAGS], [$CLANGFLAGS])
+AX_APPEND_COMPILE_FLAGS([-Wall -Wextra -Wpedantic -Wno-comment -Wno-char-subscripts], [CFLAGS], [$CLANGFLAGS])
+AX_APPEND_COMPILE_FLAGS([-funsigned-char -Wa,--noexecstack], [CFLAGS], [$CLANGFLAGS])
+if test -z "${USING_WINDOWS}${USING_AIX}"; then
+ # -fstack-protector always segfaults on MSYS2/Mingw-w64 builds and isn't supported on AIX
+ AX_APPEND_COMPILE_FLAGS([-fstack-protector], [CFLAGS], [$CLANGFLAGS])
+fi
+m4_define(AM_LDFLAGS)
+AX_COMPILER_FLAGS_LDFLAGS()
+LDFLAGS="$LDFLAGS $WARN_LDFLAGS"
+AX_ADD_FORTIFY_SOURCE
+
+AC_PATH_PROG(UPTIME, uptime)
+if test -n "${UPTIME}"; then
+ AC_DEFINE([HAVE_UPTIME])
+ AC_DEFINE_UNQUOTED([UPTIME], "$UPTIME")
+fi
+
+AC_ARG_VAR(SENDMAIL, [Path to sendmail])
+AC_PATH_PROG(SENDMAIL, sendmail)
+if test -n "${SENDMAIL}"; then
+ AC_DEFINE([HAVE_SENDMAIL])
+ AC_DEFINE_UNQUOTED([SENDMAIL], "$SENDMAIL")
+fi
+
+AC_ARG_VAR(ED, [Path to ed])
+AC_PATH_PROG(ED, ed)
+if test -n "${ED}"; then
+   AC_DEFINE([HAVE_ED])
+   AC_DEFINE_UNQUOTED([ED_PATH], "$ED -s")
+fi
+
+AX_PTHREAD()
+AX_COUNT_CPUS()
+AC_DEFINE_UNQUOTED([SQLITE_MAX_WORKER_THREADS], $CPU_COUNT)
+AC_DEFINE_UNQUOTED([SQLITE_DEFAULT_WORKER_THREADS], $CPU_COUNT)
+
+### Headers
+# Usually there's no need to check for standard C89 headers.
+
+# <stdint.h> is checked by this.
+AC_HEADER_STDBOOL
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h sys/eventfd.h])
+AC_CHECK_HEADERS([sys/socket.h arpa/inet.h libintl.h netdb.h netinet/tcp.h])
+AC_CHECK_HEADERS([netinet/in.h sys/un.h sys/resource.h sys/event.h sys/uio.h])
+AC_CHECK_HEADERS([poll.h sys/select.h sys/inotify.h langinfo.h crypt.h])
+AC_CHECK_HEADERS([event2/event.h event2/dns.h fenv.h sys/param.h syslog.h])
+AC_CHECK_HEADERS([sys/prctl.h byteswap.h endian.h sys/endian.h pthread.h])
+AC_CHECK_HEADERS([sys/ucred.h sys/file.h], [], [], [
+AC_INCLUDES_DEFAULT
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+])
+
+### C language support
+# Only need to check C99 and GNU extensions
+
+AC_C_RESTRICT
+AC_C_INLINE
+AX_C___ATTRIBUTE__
+
+if test "$ax_cv___attribute__" = "yes"; then
+ AX_GCC_MALLOC_CALL
+fi
+
+### Types
+# Again, no need to check for standard C89 types.
+
+AC_C_BIGENDIAN
+
+AC_TYPE_SSIZE_T
+AC_TYPE_PID_T
+AX_TYPE_SOCKLEN_T
+AC_TYPE_INT8_T
+AC_TYPE_UINT8_T
+AC_TYPE_INT16_T
+AC_TYPE_UINT16_T
+AC_TYPE_INT32_T
+AC_TYPE_UINT32_T
+AC_TYPE_INT64_T
+AC_TYPE_UINT64_T
+AC_TYPE_INTMAX_T
+AC_TYPE_UINTMAX_T
+AC_TYPE_UINTPTR_T
+AC_CHECK_TYPES([imaxdiv_t])
+
+### Libraries
+AC_CHECK_LIB(m, sin)
+AC_CHECK_LIB(intl, gettext)
+AC_CHECK_LIB(crypt, crypt)
+AX_LIB_SOCKET_NSL
+AC_CHECK_LIB(event_core, event_base_loop)
+AC_CHECK_LIB(event_extra, evdns_base_new)
+AC_CHECK_LIB(event_openssl, bufferevent_openssl_socket_new)
+AX_LIB_CURL([7.28.0], [AC_DEFINE(HAVE_LIBCURL)],)
+
+# Include Winsock2 library in MinGW and MSYS builds, but not Cygwin
+case "$build_os" in
+     *msys* | *mingw32* | *mingw64*)
+  AC_CHECK_LIB(ws2_32, WSAStartup)
+  AC_CHECK_LIB(bcrypt, BCryptGenRandom)
+  # And silence a bunch of warnings about MSVC stuff.
+  CFLAGS="$CFLAGS -Wno-unknown-pragmas"
+  ;;
+esac
+
+AX_CHECK_ZLIB()
+AC_CHECK_FUNCS([gzbuffer gzvprintf])
+
+# with_ssl=set
+AX_CHECK_OPENSSL(
+ AC_DEFINE(HAVE_SSL),
+ AC_MSG_ERROR([The OpenSSL library must be installed to run PennMUSH.])
+)
+
+OLDLIBS="${LIBS}"
+OLDLDFLAGS="${LDFLAGS}"
+LIBS="${LIBS} ${OPENSSL_LIBS}"
+LDFLAGS="${LDFLAGS} ${OPENSSL_LDFLAGS}"
+AC_CHECK_FUNCS([SHA DH_set0_pqg EVP_MD_do_all RAND_keep_random_devices_open])
+LIBS="${OLDLIBS}"
+LDFLAGS="${OLDLDFLAGS}"
+
+### Databases
+
+AC_ARG_ENABLE(sql, AS_HELP_STRING([--disable-sql],
+[Don't use SQL support]), enable_sql=$enableval, enable_sql=yes)
+
+if test "$enable_sql" = "yes"; then
+AC_MSG_NOTICE([Looking for supported SQL servers])
+AX_LIB_MYSQL()
+AX_LIB_POSTGRESQL(,,AC_MSG_RESULT(PostgreSQL not found))
+else
+AC_MSG_NOTICE([Skipping SQL server checks])
+fi
+
+AX_CHECK_ICU(51, AC_DEFINE(HAVE_ICU), AC_MSG_RESULT(ICU not found))
+
+### Functions
+AC_CHECK_FUNCS([textdomain bindtextdomain crypt])
+AC_MSG_CHECKING([for isnormal])
+AC_LINK_IFELSE([
+AC_LANG_SOURCE([
+#include <math.h>
+int main(void) {
+ return !isnormal(1.0);
+}
+])
+],
+[AC_MSG_RESULT(yes)]
+[AC_DEFINE(HAVE_ISNORMAL)],
+AC_MSG_RESULT(no))
+
+AC_CHECK_FUNCS([getdate getpagesize getrlimit getrusage getservbyname])
+AC_CHECK_FUNCS([gettext getpid getppid setitimer nl_langinfo])
+AC_FUNC_FORK
+AC_CHECK_FUNCS([setsid setpgid setpgrp])
+if test $ac_cv_func_setpgrp = yes; then
+AC_FUNC_SETPGRP
+fi
+AC_CHECK_FUNCS([cbrt log2 lrint imaxdiv hypot])
+AC_CHECK_FUNCS([getuid geteuid seteuid getpriority setpriority])
+AC_CHECK_FUNCS([socketpair sigaction sigprocmask writev])
+AC_CHECK_FUNCS([fcntl flock poll kqueue inotify_init1])
+AC_CHECK_FUNCS([pread pwrite eventfd pledge pipe2 syslog])
+AC_CHECK_FUNCS([fetestexcept feclearexcept])
+AX_FUNC_POSIX_MEMALIGN
+
+# Some linux OSes (Old redhat, others?) will see these functions
+# through an AC_CHECK_FUNCS but not when it comes time to actually use
+# them in source.
+AC_MSG_CHECKING([for posix_fallocate])
+AC_LINK_IFELSE([
+AC_LANG_SOURCE([
+#define _XOPEN_SOURCE 600
+#include <fcntl.h>
+
+int
+main(void)
+{
+ posix_fallocate(0, 0, 100);
+ return 0;
+}
+])
+],
+[AC_MSG_RESULT(yes)]
+[AC_DEFINE(HAVE_POSIX_FALLOCATE)],
+AC_MSG_RESULT(no))
+AC_MSG_CHECKING([for posix_fadvise and associated constants])
+AC_LINK_IFELSE([
+AC_LANG_SOURCE([
+#define _XOPEN_SOURCE 600
+#include <fcntl.h>
+
+int
+main(void)
+{
+  posix_fadvise(0, 0, 0, POSIX_FADV_SEQUENTIAL);
+  return 0;
+}
+])
+],
+[AC_MSG_RESULT(yes)]
+[AC_DEFINE(HAVE_POSIX_FADVISE)],
+AC_MSG_RESULT(no))
+
+AX_FUNC_SNPRINTF
+if test "x$ac_cv_have_working_snprintf" = xyes; then
+AC_DEFINE(HAVE_SNPRINTF)
+fi
+if test "x$ac_cv_have_working_vsnprintf" = xyes; then
+AC_DEFINE(HAVE_VSNPRINTF)
+fi
+AC_CHECK_FUNCS([_vsnprintf_s vasprintf])
+
+AC_CHECK_FUNCS([strcasecmp strncasecmp _stricmp _strnicmp strdup])
+AC_FUNC_STRCOLL
+AC_CHECK_FUNCS([strxfrm _strncoll _stricoll _strnicoll strchrnul])
+AC_CHECK_FUNCS([sysconf waitpid prctl ffs getentropy arc4random_buf])
+
+if test $ac_cv_func_waitpid = no; then
+
+AC_CHECK_FUNCS([wait3 wait])
+AC_MSG_CHECKING([for union wait])
+AC_CHECK_TYPES([union wait], [AC_DEFINE(UNION_WAIT)
+ AC_MSG_RESULT(yes)], AC_MSG_RESULT(no),
+ [AC_INCLUDES_DEFAULT
+ #ifdef I_SYS_WAIT
+ #include <sys/wait.h>
+ #endif
+ ])
+fi
+
+AC_CHECK_FUNCS([getc_unlocked fgets_unlocked putc_unlocked fputs_unlocked])
+
+# Headers and functions used by Sqlite3
+AC_CHECK_HEADERS([memory.h strings.h])
+AC_CHECK_FUNCS([fdatasync usleep fullfsync localtime_r localtime_s gmtime_r isnan malloc_usable_size])
+AC_FUNC_STRERROR_R
+SAVED_CC="${CC}"
+CC="${PTHREAD_CC}"
+SAVED_CFLAGS="${CFLAGS}"
+CFLAGS="${CFLAGS} ${PTHREAD_CFLAGS}"
+SAVED_LIBS="$LIBS"
+LIBS="${LIBS} ${PTHREAD_LIBS}"
+AC_CHECK_FUNCS([pthread_atfork])
+CC="${SAVED_CC}"
+CFLAGS="${SAVED_CFLAGS}"
+LIBS="${SAVED_LIBS}"
+
+
+
+### Variables, constants, defines and other misc. stuff
+
+AC_CHECK_MEMBERS([struct sockaddr.sa_len], [], [], [
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+])
+
+AC_CHECK_TYPES([struct sockaddr_in6, struct xucred], [], [], [
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_UCRED_H
+#include <sys/ucred.h>
+#endif
+])
+
+# Will toupper()ing an already uppercase character be a problem?
+AC_MSG_CHECKING([if it is safe to toupper uppers])
+AC_COMPILE_IFELSE(
+[AC_LANG_SOURCE([#include <ctype.h>
+int main(void) {
+if (toupper('A') == 'A')
+	return 0;
+else
+	return 1;
+}
+])], ac_safe_toupper=yes, ac_safe_toupper=no)
+AC_MSG_RESULT([$ac_safe_toupper])
+if test "x$ac_safe_toupper" = xyes; then
+	AC_DEFINE(HAVE_SAFE_TOUPPER)
+fi
+
+# Which flavor of child killing to use? Prefer SIGCHLD.
+
+AC_CHECK_DECLS(SIGCHLD, [AC_DEFINE(HAVE_SIGCHLD)],,[AC_INCLUDES_DEFAULT
+#include <signal.h>
+])
+
+### Files
+AC_CHECK_FILE(/dev/urandom, [AC_DEFINE(HAVE_DEV_URANDOM)])
+AX_ZONEINFO()
+
+### PCRE2 config
+
+AC_ARG_ENABLE(jit,  AS_HELP_STRING([--disable-jit],
+      [Don't use JIT optimizations]), enable_jit=$enableval, enable_jit=yes)
+
+PCRE2_OPTIONS="--prefix=$(pwd)/pcre2/ --disable-shared --enable-never-backslash-C"
+if test "x${USING_CYGWIN}" = "xyes"; then
+ # pcre jit crashes Cygwin builds; don't use it there.
+ PCRE2_OPTIONS="${PCRE2_OPTIONS} --disable-jit"
+else
+ # Otherwise use it if supported on this platform unless explicitly requested
+ # not to.
+ if test "x${enable_jit}" = "xyes"; then
+   PCRE2_OPTIONS="${PCRE2_OPTIONS} --enable-jit=auto"
+ fi
+fi
+AC_MSG_NOTICE([Configuring PCRE2])
+PCRE2_VERSION="10.43"
+PCRE2_TARBALL="pcre2-${PCRE2_VERSION}.tar.gz"
+PCRE2_URL="https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${PCRE2_VERSION}/${PCRE2_TARBALL}"
+PCRE2_DIR=./pcre2-${PCRE2_VERSION}
+AC_MSG_CHECKING([for PCRE ${PCRE2_VERSION}])
+if test -d ${PCRE2_DIR} ; then
+   AC_MSG_RESULT([found])
+else
+   AC_MSG_RESULT([not found])
+   AC_MSG_CHECKING([for ${PCRE2_TARBALL}])
+   if test -f ${PCRE2_TARBALL} ; then
+      AC_MSG_RESULT([found])
+      tar xzf ${PCRE2_TARBALL}
+   else
+      AC_MSG_RESULT([not found])
+      AC_MSG_NOTICE([Trying to download from ${PCRE2_URL}])
+      if ! (curl -LO "${PCRE2_URL}" && (gzip -dc "${PCRE2_TARBALL}" | tar xf -)); then
+         AC_MSG_ERROR([Unable to automatically fetch file. Download it manually and try again.])
+      fi
+   fi
+   perl -pi -e 's/\Qif (separator != CHAR_SLASH && separator != CHAR_BACKSLASH &&\E/$& separator != CHAR_GRAVE_ACCENT &&/' "${PCRE2_DIR}/src/pcre2_context.c"
+fi
+
+(cd ${PCRE2_DIR} && ./configure ${PCRE2_OPTIONS})
+if test -d pcre2 ; then
+   rm -rf pcre2/
+fi
+CPPFLAGS="${CPPFLAGS} -I../pcre2/include"
+LDFLAGS="${LDFLAGS} ../pcre2/lib/libpcre2-8.a"
+AC_DEFINE(HAVE_PCRE)
+
+### Misc features
+if test -n "${USING_CYGWIN}"; then
+   # IPv6 doesn't work well on Cygwin according to Mike.
+   default_enable_ipv6=no
+else
+   default_enable_ipv6=yes
+fi
+AC_ARG_ENABLE(ipv6,  AS_HELP_STRING([--disable-ipv6],
+      [Don't use IPv6 networking]), enable_ipv6=$enableval, enable_ipv6=${default_enable_ipv6})
+
+if test "$enable_ipv6" = "no"; then
+AC_DEFINE(FORCE_IPV4)
+fi
+
+AC_ARG_ENABLE(nls, AS_HELP_STRING([--disable-nls],
+  [Don't use message-translation]), enable_nls=$enableval, enable_nls=no)
+
+if test "$enable_nls" = "no"; then
+AC_DEFINE(DONT_TRANSLATE)
+fi
+
+if test -n "${USING_CYGWIN}${USING_WINDOWS}"; then
+   # Don't use info_slave or ssl_slave on Windows targets
+   default_enable_slaves=no
+else
+   default_enable_slaves=yes
+fi
+AC_ARG_ENABLE(info_slave, AS_HELP_STRING([--disable-info_slave],
+			  [Don't use a separate process for hostname lookups]),
+			  enable_info_slave=$enableval, enable_info_slave=${default_enable_slaves})
+if test "$enable_info_slave" = yes; then
+   AC_SUBST(INFO_SLAVE_TARGET, info_slave)
+   AC_DEFINE(INFO_SLAVE)
+fi
+
+AC_ARG_ENABLE(ssl_slave, AS_HELP_STRING([--disable-ssl_slave],
+			 [Use a seperate process for SSL connections that will persist across restarts. (Unix-only.)]),
+			 enable_ssl_slave=$enableval, enable_ssl_slave=${default_enable_slaves})
+if test "$enable_ssl_slave" = yes; then
+   if test "$ac_cv_lib_event_openssl_bufferevent_openssl_socket_new" = yes; then
+      AC_SUBST(SSL_SLAVE_TARGET, ssl_slave)
+      AC_DEFINE(SSL_SLAVE)
+   else
+      AC_MSG_WARN([ssl_slave requested but OpenSSL and/or libevent2 weren't found.])
+      enable_ssl_slave=no
+   fi
+fi
+
+AC_ARG_ENABLE(sse2, AS_HELP_STRING([--enable-sse2],
+  [Use SSE2 instructions (Requires a CPU that supports SSE2)]))
+AC_ARG_ENABLE(sse3, AS_HELP_STRING([--enable-sse3],
+  [Use SSE3 instructions (Requires a CPU that supports SSE3)]))
+AC_ARG_ENABLE(ssse3, AS_HELP_STRING([--enable-ssse3],
+  [Use SSSE3 instructions (Requires a CPU that supports SSSE3)]))
+AC_ARG_ENABLE(sse42, AS_HELP_STRING([--enable-sse42],
+  [Use SSE4.2 instructions (Requires a CPU that supports SSE 4.2)]))
+AC_ARG_ENABLE(altivec, AS_HELP_STRING([--enable-altivec],
+  [Use PowerPC Altivec instructions (Requires a CPU that supports Altivec)]))
+
+if test "$enable_sse42" = yes; then
+   AC_DEFINE(HAVE_SSE42)
+   CFLAGS="$CFLAGS -msse4.2"
+fi
+
+if test "$enable_ssse3" = yes; then
+   AC_DEFINE(HAVE_SSSE3)
+   CFLAGS="$CFLAGS -mssse3"
+fi
+
+if test "$enable_sse3" = yes; then
+   AC_DEFINE(HAVE_SSE3)
+   CFLAGS="$CFLAGS -msse3"
+fi
+
+if test "$enable_sse2" = yes; then
+   AC_DEFINE(HAVE_SSE2)
+   CFLAGS="$CFLAGS -msse2"
+fi
+
+if test "$enable_altivec" = yes; then
+   AC_DEFINE(HAVE_ALTIVEC)
+   CFLAGS="$CFLAGS -maltivec -faltivec"
+fi
+
+### Output
+
+
+echo "Configuration summary:"
+echo "* Compiler: $CC"
+echo "* Compiler flags: $CFLAGS"
+
+if test "$enable_sql" = yes; then
+ sql_servers="Sqlite3"
+ if test "$found_mysql" = yes; then
+  sql_servers="${sql_servers} MySQL"
+ fi
+ if test "$found_postgresql" = yes; then
+  sql_servers="${sql_servers} Postgres"
+ fi
+ echo "* SQL support: ${sql_servers}"
+else
+ echo "* SQL support: Sqlite3"
+fi
+
+if test "$enable_ssl_slave" = yes; then
+   echo "* SSL connections will be maintained across restarts."
+else
+   echo "* SSL connections will not persist across restarts."
+fi
+
+if test "$enable_info_slave" = yes; then
+   echo "* Info slave will be used for hostname lookups."
+else
+   echo "* Hostname lookups will be done by the mush process."
+fi
+
+if test "$enable_nls" = yes -a "${ac_cv_lib_intl_gettext:+set}" = set; then
+   echo "* Translation support: Yes"
+else
+   echo "* Translation support: No"
+fi
+
+if test "$enable_ipv6" = yes; then
+  echo "* IPv6 sockets will be used if possible."
+else
+  echo "* Sockets are limited to IPv4"
+fi
+
+if test "x$CURL_CONFIG" != "x"; then
+   echo "* libcurl will be used for @HTTP"
+else
+   echo "* No libcurl. @HTTP disabled."
+fi
+
+AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([game/txt/compose.sh], [chmod +x game/txt/compose.sh])
+AC_CONFIG_FILES([test/alltests.sh], [chmod +x test/alltests.sh])
+AC_OUTPUT
