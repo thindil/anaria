@@ -247,7 +247,7 @@ FUNCTION(fun_pfun)
   char rbuff[BUFFER_LEN];
   ATTR *a;
   int i;
-  int pe_flags = PE_UDEFAULT;
+/*  int pe_flags = PE_UDEFAULT;*/
   dbref parent;
   ufun_attrib ufun;
   PE_REGS *pe_regs;
@@ -269,10 +269,10 @@ FUNCTION(fun_pfun)
     return; /* attr isn't inheritable */
 
   /* DEBUG attributes */
-  if (AF_NoDebug(a))
-    pe_flags |= PE_NODEBUG; /* no_debug overrides debug */
-  else if (AF_Debug(a))
-    pe_flags |= PE_DEBUG;
+/*  if (AF_NoDebug(a))
+    pe_flags |= PE_NODEBUG; * no_debug overrides debug */
+/*  else if (AF_Debug(a))
+    pe_flags |= PE_DEBUG;*/
 
   ufun.thing = executor;
   mush_strncpy(ufun.contents, atr_value(a), BUFFER_LEN);

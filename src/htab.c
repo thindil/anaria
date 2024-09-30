@@ -96,7 +96,7 @@ next_prime_after(unsigned int val)
 
   while (1) {
     BN_set_word(p, val);
-    if (BN_is_prime_ex(p, BN_prime_checks, ctx, NULL) > 0)
+    if (BN_check_prime(p, ctx, NULL) > 0)
       break;
     val += 2;
   }

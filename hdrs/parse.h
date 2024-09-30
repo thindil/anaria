@@ -101,8 +101,8 @@ int list2arr_ansi(char *r[], int max, char *list, char sep, int nullok);
 void freearr(char *r[], int size);
 
 /* Initialize the pe_regs strtrees */
-void init_pe_regs_trees();
-void free_pe_regs_trees();
+void init_pe_regs_trees(void);
+void free_pe_regs_trees(void);
 
 /* Functions used to create new pe_reg stacks */
 void pe_regs_dump(PE_REGS *pe_regs, dbref who);

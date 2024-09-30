@@ -92,7 +92,7 @@ void get_new_locks(dbref i, PENNFILE *f, int c);
 void db_read_attrs(PENNFILE *f, dbref i, int c);
 int get_list(PENNFILE *f, dbref i);
 void db_free(void);
-static void init_objdata();
+static void init_objdata(void);
 static void db_write_flags(PENNFILE *f);
 static void db_write_attrs(PENNFILE *f);
 static dbref db_read_oldstyle(PENNFILE *f);
@@ -2580,7 +2580,7 @@ close_statement(sqlite3_stmt *stmt)
 }
 
 static void
-init_objdata()
+init_objdata(void)
 {
   const char *create_query =
     "CREATE TABLE objects(dbref INTEGER NOT NULL PRIMARY KEY, queue INTEGER "

@@ -152,7 +152,7 @@ void rusage_stats(void);
 #endif
 uint64_t queue_msecs_till_next(void); /* from cque.c */
 void queue_update(void);              /* from cque.c */
-void update_queue_load();
+void update_queue_load(void);
 
 dbref email_register_player(DESC *d, const char *name, const char *email,
                             const char *host,
@@ -348,9 +348,9 @@ static void update_quotas(struct timeval current);
 
 int how_many_fds(void);
 static void open_ports(Port_t port, Port_t sslport);
-static void gameloop();
-static void ext_startup();
-static void ext_shutdown();
+static void gameloop(void);
+static void ext_startup(void);
+static void ext_shutdown(void);
 
 #ifndef WIN32
 typedef int SOCKET;
@@ -1009,7 +1009,7 @@ update_quotas(struct timeval current)
 }
 
 int
-http_msecs_till_next()
+http_msecs_till_next(void)
 {
   if (http_quota < MS_PER_SEC && HTTP_SECOND_LIMIT > 0) {
     /* Quota is exhausted. Calculate how long until we can serve an http
@@ -1220,7 +1220,7 @@ handle_curl_msg(CURLMsg *msg)
  * \return 1 if everything's okay, 0 to shut down.
  */
 static int
-check_status()
+check_status(void)
 {
 /* Check signal handler flags */
 #ifndef WIN32
@@ -1382,7 +1382,7 @@ static nfds_t fd_size = 0, fds_used = 0;
 #endif
 
 void
-ext_startup()
+ext_startup(void)
 {
 
 #ifdef HAVE_LIBCURL
@@ -1407,7 +1407,7 @@ ext_startup()
 }
 
 void
-ext_shutdown()
+ext_shutdown(void)
 {
   if (fds)
     mush_free(fds, "pollfds");
@@ -1675,7 +1675,7 @@ check_sockets(uint32_t msec_timeout)
 }
 
 static void
-gameloop()
+gameloop(void)
 {
   uint64_t msec_timeout, timeout_check;
   struct timeval current_time;

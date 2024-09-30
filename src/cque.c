@@ -958,7 +958,7 @@ wait_que(dbref executor, int waittill, char *command, dbref enactor, dbref sem,
 }
 
 void
-update_queue_load()
+update_queue_load(void)
 {
   static time_t last_mudtime = 0;
   time_t diff;

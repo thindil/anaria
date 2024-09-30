@@ -1451,7 +1451,7 @@ FUNCTION(fun_allof)
 
 /* Returns a platform-specific timestamp with platform-dependent resolution. */
 static uint64_t
-get_tsc()
+get_tsc(void)
 {
 #ifdef WIN32
   LARGE_INTEGER li;
