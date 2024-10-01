@@ -88,7 +88,7 @@ penn_gettimeofday(struct timeval *now)
 
 /* Returns current time in milliseconds. */
 uint64_t
-now_msecs()
+now_msecs(void)
 {
   struct timeval tv;
   penn_gettimeofday(&tv);

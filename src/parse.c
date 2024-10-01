@@ -858,7 +858,7 @@ static const char *envid[10] = {"0", "1", "2", "3", "4",
                                 "5", "6", "7", "8", "9"};
 
 void
-init_pe_regs_trees()
+init_pe_regs_trees(void)
 {
   int i;
   char qv[2] = "0";
@@ -884,7 +884,7 @@ init_pe_regs_trees()
 }
 
 void
-free_pe_regs_trees()
+free_pe_regs_trees(void)
 {
   st_flush(&pe_reg_names);
   st_flush(&pe_reg_vals);

@@ -324,16 +324,13 @@ ssl_init(char *private_key_file, char *certificate_file, char *ca_file, char *ca
     DH *dh;
     dh = get_dh2048();
     SSL_CTX_set_tmp_dh(ctx, dh);
-    DH_free(dh);
   }
 
 #ifdef NID_X9_62_prime256v1
   /* Set up ECDH key */
   {
     EC_KEY *ecdh = NULL;
-    ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
     SSL_CTX_set_tmp_ecdh(ctx, ecdh);
-    EC_KEY_free(ecdh);
   }
 #endif
 
@@ -412,10 +409,7 @@ get_dh2048(void)
   static const uint8_t dh2048_g[] = {
     0x02,
   };
-  DH *dh;
-
-  if ((dh = DH_new()) == NULL)
-    return NULL;
+  DH *dh = NULL;
 
 #ifdef HAVE_DH_SET0_PQG
   BIGNUM *p, *g;
@@ -424,7 +418,6 @@ get_dh2048(void)
     lock_file(stderr);
     fprintf(stderr, "%s Error in BN_bin2bn 1!\n", time_string());
     unlock_file(stderr);
-    DH_free(dh);
     return NULL;
   }
 
@@ -434,11 +427,9 @@ get_dh2048(void)
     fprintf(stderr, "%s Error in BN_bin2bn 2!\n", time_string());
     unlock_file(stderr);
     BN_free(p);
-    DH_free(dh);
     return NULL;
   }
 
-  DH_set0_pqg(dh, p, NULL, g);
 #else
   dh->p = BN_bin2bn(dh2048_p, sizeof(dh2048_p), NULL);
   if (!dh->p) {

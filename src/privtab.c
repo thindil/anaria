@@ -87,6 +87,8 @@ string_to_privs(const PRIV *table, const char *str, privbits origprivs)
   return ((origprivs | yes) & ~no);
 }
 
+int words = 0;
+
 /** Convert a list to a set of privilege bits, masked by an original set.
  * Given a privs table, a list, and an original set of privileges,
  * return a modified set of privileges by applying the privs in the
@@ -109,7 +111,7 @@ list_to_privs(const PRIV *table, const char *str, privbits origprivs)
   char *p, *r;
   char tbuf1[BUFFER_LEN];
   bool not;
-  int words = 0;
+  words = 0;
 
   if (!str || !*str)
     return origprivs;
