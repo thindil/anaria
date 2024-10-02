@@ -50,7 +50,7 @@ static char missing_name[ATTRIBUTE_NAME_LIMIT + 1];
 
 /*======================================================================*/
 
-static int real_atr_clr(dbref thinking, char const *atr, dbref player,
+static atr_err real_atr_clr(dbref thing, char const *atr, dbref player,
                         int we_are_wiping);
 static void atr_free_one(dbref, ATTR *);
 static int find_atr_pos_in_list(dbref thing, char const *name);
