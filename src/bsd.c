@@ -4014,7 +4014,7 @@ do_http_command(DESC *d)
     headerval += 2; /* skip past ": " */
     /* Normalize the header name into Q-reg acceptable name */
     pi_regs_normalize_key(headername);
-    snprintf(tmp, BUFFER_LEN, "HDR.%s", headername);
+    snprintf(tmp, BUFFER_LEN, "HDR.%.4096s", headername);
     rval = PE_Getq(pe_info, tmp);
     if (rval && *rval) {
       snprintf(vals, BUFFER_LEN, "%s\n%s", rval, headerval);
@@ -5522,7 +5522,7 @@ dump_users(DESC *call_by, char *match)
   DESC *d;
   int count = 0;
   char tbuf[BUFFER_LEN];
-  char nbuff[BUFFER_LEN];
+  char nbuff[BUFFER_LEN - 32];
   char *np;
   int nlen;
 

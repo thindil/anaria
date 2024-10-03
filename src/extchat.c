@@ -3901,7 +3901,7 @@ channel_send(CHAN *channel, dbref player, int flags, const char *origmessage)
      */
     int ignoreme __attribute__((__unused__));
     ignoreme = snprintf(title, BUFFER_LEN, "%s", message);
-    ignoreme = snprintf(message, BUFFER_LEN, "%s %s", playername, title);
+    ignoreme = snprintf(message, BUFFER_LEN, "%.4090s %.4090s", playername, title);
     title[0] = '\0';
   }
 

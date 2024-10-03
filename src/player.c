@@ -607,9 +607,9 @@ void
 do_password(dbref executor, dbref enactor, const char *old, const char *newobj,
             MQUE *queue_entry)
 {
+  char new_eval[BUFFER_LEN];
   if (!queue_entry->port) {
     char old_eval[BUFFER_LEN];
-    char new_eval[BUFFER_LEN];
     char const *sp;
     char *bp;
 

@@ -1925,7 +1925,7 @@ COMMAND(cmd_fetch)
   pe_regs_qcopy(req->pe_regs, queue_entry->pe_info->regvals);
 
   handle = curl_easy_init();
-  curl_easy_setopt(handle, CURLOPT_PROTOCOLS,
+  curl_easy_setopt(handle, CURLOPT_PROTOCOLS_STR,
                    CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_DICT);
   curl_easy_setopt(handle, CURLOPT_URL, args_right[1]);
   curl_easy_setopt(handle, CURLOPT_VERBOSE, 0);

@@ -646,9 +646,7 @@ fork_and_dump(int forking)
       if (status) {
         queue_event(SYSEVENT, "DUMP`COMPLETE", "%s,%d", DUMP_NOFORK_COMPLETE,
                     0);
-        if (status && DUMP_NOFORK_COMPLETE && *DUMP_NOFORK_COMPLETE) {
-          flag_broadcast(0, 0, "%s", DUMP_NOFORK_COMPLETE);
-        }
+        flag_broadcast(0, 0, "%s", DUMP_NOFORK_COMPLETE);
       }
     }
   }

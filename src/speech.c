@@ -462,7 +462,7 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
       mush_free(tbuf, "string");
       return;
     }
-    ignoreme = snprintf(pbuff, BUFFER_LEN, T("%s whispers%s."), sname, tbuf);
+    ignoreme = snprintf(pbuff, BUFFER_LEN, T("%.4096s whispers%s."), sname, tbuf);
     p = pbuff;
     DOLIST (first, first) {
       overheard = 1;
@@ -1040,7 +1040,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   if ((ap = shortalias(executor)) && *ap) {
     mush_strncpy(alias, ap, sizeof alias);
     if (PAGE_ALIASES && strcasecmp(ap, Name(executor))) {
-      ignoreme = snprintf(msg, BUFFER_LEN, "%s (%s)",
+      ignoreme = snprintf(msg, BUFFER_LEN, "%s (%.4096s)",
                           AName(executor, AN_SAY, NULL), alias);
       current = msg;
     } else {
