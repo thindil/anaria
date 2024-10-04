@@ -2321,58 +2321,60 @@ initializesock(int s, char *addr, char *ip, conn_source source)
 {
   DESC *d;
   d = (DESC *) mush_malloc(sizeof(DESC), "descriptor");
-  if (!d)
+  if (!d) {
     mush_panic("Out of memory.");
-  d->descriptor = s;
-  d->closer = NOTHING;
-  d->close_reason = "unknown";
-  d->http_request = NULL;
-  d->connected = CONN_SCREEN;
-  d->conn_timer = NULL;
-  d->connected_at = mudtime;
-  make_nonblocking(s);
-  d->output_prefix = 0;
-  d->output_suffix = 0;
-  d->output_size = 0;
-  init_text_queue(&d->input);
-  init_text_queue(&d->output);
-  d->player = NOTHING;
-  d->raw_input = 0;
-  d->raw_input_at = 0;
-  d->quota = QUOTA_MAX;
-  d->last_time = mudtime;
-  d->cmds = 0;
-  d->hide = 0;
-  mush_strncpy(d->addr, addr, 100);
-  d->addr[99] = '\0';
-  mush_strncpy(d->ip, ip, 100);
-  d->ip[99] = '\0';
-  d->conn_flags = CONN_DEFAULT;
-  d->input_chars = 0;
-  d->output_chars = 0;
-  d->width = 78;
-  d->height = 24;
-  d->ttype = NULL;
-  d->checksum[0] = '\0';
-  d->ssl = NULL;
-  d->ssl_state = 0;
-  d->source = source;
-  d->next = descriptor_list;
-  descriptor_list = d;
-  if (source == CS_OPENSSL_SOCKET) {
-    d->ssl = ssl_listen(d->descriptor, &d->ssl_state);
-    if (d->ssl_state < 0) {
-      /* Error we can't handle */
-      ssl_close_connection(d->ssl);
-      d->ssl = NULL;
-      d->ssl_state = 0;
-    }
+  } else {
+     d->descriptor = s;
+     d->closer = NOTHING;
+     d->close_reason = "unknown";
+     d->http_request = NULL;
+     d->connected = CONN_SCREEN;
+     d->conn_timer = NULL;
+     d->connected_at = mudtime;
+     make_nonblocking(s);
+     d->output_prefix = 0;
+     d->output_suffix = 0;
+     d->output_size = 0;
+     init_text_queue(&d->input);
+     init_text_queue(&d->output);
+     d->player = NOTHING;
+     d->raw_input = 0;
+     d->raw_input_at = 0;
+     d->quota = QUOTA_MAX;
+     d->last_time = mudtime;
+     d->cmds = 0;
+     d->hide = 0;
+     mush_strncpy(d->addr, addr, 100);
+     d->addr[99] = '\0';
+     mush_strncpy(d->ip, ip, 100);
+     d->ip[99] = '\0';
+     d->conn_flags = CONN_DEFAULT;
+     d->input_chars = 0;
+     d->output_chars = 0;
+     d->width = 78;
+     d->height = 24;
+     d->ttype = NULL;
+     d->checksum[0] = '\0';
+     d->ssl = NULL;
+     d->ssl_state = 0;
+     d->source = source;
+     d->next = descriptor_list;
+     descriptor_list = d;
+     if (source == CS_OPENSSL_SOCKET) {
+       d->ssl = ssl_listen(d->descriptor, &d->ssl_state);
+       if (d->ssl_state < 0) {
+         /* Error we can't handle */
+         ssl_close_connection(d->ssl);
+         d->ssl = NULL;
+         d->ssl_state = 0;
+       }
+     }
+     im_insert(descs_by_fd, d->descriptor, d);
+     d->connlog_id = connlog_connection(ip, addr, is_ssl_desc(d));
+     d->conn_timer = sq_register_in(1, test_telnet_wrapper, (void *) d, NULL);
+     queue_event(SYSEVENT, "SOCKET`CONNECT", "%d,%s", d->descriptor, d->ip);
+     return d;
   }
-  im_insert(descs_by_fd, d->descriptor, d);
-  d->connlog_id = connlog_connection(ip, addr, is_ssl_desc(d));
-  d->conn_timer = sq_register_in(1, test_telnet_wrapper, (void *) d, NULL);
-  queue_event(SYSEVENT, "SOCKET`CONNECT", "%d,%s", d->descriptor, d->ip);
-  return d;
 }
 
 static int
@@ -4074,7 +4076,7 @@ do_http_command(DESC *d)
   queue_newwrite(d, req->ctype, strlen(req->ctype));
   queue_newwrite(d, "\r\n", 2);
   queue_newwrite(d, req->headers, strlen(req->headers));
-  snprintf(tmp, BUFFER_LEN, "Content-Length: %d\r\n\r\n", content_len);
+  snprintf(tmp, BUFFER_LEN, "Content-Length: %u\r\n\r\n", content_len);
   queue_newwrite(d, tmp, strlen(tmp));
 
   queue_newwrite(d, req->response, content_len);

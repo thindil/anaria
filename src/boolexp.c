@@ -1494,16 +1494,18 @@ append_insn(struct bvm_asm *a, bvm_opcode op, int arg, const char *s)
   if (bvm_asmnode_slab == NULL)
     bvm_asmnode_slab = slab_create("bvm.asmnode", sizeof *newop);
   newop = slab_malloc(bvm_asmnode_slab, NULL);
-  if (!newop)
+  if (!newop) {
     mush_panic("Unable to allocate memory for boolexp asm node!");
-  newop->op = op;
-  newop->arg = arg;
-  newop->next = NULL;
-  if (a->head == NULL)
-    a->head = a->tail = newop;
-  else {
-    a->tail->next = newop;
-    a->tail = newop;
+  } else {
+     newop->op = op;
+     newop->arg = arg;
+     newop->next = NULL;
+     if (a->head == NULL)
+       a->head = a->tail = newop;
+     else {
+       a->tail->next = newop;
+       a->tail = newop;
+     }
   }
 }
 

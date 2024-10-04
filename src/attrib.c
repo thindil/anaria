@@ -969,10 +969,12 @@ atr_add(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
         AL_CREATOR(root) = Owner(player);
         if (!EMPTY_ATTRS) {
           char *t = compress(" ");
-          if (!t)
+          if (!t) {
             mush_panic("Unable to allocate memory in atr_add()!");
-          root->data = chunk_create(t, strlen(t), 0);
-          free(t);
+          } else {
+            root->data = chunk_create(t, strlen(t), 0);
+            free(t);
+          }
         }
       } else
         AL_FLAGS(root) |= AF_ROOT;
@@ -2657,7 +2659,7 @@ atr_get_compressed_data(ATTR *atr)
   if (!atr->data)
     return empty_string;
   len = chunk_fetch(atr->data, buffer, sizeof(buffer));
-  if (len > sizeof(buffer))
+  if (len > (sizeof(buffer) - 1))
     return empty_string;
   buffer[len] = '\0';
   return buffer;

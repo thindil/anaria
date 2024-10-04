@@ -250,7 +250,6 @@ read_access_file(void)
   uint32_t can, cant;
   int retval;
   dbref who = AMBIGUOUS;
-  char *comment;
   const char *errptr = NULL;
 
   if (access_top) {
@@ -268,6 +267,7 @@ read_access_file(void)
     retval = 0;
   } else {
     do_rawlog(LT_ERR, "Reading %s", ACCESS_FILE);
+    char *comment;
     while (fgets(buf, BUFFER_LEN, fp)) {
       /* Strip end of line if it's \r\n or \n */
       if ((p = strchr(buf, '\r')))
@@ -276,7 +276,7 @@ read_access_file(void)
         *p = '\0';
       /* Find beginning of line; ignore blank lines */
       p = buf;
-      if (*p && isspace(*p))
+      if (isspace(*p))
         p++;
       if (*p && *p != '#') {
         can = cant = 0;
@@ -708,7 +708,7 @@ parse_access_options(const char *opts, dbref *who, uint32_t *can,
   char *p;
   char *w;
   acsflag *c;
-  int found, totalfound, first;
+  int totalfound, first;
 
   if (!opts || !*opts)
     return 0;
@@ -718,6 +718,7 @@ parse_access_options(const char *opts, dbref *who, uint32_t *can,
   if (who)
     *who = AMBIGUOUS;
   p = trim_space_sep(myopts, ' ');
+  int found;
   while ((w = split_token(&p, ' '))) {
     found = 0;
 

@@ -479,9 +479,9 @@ const char *
 display_attr_limit(ATTR *ap)
 {
   char *ptr;
-  char *s;
 
   if (ap->data && (ap->flags & AF_ENUM)) {
+    char *s;
     ptr = atr_value(ap);
     *(ptr++) = '\0';
     s = ptr + strlen(ptr);
@@ -506,12 +506,9 @@ check_attr_value(dbref player, const char *name, const char *value)
   /* Check for attribute limits and enums. */
   ATTR *ap;
   char *attrval;
-  pcre2_code *re;
-  pcre2_match_data *md;
-  int subpatterns;
   int errcode;
   PCRE2_SIZE erroffset;
-  char *ptr, *ptr2;
+  char *ptr;
   char delim;
   int len;
   static char buff[BUFFER_LEN];
@@ -537,6 +534,7 @@ check_attr_value(dbref player, const char *name, const char *value)
   }
 
   if (ap->flags & AF_RLIMIT) {
+    pcre2_code *re;
     re = pcre2_compile((const PCRE2_UCHAR *) remove_markup(attrval, NULL),
                        PCRE2_ZERO_TERMINATED, re_compile_flags | PCRE2_CASELESS,
                        &errcode, &erroffset, re_compile_ctx);
@@ -544,7 +542,9 @@ check_attr_value(dbref player, const char *name, const char *value)
       return value;
     }
 
+    pcre2_match_data *md;
     md = pcre2_match_data_create_from_pattern(re, NULL);
+    int subpatterns;
     subpatterns = pcre2_match(re, (const PCRE2_UCHAR *) value, strlen(value), 0,
                               re_match_flags, md, re_match_ctx);
     pcre2_code_free(re);
@@ -587,6 +587,7 @@ check_attr_value(dbref player, const char *name, const char *value)
     if (ptr) {
       /* ptr is pointing at the delim before the value. */
       ptr++;
+      char *ptr2;
       ptr2 = strchr(ptr, delim);
       if (!ptr2)
         return NULL; /* Shouldn't happen, but sanity check. */
