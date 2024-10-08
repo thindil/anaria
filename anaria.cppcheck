@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>anaria-cppcheck-build-dir</builddir>
+    <analyze-all-vs-configs>false</analyze-all-vs-configs>
+    <check-headers>true</check-headers>
+    <check-unused-templates>true</check-unused-templates>
+    <inline-suppression>true</inline-suppression>
+    <max-ctu-depth>2</max-ctu-depth>
+    <max-template-recursion>100</max-template-recursion>
+    <includedir>
+        <dir name="../hdrs/"/>
+        <dir name="../pcre2-10.43/src/"/>
+    </includedir>
+    <paths>
+        <dir name="../src"/>
+    </paths>
+    <exclude>
+        <path name="../pcre2-10.43/"/>
+        <path name="../src/sqlite3.c"/>
+    </exclude>
+    <libraries>
+        <library>bsd</library>
+        <library>icu</library>
+        <library>openssl</library>
+        <library>posix</library>
+    </libraries>
+    <project-name>anaria</project-name>
+</project>
