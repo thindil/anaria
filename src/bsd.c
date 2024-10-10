@@ -4066,7 +4066,7 @@ do_http_command(DESC *d)
 
   content_len = req->rp - req->response;
 
-  queue_event(SYSEVENT, "HTTP`COMMAND", "%s,%s,%s,%s,%s,%u,%d", d->ip,
+  queue_event(SYSEVENT, "HTTP`COMMAND", "%s,%s,%s,%s,%s,%ld,%d", d->ip,
               req->method, req->path, req->code, req->ctype,
               strlen(req->inbody), content_len);
 
