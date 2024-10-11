@@ -24,5 +24,8 @@
         <library>openssl</library>
         <library>posix</library>
     </libraries>
+    <suppressions>
+        <suppression>missingIncludeSystem</suppression>
+    </suppressions>
     <project-name>anaria</project-name>
 </project>
