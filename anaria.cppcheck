@@ -15,7 +15,6 @@
         <dir name="src"/>
     </paths>
     <exclude>
-        <path name="pcre2-10.43/"/>
         <path name="src/sqlite3.c"/>
     </exclude>
     <libraries>
@@ -26,6 +25,8 @@
     </libraries>
     <suppressions>
         <suppression>missingIncludeSystem</suppression>
+        <suppression>missingInclude</suppression>
     </suppressions>
+    <check-level-exhaustive/>
     <project-name>anaria</project-name>
 </project>
