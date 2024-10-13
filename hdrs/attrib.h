@@ -35,19 +35,19 @@ ATTR *aname_hash_lookup(const char *name);
 int alias_attribute(const char *atr, const char *alias);
 void do_attribute_limit(dbref player, const char *name, int type,
                         const char *pattern);
-void do_attribute_access(dbref player, char *name, char *perms,
+void do_attribute_access(dbref player, char *name, const char *perms,
                          int retroactive);
 void do_attribute_delete(dbref player, char *name);
 void do_attribute_rename(dbref player, char *old, char *newname);
 void do_attribute_info(dbref player, char *name);
 void do_list_attribs(dbref player, int lc);
-void do_decompile_attribs(dbref player, char *pattern, int retroactive);
+void do_decompile_attribs(dbref player, const char *pattern, int retroactive);
 char *list_attribs(void);
 void attr_init_postconfig(void);
 const char *check_attr_value(dbref player, const char *name, const char *value);
-int cnf_attribute_access(char *attrname, char *opts);
+int cnf_attribute_access(char *attrname, const char *opts);
 
-void add_new_attr(char *name, uint32_t flags);
+void add_new_attr(const char *name, uint32_t flags);
 bool attr_reserve(dbref, int);
 void attr_shrink(dbref);
 

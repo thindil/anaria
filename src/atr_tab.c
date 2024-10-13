@@ -98,7 +98,7 @@ static ATTR *attr_read(PENNFILE *f);
 static ATTR *attr_alias_read(PENNFILE *f, char *alias);
 
 static int free_standard_attr(ATTR *a, bool inserted);
-static int free_standard_attr_aliases(ATTR *a);
+static int free_standard_attr_aliases(const ATTR *a);
 static void display_attr_info(dbref player, ATTR *ap);
 
 const char *display_attr_limit(ATTR *ap);
@@ -175,7 +175,7 @@ free_standard_attr(ATTR *a, bool inserted)
 
 /* Remove all aliases for a standard attr. */
 static int
-free_standard_attr_aliases(ATTR *a)
+free_standard_attr_aliases(const ATTR *a)
 {
   bool found_alias;
   ATTR *curr;
@@ -378,7 +378,7 @@ attr_write_all(PENNFILE *f)
   int attrcount = 0, aliascount = 0;
   ATTR *a;
   const char *attrname;
-  char *data;
+  const char *data;
 
   for (a = ptab_firstentry_new(&ptab_attrib, &attrname); a;
        a = ptab_nextentry_new(&ptab_attrib, &attrname)) {
@@ -442,7 +442,7 @@ aname_find_exact(const char *name)
 
 /* Add a new, or restrict an existing, standard attribute from cnf file */
 int
-cnf_attribute_access(char *attrname, char *opts)
+cnf_attribute_access(char *attrname, const char *opts)
 {
   ATTR *a;
   privbits flags = 0;
@@ -505,12 +505,10 @@ check_attr_value(dbref player, const char *name, const char *value)
 {
   /* Check for attribute limits and enums. */
   ATTR *ap;
-  char *attrval;
+  const char *attrval;
   int errcode;
   PCRE2_SIZE erroffset;
   char *ptr;
-  char delim;
-  int len;
   static char buff[BUFFER_LEN];
   char vbuff[BUFFER_LEN];
   char ucname[BUFFER_LEN];
@@ -558,6 +556,7 @@ check_attr_value(dbref player, const char *name, const char *value)
       return NULL;
     }
   } else if (ap->flags & AF_ENUM) {
+    char delim;
     /* Delimiter is always the first character of the enum string.
      * and the value cannot have the delimiter in it. */
     delim = *attrval;
@@ -573,6 +572,7 @@ check_attr_value(dbref player, const char *name, const char *value)
      * to buff and use that. */
     strupper_r(attrval, buff, sizeof buff);
 
+    int len;
     len = strlen(value);
     snprintf(vbuff, BUFFER_LEN, "%c%s%c", delim, value, delim);
     upcasestr(vbuff);
@@ -587,7 +587,7 @@ check_attr_value(dbref player, const char *name, const char *value)
     if (ptr) {
       /* ptr is pointing at the delim before the value. */
       ptr++;
-      char *ptr2;
+      const char *ptr2;
       ptr2 = strchr(ptr, delim);
       if (!ptr2)
         return NULL; /* Shouldn't happen, but sanity check. */
@@ -632,9 +632,6 @@ do_attribute_limit(dbref player, const char *name, int type,
 {
   ATTR *ap;
   char buff[BUFFER_LEN];
-  char *bp;
-  char delim = ' ';
-  pcre2_code *re;
   int errcode;
   PCRE2_SIZE erroffset;
   int unset = 0;
@@ -642,6 +639,7 @@ do_attribute_limit(dbref player, const char *name, int type,
 
   if (pattern && *pattern) {
     if (type == AF_RLIMIT) {
+      pcre2_code *re;
       /* Compile to regexp. */
       re =
         pcre2_compile((const PCRE2_UCHAR *) remove_markup(pattern, NULL),
@@ -658,6 +656,7 @@ do_attribute_limit(dbref player, const char *name, int type,
       mush_strncpy(buff, pattern, sizeof buff);
     } else if (type == AF_ENUM) {
       const char *ptr;
+      char delim = ' ';
 
       /* Check for a delimiter: @attr/enum | attrname=foo */
       if ((ptr = strchr(name, ' ')) != NULL) {
@@ -675,6 +674,7 @@ do_attribute_limit(dbref player, const char *name, int type,
        * a delimiter. */
       snprintf(buff, BUFFER_LEN, "%c%s%c", delim, pattern, delim);
       buff[BUFFER_LEN - 1] = '\0';
+      char *bp;
 
       /* For sanity's sake, we'll enforce a properly delimited enum
        * with a quick and dirty squish().
@@ -756,11 +756,10 @@ do_attribute_limit(dbref player, const char *name, int type,
  * \param retroactive if true, apply the permissions retroactively.
  */
 void
-do_attribute_access(dbref player, char *name, char *perms, int retroactive)
+do_attribute_access(dbref player, char *name, const char *perms, int retroactive)
 {
-  ATTR *ap, *ap2;
+  ATTR *ap;
   privbits flags = 0;
-  int i;
   int insert = 0;
 
   /* Parse name and perms */
@@ -814,6 +813,8 @@ do_attribute_access(dbref player, char *name, char *perms, int retroactive)
    * set on objects in the db. If so, and if we're retroactive, set
    * perms/creator
    */
+  ATTR *ap2;
+  int i;
   if (retroactive) {
     for (i = 0; i < db_top; i++) {
       if ((ap2 = atr_get_noparent(i, name))) {
@@ -836,7 +837,7 @@ do_attribute_access(dbref player, char *name, char *perms, int retroactive)
  * \param flags attribute flags (AF_*)
  */
 void
-add_new_attr(char *name, uint32_t flags)
+add_new_attr(const char *name, uint32_t flags)
 {
   ATTR *ap;
   ap = (ATTR *) ptab_find_exact(&ptab_attrib, name);
@@ -1005,7 +1006,7 @@ display_attr_info(dbref player, ATTR *ap)
  * \param retroactive Include the /retroactive switch?
  */
 void
-do_decompile_attribs(dbref player, char *pattern, int retroactive)
+do_decompile_attribs(dbref player, const char *pattern, int retroactive)
 {
   ATTR *ap;
   const char *name;
