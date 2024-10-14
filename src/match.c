@@ -232,7 +232,6 @@ static dbref
 choose_thing(const dbref who, const int preferred_type, long flags,
              dbref thing1, dbref thing2)
 {
-  int key;
   /* If there's only one valid thing, return it */
   /* Rather convoluted to ensure we always return AMBIGUOUS, not NOTHING, if we
    * have one of each */
@@ -260,7 +259,7 @@ choose_thing(const dbref who, const int preferred_type, long flags,
   }
 
   if (flags & MAT_CHECK_KEYS) {
-    key = could_doit(who, thing1, NULL);
+    int key = could_doit(who, thing1, NULL);
     if (!key && could_doit(who, thing2, NULL)) {
       return thing2;
     } else if (key && !could_doit(who, thing2, NULL)) {
