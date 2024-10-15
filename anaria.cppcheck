@@ -16,6 +16,7 @@
     </paths>
     <exclude>
         <path name="src/sqlite3.c"/>
+        <path name="src/match.c"/>
     </exclude>
     <libraries>
         <library>bsd</library>
