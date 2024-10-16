@@ -572,13 +572,12 @@ check_attr_value(dbref player, const char *name, const char *value)
      * to buff and use that. */
     strupper_r(attrval, buff, sizeof buff);
 
-    int len;
-    len = strlen(value);
     snprintf(vbuff, BUFFER_LEN, "%c%s%c", delim, value, delim);
     upcasestr(vbuff);
 
     ptr = strstr(buff, vbuff);
     if (!ptr) {
+      int len = strlen(value);
       *(vbuff + len + 1) = '\0'; /* Remove the second delim */
       ptr = strstr(buff, vbuff);
     }
@@ -813,9 +812,9 @@ do_attribute_access(dbref player, char *name, const char *perms, int retroactive
    * set on objects in the db. If so, and if we're retroactive, set
    * perms/creator
    */
-  ATTR *ap2;
-  int i;
   if (retroactive) {
+    ATTR *ap2;
+    int i;
     for (i = 0; i < db_top; i++) {
       if ((ap2 = atr_get_noparent(i, name))) {
         if (AF_Root(ap2))
