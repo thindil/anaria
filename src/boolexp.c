@@ -416,7 +416,7 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
     int arg;
     ATTR *a;
     int r = 0;
-    char *s = NULL;
+    const char *s = NULL;
     uint8_t *bytecode, *pc;
 
     bytecode = pc = safe_get_bytecode(b);
@@ -532,7 +532,7 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
           if (!a || !Can_Read_Attr(target, player, a))
             r = 0;
           else {
-            char *p = least_idle_ip(Owner(player));
+            const char *p = least_idle_ip(Owner(player));
             r = p ? quick_wild((char *) bytecode + arg, p) : 0;
           }
         }
@@ -548,7 +548,7 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
           if (!a || !Can_Read_Attr(target, player, a))
             r = 0;
           else {
-            char *p = least_idle_hostname(Owner(player));
+            const char *p = least_idle_hostname(Owner(player));
             r = p ? quick_wild((char *) bytecode + arg, p) : 0;
           }
         }
@@ -575,8 +575,8 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
         }
         break;
       case OP_TDBREFLIST: {
-        char *idstr, *curr, *orig;
-        dbref mydb;
+        char *idstr, *orig;
+        const char *curr;
 
         r = 0;
         a = atr_get(target, (char *) bytecode + arg);
@@ -586,6 +586,7 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
         orig = safe_atr_value(a, "atrval.boolexp");
         idstr = trim_space_sep(orig, ' ');
 
+        dbref mydb;
         while ((curr = split_token(&idstr, ' ')) != NULL) {
           mydb = parse_objid(curr);
           if (mydb == player) {
@@ -1134,7 +1135,7 @@ parse_boolexp_R(void)
     return b;
   } else {
     /* Are these special atoms? */
-    if (*tbuf1 && *tbuf1 == '#' && *(tbuf1 + 1)) {
+    if (*tbuf1 == '#' && *(tbuf1 + 1)) {
       if (*(tbuf1 + 1) == 't' || *(tbuf1 + 1) == 'T') {
         b->type = BOOLEXP_BOOL;
         b->thing = 1;
@@ -1223,11 +1224,11 @@ parse_boolexp_L(void)
 static struct boolexp_node *
 parse_boolexp_O(void)
 {
-  struct boolexp_node *b2, *t;
+  struct boolexp_node *t;
   skip_whitespace();
   if (*parsebuf == OWNER_TOKEN) {
     parsebuf++;
-    b2 = alloc_bool();
+    struct boolexp_node *b2 = alloc_bool();
     b2->type = BOOLEXP_OWNER;
     t = parse_boolexp_R();
     if (t == NULL) {
@@ -1250,11 +1251,11 @@ parse_boolexp_O(void)
 static struct boolexp_node *
 parse_boolexp_C(void)
 {
-  struct boolexp_node *b2, *t;
+  struct boolexp_node *t;
   skip_whitespace();
   if (*parsebuf == IN_TOKEN) {
     parsebuf++;
-    b2 = alloc_bool();
+    struct boolexp_node *b2 = alloc_bool();
     b2->type = BOOLEXP_CARRY;
     t = parse_boolexp_R();
     if (t == NULL) {
@@ -1277,11 +1278,11 @@ parse_boolexp_C(void)
 static struct boolexp_node *
 parse_boolexp_I(void)
 {
-  struct boolexp_node *b2, *t;
+  struct boolexp_node *t;
   skip_whitespace();
   if (*parsebuf == IS_TOKEN) {
     parsebuf++;
-    b2 = alloc_bool();
+    struct boolexp_node *b2 = alloc_bool();
     b2->type = BOOLEXP_IS;
     t = parse_boolexp_R();
     if (t == NULL) {
@@ -1304,12 +1305,11 @@ parse_boolexp_I(void)
 static struct boolexp_node *
 parse_boolexp_A(void)
 {
-  struct boolexp_node *b2, *t;
-  bool escaped = 0;
+  struct boolexp_node *t;
   skip_whitespace();
   if (*parsebuf == AT_TOKEN) {
     parsebuf++;
-    b2 = alloc_bool();
+    struct boolexp_node *b2 = alloc_bool();
     b2->type = BOOLEXP_IND;
     t = parse_boolexp_R();
     if (t == NULL) {
@@ -1327,6 +1327,7 @@ parse_boolexp_A(void)
       const char *m;
       parsebuf++;
       p = tbuf1;
+      bool escaped = 0;
       while (*parsebuf &&
              (escaped || !(*parsebuf == AND_TOKEN || *parsebuf == OR_TOKEN ||
                            *parsebuf == ')'))) {
@@ -1360,11 +1361,10 @@ parse_boolexp_A(void)
 static struct boolexp_node *
 parse_boolexp_F(void)
 {
-  struct boolexp_node *b2;
   skip_whitespace();
   if (*parsebuf == NOT_TOKEN) {
     parsebuf++;
-    b2 = alloc_bool();
+    struct boolexp_node *b2 = alloc_bool();
     b2->type = BOOLEXP_NOT;
     if ((b2->data.n = parse_boolexp_F()) == NULL) {
       free_boolexp_node(b2);
@@ -1379,7 +1379,7 @@ parse_boolexp_F(void)
 static struct boolexp_node *
 parse_boolexp_T(void)
 {
-  struct boolexp_node *b, *b2;
+  struct boolexp_node *b;
 
   if ((b = parse_boolexp_F()) == NULL) {
     return b;
@@ -1387,7 +1387,7 @@ parse_boolexp_T(void)
     skip_whitespace();
     if (*parsebuf == AND_TOKEN) {
       parsebuf++;
-      b2 = alloc_bool();
+      struct boolexp_node *b2 = alloc_bool();
       b2->type = BOOLEXP_AND;
       b2->data.sub.a = b;
       if ((b2->data.sub.b = parse_boolexp_T()) == NULL) {
@@ -1406,7 +1406,7 @@ parse_boolexp_T(void)
 static struct boolexp_node *
 parse_boolexp_E(void)
 {
-  struct boolexp_node *b, *b2;
+  struct boolexp_node *b;
 
   if ((b = parse_boolexp_T()) == NULL) {
     return b;
@@ -1414,7 +1414,7 @@ parse_boolexp_E(void)
     skip_whitespace();
     if (*parsebuf == OR_TOKEN) {
       parsebuf++;
-      b2 = alloc_bool();
+      struct boolexp_node *b2 = alloc_bool();
       b2->type = BOOLEXP_OR;
       b2->data.sub.a = b;
       if ((b2->data.sub.b = parse_boolexp_E()) == NULL) {
@@ -1473,7 +1473,7 @@ append_insn(struct bvm_asm *a, bvm_opcode op, int arg, const char *s)
     /* Allocate a new string if needed. */
     if (!found) {
       newstr = mush_malloc(sizeof *newstr, "bvm.strnode");
-      if (!s)
+      if (!newstr)
         mush_panic("Unable to allocate memory for boolexp string node!");
       newstr->s = mush_strdup(s, "bvm.string");
       if (!newstr->s)
@@ -1812,17 +1812,19 @@ optimize_bvm_asm(struct bvm_asm *a)
              jumping to the next instruction after. Ex: a&b|c */
           struct bvm_asmnode *newlbl;
           newlbl = slab_malloc(bvm_asmnode_slab, NULL);
-          if (!newlbl)
+          if (!newlbl) {
             mush_panic("Unable to allocate memory for boolexp asm node!");
-          newlbl->op = OP_LABEL;
-          n->arg = newlbl->arg = gen_label_id(a);
-          if (target->next)
-            newlbl->next = target->next;
-          else
-            newlbl->next = NULL;
-          target->next = newlbl;
-          if (a->tail == target)
-            a->tail = newlbl;
+          } else {
+            newlbl->op = OP_LABEL;
+            n->arg = newlbl->arg = gen_label_id(a);
+            if (target->next)
+              newlbl->next = target->next;
+            else
+              newlbl->next = NULL;
+            target->next = newlbl;
+            if (a->tail == target)
+              a->tail = newlbl;
+          }
         }
       } else
         n = n->next;
@@ -1997,13 +1999,13 @@ check_attrib_lock(dbref player, dbref target, const char *atrname,
 bool
 is_eval_lock(boolexp b)
 {
-  bvm_opcode op;
   uint8_t *pc;
 
   if (b == TRUE_BOOLEXP)
     return 0;
 
   pc = get_bytecode(b, NULL);
+  bvm_opcode op;
   while (1) {
     op = (bvm_opcode) *pc;
     pc += INSN_LEN;
@@ -2057,9 +2059,9 @@ sizeof_boolexp_node(struct boolexp_node *b)
 static void
 print_bytecode(boolexp b)
 {
-  bvm_opcode op;
   int arg, len = 0, pos = 0;
-  char *pc, *bytecode;
+  char *pc;
+  const char *bytecode;
 
   if (b == TRUE_BOOLEXP) {
     puts("NULL bytecode!");
@@ -2070,6 +2072,7 @@ print_bytecode(boolexp b)
 
   printf("Total length of bytecode+strings: %d bytes\n", len);
 
+  bvm_opcode op;
   while (1) {
     op = (bvm_opcode) *pc;
     memcpy(&arg, pc + 1, sizeof arg);
@@ -2084,10 +2087,10 @@ print_bytecode(boolexp b)
       printf("PAREN %c\n", (arg == 0) ? '(' : ((arg == 1) ? ')' : '!'));
       break;
     case OP_JMPT:
-      printf("JMPT %d\n", arg / INSN_LEN);
+      printf("JMPT %zd\n", arg / INSN_LEN);
       break;
     case OP_JMPF:
-      printf("JMPF %d\n", arg / INSN_LEN);
+      printf("JMPF %zd\n", arg / INSN_LEN);
       break;
     case OP_TCONST:
       printf("TCONST #%d\n", arg);
@@ -2243,15 +2246,14 @@ cleanup_boolexp(boolexp b)
 {
   uint8_t *pc, *bytecode;
   uint32_t bytecode_len = 0;
-  bvm_opcode op;
   int arg;
   bool revised = 0;
-  char false_op[INSN_LEN] = {OP_LOADR, 0};
 
   if (b == TRUE_BOOLEXP)
     return b;
 
   bytecode = pc = get_bytecode(b, &bytecode_len);
+  bvm_opcode op;
   while (1) {
     op = (bvm_opcode) *pc;
     memcpy(&arg, pc + 1, sizeof arg);
@@ -2265,6 +2267,7 @@ cleanup_boolexp(boolexp b)
     case OP_TIND:
       if (IsGarbage(arg)) {
         revised = 1;
+        char false_op[INSN_LEN] = {OP_LOADR, 0};
         memcpy(pc, false_op, INSN_LEN);
       }
       break;
