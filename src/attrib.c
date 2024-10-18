@@ -52,7 +52,7 @@ static char missing_name[ATTRIBUTE_NAME_LIMIT + 1];
 
 static atr_err real_atr_clr(dbref thing, char const *atr, dbref player,
                         int we_are_wiping);
-static void atr_free_one(dbref, ATTR *);
+static void atr_free_one(dbref, const ATTR *);
 static int find_atr_pos_in_list(dbref thing, char const *name);
 static atr_err can_create_attr(dbref player, dbref obj, char const *atr_name,
                                uint32_t flags);
@@ -279,7 +279,7 @@ atrflag_to_string(privbits mask)
  * \retval 1 if the player can read the attribute.
  */
 int
-can_read_attr_internal(dbref player, dbref obj, ATTR *atr)
+can_read_attr_internal(dbref player, dbref obj, const ATTR *atr)
 {
   static char name[ATTRIBUTE_NAME_LIMIT + 1];
   char *p;
@@ -380,7 +380,7 @@ can_read_attr_internal(dbref player, dbref obj, ATTR *atr)
  * \retval 1 if the player can write the attribute.
  */
 int
-can_write_attr_internal(dbref player, dbref obj, ATTR *atr, int safe)
+can_write_attr_internal(dbref player, dbref obj, const ATTR *atr, int safe)
 {
   char *p;
   missing_name[0] = '\0';
@@ -871,7 +871,7 @@ unanchored_regexp_attr_check(dbref thing, ATTR *atr, dbref player)
     return;
 
   p = atr_value(atr);
-  if (!p || !*p || *p != '$')
+  if (!p || *p != '$')
     return;
 
   p++;
@@ -1607,7 +1607,7 @@ atr_iter_get_parent(dbref player, dbref thing, const char *name, unsigned flags,
                  */
                 char bname[BUFFER_LEN];
                 char *p;
-                ATTR *branch;
+                const ATTR *branch;
                 bool skip = 0;
 
                 strcpy(bname, AL_NAME(ptr));
@@ -1662,7 +1662,6 @@ atr_iter_get_parent(dbref player, dbref thing, const char *name, unsigned flags,
 void
 atr_free_all(dbref thing)
 {
-  ATTR *ptr;
 
   if (AttrCap(thing) == 0) {
     return;
@@ -1672,6 +1671,7 @@ atr_free_all(dbref thing)
     ModTime(thing) = mudtime;
   }
 
+  ATTR *ptr;
   ATTR_FOR_EACH (thing, ptr) {
     if (ptr->data)
       chunk_delete(ptr->data);
@@ -1715,7 +1715,8 @@ static bool
 can_debug(dbref player, dbref victim)
 {
   ATTR *a;
-  char *aval, *dfl, *curr;
+  char *aval, *dfl;
+  const char *curr;
   dbref member;
   int success = 0;
 
@@ -1760,7 +1761,7 @@ atr_single_match_r(ATTR *ptr, int flag_mask, int end, const char *input,
                    char cmd_buff[], PE_REGS *pe_regs)
 {
   char buff[BUFFER_LEN];
-  char *atrval;
+  const char *atrval;
   int i, j;
   int match_found = 0;
 
@@ -2018,8 +2019,6 @@ atr_comm_match(dbref thing, dbref player, int type, int end, char const *str,
       match_found =
         atr_single_match_r(ptr, flag_mask, end, str, args, match_space,
                            match_space_len, cmd_buff, pe_regs);
-      if (match_found)
-        match++;
 
       if (match_found) {
         /* We only want to do the lock check once, so that any side
@@ -2028,6 +2027,7 @@ atr_comm_match(dbref thing, dbref player, int type, int end, char const *str,
          * run the lock once for 'foo bar'. Locks are always checked on
          * the child, even when the attr is inherited.
          */
+        match++;
         if (!lock_checked) {
           lock_checked = 1;
           if ((type == '$' &&
@@ -2053,8 +2053,6 @@ atr_comm_match(dbref thing, dbref player, int type, int end, char const *str,
           safe_str(AL_NAME(ptr), atrname, abp);
         }
         if (!just_match) {
-          char tmp[BUFFER_LEN];
-
           if (from_queue &&
               (queue_type & ~QUEUE_DEBUG_PRIVS) != QUEUE_DEFAULT) {
             int pe_flags = PE_INFO_DEFAULT;
@@ -2085,6 +2083,7 @@ atr_comm_match(dbref thing, dbref player, int type, int end, char const *str,
             }
 
             /* inplace queue */
+            char tmp[BUFFER_LEN];
             snprintf(tmp, sizeof tmp, "#%d/%s", thing, AL_NAME(ptr));
             new_queue_actionlist_int(thing, player, player, cmd_buff,
                                      from_queue, pe_flags, queue_type, pe_regs,
@@ -2183,7 +2182,6 @@ one_comm_match(dbref thing, dbref player, const char *atr, const char *str,
       free_pe_info(pe_info);
     }
     if (success) {
-      char tmp[BUFFER_LEN];
       if (from_queue && (queue_type & ~QUEUE_DEBUG_PRIVS) != QUEUE_DEFAULT) {
         /* inplace queue */
         int pe_flags = PE_INFO_DEFAULT;
@@ -2213,6 +2211,7 @@ one_comm_match(dbref thing, dbref player, const char *atr, const char *str,
         }
 
         /* inplace queue */
+        char tmp[BUFFER_LEN];
         snprintf(tmp, sizeof tmp, "#%d/%s", thing, AL_NAME(ptr));
         new_queue_actionlist_int(thing, player, player, cmd_buff, from_queue,
                                  pe_flags, queue_type, pe_regs, tmp);
@@ -2256,7 +2255,6 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
   atr_err res;
   int was_hearer;
   int was_listener;
-  dbref announceloc;
   const char *new;
   if (!EMPTY_ATTRS && s && !*s)
     s = NULL;
@@ -2425,6 +2423,7 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
       notify(player, T("Alias removed."));
     return 1;
   } else if (!strcmp(name, "LISTEN")) {
+    dbref announceloc;
     if (IsRoom(thing))
       announceloc = thing;
     else {
@@ -2630,7 +2629,7 @@ cleanup:
  * \param a the attribute to free
  */
 static void
-atr_free_one(dbref thing, ATTR *a)
+atr_free_one(dbref thing, const ATTR *a)
 {
   ptrdiff_t pos;
 
@@ -2651,7 +2650,7 @@ atr_free_one(dbref thing, ATTR *a)
  * \return a pointer to the compressed data, in a static buffer.
  */
 char const *
-atr_get_compressed_data(ATTR *atr)
+atr_get_compressed_data(const ATTR *atr)
 {
   static char buffer[BUFFER_LEN * 2];
   static char const empty_string[] = {0};
@@ -2685,7 +2684,7 @@ atr_value(ATTR *atr)
  * \return a pointer to the uncompressed data, in a dynamic buffer.
  */
 char *
-safe_atr_value(ATTR *atr, char *check)
+safe_atr_value(ATTR *atr, const char *check)
 {
   add_check(check);
   return safe_uncompress(atr_get_compressed_data(atr));
