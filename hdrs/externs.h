@@ -29,7 +29,7 @@ void emergency_shutdown(void);
 void boot_desc(DESC *d, const char *cause,
                dbref executor); /* remove a player */
 int boot_player(dbref player, int idleonly, int slilent, dbref booter);
-const char *sockset(DESC *d, char *name, char *val);
+const char *sockset(DESC *d, const char *name, char *val);
 const char *sockset_show(DESC *d, char *nl);
 
 DESC *player_desc(dbref player);   /* find descriptors */
@@ -82,7 +82,7 @@ void do_who_session(dbref player, char *name);
 char *json_unescape_string(char *input);
 char *json_escape_string(char *input);
 void register_gmcp_handler(char *package, gmcp_handler_func func);
-void send_oob(DESC *d, char *package, cJSON *data);
+void send_oob(DESC *d, char *package, const cJSON *data);
 
 /* sql.c */
 void sql_shutdown(void);

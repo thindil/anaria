@@ -220,8 +220,8 @@ static void test_telnet(DESC *d);
 static void setup_telnet(DESC *d);
 bool test_telnet_wrapper(void *data);
 bool welcome_user_wrapper(void *data);
-static int handle_telnet(DESC *d, char **q, char *qend);
-static void set_ttype(DESC *d, char *value);
+static int handle_telnet(DESC *d, char **q, const char *qend);
+static void set_ttype(DESC *d, const char *value);
 bool http_finished_wrapper(void *data);
 
 typedef void (*telnet_handler)(DESC *d, char *cmd, int len);
@@ -387,14 +387,14 @@ struct fcache_entries {
 static struct fcache_entries fcache;
 static bool fcache_dump(DESC *d, FBLOCK fp[2], const char *prefix, char *arg);
 static int fcache_dump_attr(DESC *d, dbref thing, const char *attr, int html,
-                            const char *prefix, char *arg);
+                            const char *prefix, const char *arg);
 static int fcache_read(FBLOCK *cp, const char *filename);
 static void logout_sock(DESC *d);
 static void shutdownsock(DESC *d, const char *reason, dbref executor,
                          int flags);
 static void disconnect_desc(DESC *d);
 static void cleanup_desc(DESC *d);
-DESC *initializesock(int s, char *addr, char *ip, conn_source source);
+DESC *initializesock(int s, const char *addr, const char *ip, conn_source source);
 int process_output(DESC *d);
 /* Notify.c */
 void free_text_block(struct text_block *t);
@@ -415,7 +415,7 @@ static void process_input_helper(DESC *d, char *tbuf1, int got);
 static bool is_http_request(const char *command);
 static bool is_http_bodyless(const char *method);
 static int process_http_start(DESC *d, char *command);
-static void process_http_input(DESC *d, char *buf, int len);
+static void process_http_input(DESC *d, const char *buf, int len);
 static void http_command_ready(DESC *d);
 static void do_http_command(DESC *d);
 static void set_userstring(char **userstring, const char *command);
@@ -428,7 +428,7 @@ enum comm_res {
   CRES_BOOTED
 };
 static enum comm_res do_command(DESC *d, char *command);
-static void parse_puebloclient(DESC *d, char *command);
+static void parse_puebloclient(DESC *d, const char *command);
 static int dump_messages(DESC *d, dbref player, int new);
 static int check_connect(DESC *d, const char *msg);
 static void parse_connect(const char *msg, char *command, char *user,
@@ -480,7 +480,7 @@ void file_watch_event(int);
 static char *get_doing(dbref player, dbref caller, dbref enactor,
                        NEW_PE_INFO *pe_info, bool full);
 
-static bool who_check_name(DESC *d, char *name, bool wild);
+static bool who_check_name(const DESC *d, const char *name, bool wild);
 
 #ifndef BOOLEXP_DEBUGGING
 #ifdef WIN32SERVICES
@@ -560,7 +560,7 @@ main(int argc, char **argv)
         else if (strcmp(argv[n], "--disable-socket-quota") == 0) {
           disable_socket_quota = true;
         } else if (strncmp(argv[n], "--pidfile-fd", 12) == 0) {
-          char *eq;
+          const char *eq;
           if ((eq = strchr(argv[n], '='))) {
             pidfile_fd = atoi(eq + 1);
           } else {
@@ -1030,7 +1030,7 @@ is_remote_source(conn_source source)
 }
 
 static inline bool
-is_remote_desc(DESC *d)
+is_remote_desc(const DESC *d)
 {
   if (!d)
     return 0;
@@ -1039,7 +1039,7 @@ is_remote_desc(DESC *d)
 
 /** Is a descriptor using SSL? */
 static inline bool
-is_ssl_desc(DESC *d)
+is_ssl_desc(const DESC *d)
 {
   if (!d)
     return 0;
@@ -1048,7 +1048,7 @@ is_ssl_desc(DESC *d)
 
 /** Is a descriptor using a websocket? */
 static inline bool
-is_ws_desc(DESC *d)
+is_ws_desc(const DESC *d)
 {
   if (!d) {
     return 0;
@@ -1059,7 +1059,7 @@ is_ws_desc(DESC *d)
 static void
 setup_desc(int sockfd, conn_source source)
 {
-  DESC *newd;
+  const DESC *newd;
   int result;
 
   if (!(newd = new_connection(sockfd, &result, source))) {
@@ -1954,7 +1954,7 @@ clearstrings(DESC *d)
  */
 static int
 fcache_dump_attr(DESC *d, dbref thing, const char *attrib, int html,
-                 const char *prefix, char *arg)
+                 const char *prefix, const char *arg)
 {
   char descarg[SBUF_LEN], dbrefarg[SBUF_LEN], buff[BUFFER_LEN], *bp;
   PE_REGS *pe_regs;
@@ -2062,11 +2062,11 @@ fcache_read(FBLOCK *fb, const char *filename)
   if (*filename == NUMBER_TOKEN) {
     char objname[BUFFER_LEN];
     char *attrib;
-    dbref thing;
 
     strcpy(objname, filename);
     if ((attrib = strchr(objname, '/')) != NULL) {
       *attrib++ = '\0';
+      dbref thing;
       if ((thing = qparse_dbref(objname)) != NOTHING) {
         /* we have #dbref/attr */
         fb->buff = strupper_a(attrib, "fcache_data");
@@ -2317,7 +2317,7 @@ cleanup_desc(DESC *d)
 
 /* ARGSUSED */
 DESC *
-initializesock(int s, char *addr, char *ip, conn_source source)
+initializesock(int s, const char *addr, const char *ip, conn_source source)
 {
   DESC *d;
   d = (DESC *) mush_malloc(sizeof(DESC), "descriptor");
@@ -2742,7 +2742,7 @@ TELNET_HANDLER(telnet_willdo)
 TELNET_HANDLER(telnet_sga)
 {
   if (*cmd == DO) {
-    char response[6] = {IAC, WILL, TN_SGA, IAC, DO, TN_SGA};
+    const char response[6] = {IAC, WILL, TN_SGA, IAC, DO, TN_SGA};
     queue_newwrite(d, response, 6);
     process_output(d);
     /* Yeah, we still will send GA, which they should treat as a NOP,
@@ -2775,7 +2775,7 @@ TELNET_HANDLER(telnet_naws_sb)
  * \param d descriptor to set ttyp for
  * \param value ttyp to set, or NULL/default_ttype for default */
 static void
-set_ttype(DESC *d, char *value)
+set_ttype(DESC *d, const char *value)
 {
   if (!d)
     return;
@@ -2791,7 +2791,7 @@ set_ttype(DESC *d, char *value)
 /* Send TTYP subnegotiation request */
 TELNET_HANDLER(telnet_ttype)
 {
-  char reply[6] = {IAC, SB, TN_TTYPE, 1, IAC, SE};
+  const char reply[6] = {IAC, SB, TN_TTYPE, 1, IAC, SE};
   queue_newwrite(d, reply, 6);
   process_output(d);
 }
@@ -2825,7 +2825,7 @@ TELNET_HANDLER(telnet_charset)
   static const char *delim_list = "; +=/!", *delim_curr;
 #endif /* HAVE_NL_LANGINFO */
   char delim[2] = {';', '\0'};
-  char *curr_locale = NULL;
+  const char *curr_locale = NULL;
 
   if (*cmd != DO)
     return;
@@ -3030,7 +3030,7 @@ telnet_escape(char *str)
 void
 register_gmcp_handler(char *package, gmcp_handler_func func)
 {
-  char *p;
+  const char *p;
   struct gmcp_handler *g;
 
   if (!func)
@@ -3052,7 +3052,7 @@ register_gmcp_handler(char *package, gmcp_handler_func func)
 /* Handler for Core.Hello messages */
 GMCP_HANDLER(gmcp_core_hello)
 {
-  cJSON *j;
+  const cJSON *j;
 
   if (strcasecmp(package, "Core.Hello")) {
     return 0; /* Package was Core.Hello.something, and we don't handle that */
@@ -3121,7 +3121,7 @@ GMCP_HANDLER(gmcp_softcode_example)
  * \param data a JSON object, or NULL for no message
  */
 void
-send_oob(DESC *d, char *package, cJSON *data)
+send_oob(DESC *d, char *package, const cJSON *data)
 {
   char buff[BUFFER_LEN];
   char *bp = buff;
@@ -3162,7 +3162,7 @@ FUNCTION(fun_oob)
   cJSON *json = NULL;
   int i = 0;
   const char *l = NULL;
-  char *p;
+  const char *p;
   int failed = 0;
 
   if (nargs > 2 && arglens[2]) {
@@ -3304,7 +3304,7 @@ init_telnet_opts(void)
  * \retval 1 Telnet code successfully handled
  */
 static int
-handle_telnet(DESC *d, char **q, char *qend)
+handle_telnet(DESC *d, char **q, const char *qend)
 {
   char *p;
   unsigned char opt = '\0';
@@ -3396,7 +3396,8 @@ handle_telnet(DESC *d, char **q, char *qend)
 static void
 process_input_helper(DESC *d, char *tbuf1, int got)
 {
-  char *p, *pend, *q, *qend;
+  char *p, *q, *qend;
+  const char *pend;
   int is_first;
 
   is_first = d->conn_flags & CONN_AWAITING_FIRST_DATA;
@@ -3652,7 +3653,7 @@ http_bounce_mud_url(DESC *d)
   char buf[BUFFER_LEN];
   char *bp = buf;
   bool has_url = strncmp(MUDURL, "http", 4) == 0;
-  FBLOCK *index = &fcache.index_fcache;
+  const FBLOCK *index = &fcache.index_fcache;
 
   /* Setup the return headers. */
   safe_format(buf, &bp,
@@ -3663,7 +3664,7 @@ http_bounce_mud_url(DESC *d)
               "\r\n");
 
   /* See if we've got a cached index.html file and use that. */
-  if (index && index->buff) {
+  if (index->buff) {
     *bp = '\0';
 
     /* Check for an attribute override. */
@@ -3721,7 +3722,8 @@ static int
 process_http_start(DESC *d, char *line)
 {
   struct http_request *req;
-  char *c, *method, *path, *version;
+  char *c, *path;
+  const char *method, *version;
   const char *reason = "Malformed Request";
   char buff[BUFFER_LEN];
 
@@ -3856,9 +3858,10 @@ http_finished_wrapper(void *data)
 }
 
 static void
-process_http_input(DESC *d, char *buf, int len)
+process_http_input(DESC *d, const char *buf, int len)
 {
-  char *p, *eol, *val;
+  char *p, *eol;
+  const char *val;
   struct http_request *req;
   if (d->conn_timer) {
     sq_cancel(d->conn_timer);
@@ -4231,7 +4234,7 @@ do_command(DESC *d, char *command)
   } else {
     if (d->connected) {
       int fd = d->descriptor;
-      DESC *tmp;
+      const DESC *tmp;
       send_prefix(d);
       run_user_input(d->player, d->descriptor, command);
       /* Check to make sure the descriptor hasn't been closed while
@@ -4269,12 +4272,13 @@ do_command(DESC *d, char *command)
  * \param command string to parse
  */
 static void
-parse_puebloclient(DESC *d, char *command)
+parse_puebloclient(DESC *d, const char *command)
 {
-  const char *p, *end;
+  const char *p;
   if ((p = string_match(command, "md5="))) {
     /* Skip md5=" */
     p += 5;
+    const char *end;
     if ((end = strchr(p, '"'))) {
       if ((end > p) && ((end - p) <= PUEBLO_CHECKSUM_LEN)) {
         /* Got it! */
@@ -4728,7 +4732,8 @@ emergency_shutdown(void)
 int
 boot_player(dbref player, int idleonly, int silent, dbref booter)
 {
-  DESC *d, *ignore = NULL, *boot = NULL;
+  DESC *d, *boot = NULL;
+  const DESC *ignore = NULL;
   int count = 0;
   time_t now = mudtime;
 
@@ -4781,7 +4786,7 @@ boot_desc(DESC *d, const char *cause, dbref executor)
  * \retval 0 no
  */
 static int
-isyes(char *str)
+isyes(const char *str)
 {
   if (!str)
     return 0;
@@ -4898,7 +4903,7 @@ sockset_show(DESC *d, char *nl)
  * \return string Set message (error or success)
  */
 const char *
-sockset(DESC *d, char *name, char *val)
+sockset(DESC *d, const char *name, char *val)
 {
   static char retval[BUFFER_LEN];
   int ival;
@@ -5528,7 +5533,7 @@ dump_users(DESC *call_by, char *match)
   char *np;
   int nlen;
 
-  while (*match && *match == ' ')
+  while (*match == ' ')
     match++;
 
   if (SUPPORT_PUEBLO && (call_by->conn_flags & CONN_HTML)) {
@@ -5592,10 +5597,11 @@ dump_users(DESC *call_by, char *match)
  * \retval 0 name does not match
  */
 static bool
-who_check_name(DESC *d, char *name, bool wild)
+who_check_name(const DESC *d, const char *name, bool wild)
 {
   ATTR *a;
-  char *aval, *all_aliases, *one_alias;
+  char *aval, *all_aliases;
+  const char *one_alias;
 
   if (!name || !*name)
     return 1;
@@ -6428,10 +6434,10 @@ FUNCTION(fun_xwho)
   int powered = (*(called_as + 1) != 'M') && Priv_Who(executor);
   int objid = (strchr(called_as, 'D') != NULL);
   int firstnum = 0;
-  dbref victim;
 
   if (nargs > 2) {
     firstnum = 1;
+    dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
       safe_str(T(e_notvis), buff, bp);
@@ -6483,13 +6489,13 @@ FUNCTION(fun_xwho)
 FUNCTION(fun_nwho)
 {
   DESC *d;
-  dbref victim;
   int count = 0;
   int powered = ((*(called_as + 1) != 'M') && Priv_Who(executor));
 
   if (nargs && args[0] && *args[0]) {
     /* An argument was given. Find the victim and choose the lowest
      * perms possible */
+    dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
       safe_str(T(e_notvis), buff, bp);
@@ -6516,7 +6522,6 @@ FUNCTION(fun_lwho)
 {
   DESC *d;
   int first = 1;
-  dbref victim;
   int powered = ((*called_as == 'L') && Priv_Who(executor));
   int objid = (strchr(called_as, 'D') != NULL);
   int online = 1;
@@ -6525,6 +6530,7 @@ FUNCTION(fun_lwho)
   if (nargs && args[0] && *args[0]) {
     /* An argument was given. Find the victim and choose the lowest
      * perms possible */
+    dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
       safe_str(T(e_notvis), buff, bp);
@@ -6591,7 +6597,7 @@ FUNCTION(fun_hidden)
     return;
   }
   if (is_strict_integer(args[0])) {
-    DESC *d = lookup_desc(executor, args[0]);
+    const DESC *d = lookup_desc(executor, args[0]);
     if (!d) {
       notify(executor, T("Couldn't find that descriptor."));
       safe_str("#-1", buff, bp);
@@ -6692,7 +6698,8 @@ least_idle_desc(dbref player, int priv)
 int
 most_conn_time(dbref player)
 {
-  DESC *d, *match = NULL;
+  DESC *d = NULL;
+  const DESC *match = NULL;
   DESC_ITER_CONN (d) {
     if ((d->player == player) && !Hidden(d) &&
         (!match || (d->connected_at > match->connected_at)))
@@ -6713,7 +6720,8 @@ most_conn_time(dbref player)
 int
 most_conn_time_priv(dbref player)
 {
-  DESC *d, *match = NULL;
+  DESC *d = NULL;
+  const DESC *match = NULL;
   DESC_ITER_CONN (d) {
     if ((d->player == player) &&
         (!match || (d->connected_at > match->connected_at)))
@@ -6734,7 +6742,7 @@ most_conn_time_priv(dbref player)
 int
 least_idle_time(dbref player)
 {
-  DESC *d;
+  const DESC *d;
   d = least_idle_desc(player, 0);
   if (d) {
     double result = difftime(mudtime, d->last_time);
@@ -6751,7 +6759,7 @@ least_idle_time(dbref player)
 int
 least_idle_time_priv(dbref player)
 {
-  DESC *d;
+  const DESC *d;
   d = least_idle_desc(player, 1);
   if (d) {
     double result = difftime(mudtime, d->last_time);
@@ -6783,7 +6791,7 @@ least_idle_ip(dbref player)
 char *
 least_idle_hostname(dbref player)
 {
-  DESC *d;
+  const DESC *d;
   static char hostname[101];
   char *p;
 
@@ -6858,7 +6866,7 @@ FUNCTION(fun_zwho)
 FUNCTION(fun_player)
 {
   /* Gets the player associated with a particular descriptor */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d)
     safe_dbref(d->player, buff, bp);
   else
@@ -6869,7 +6877,7 @@ FUNCTION(fun_player)
 FUNCTION(fun_doing)
 {
   /* Gets a player's @doing */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d)
     safe_str(get_doing(d->player, executor, enactor, pe_info, 0), buff, bp);
 }
@@ -6878,7 +6886,7 @@ FUNCTION(fun_doing)
 FUNCTION(fun_hostname)
 {
   /* Gets a player's hostname */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d && (d->player == executor || See_All(executor)))
     safe_str(d->addr, buff, bp);
   else
@@ -6889,7 +6897,7 @@ FUNCTION(fun_hostname)
 FUNCTION(fun_ipaddr)
 {
   /* Gets a player's IP address */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d && (d->player == executor || See_All(executor)))
     safe_str(d->ip, buff, bp);
   else
@@ -6900,7 +6908,7 @@ FUNCTION(fun_ipaddr)
 FUNCTION(fun_cmds)
 {
   /* Gets a player's IP address */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d && (d->player == executor || See_All(executor)))
     safe_integer(d->cmds, buff, bp);
   else
@@ -6911,7 +6919,7 @@ FUNCTION(fun_cmds)
 FUNCTION(fun_sent)
 {
   /* Gets a player's bytes sent */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d && (d->player == executor || See_All(executor)))
     safe_integer(d->input_chars, buff, bp);
   else
@@ -6922,7 +6930,7 @@ FUNCTION(fun_sent)
 FUNCTION(fun_recv)
 {
   /* Gets a player's bytes received */
-  DESC *d = lookup_desc(executor, args[0]);
+  const DESC *d = lookup_desc(executor, args[0]);
   if (d && (d->player == executor || See_All(executor)))
     safe_integer(d->output_chars, buff, bp);
   else
@@ -6948,7 +6956,7 @@ FUNCTION(fun_ssl)
   /* Return the status of the ssl flag on the least idle descriptor we
    * find that matches the player's dbref.
    */
-  DESC *match;
+  const DESC *match;
   match = lookup_desc(executor, args[0]);
   if (match) {
     if (match->player == executor || See_All(executor))
@@ -6961,7 +6969,7 @@ FUNCTION(fun_ssl)
 
 FUNCTION(fun_width)
 {
-  DESC *match;
+  const DESC *match;
   if (!*args[0])
     safe_str(T("#-1 FUNCTION REQUIRES ONE ARGUMENT"), buff, bp);
   else if ((match = lookup_desc(executor, args[0])) && match->width > 0)
@@ -6974,7 +6982,7 @@ FUNCTION(fun_width)
 
 FUNCTION(fun_height)
 {
-  DESC *match;
+  const DESC *match;
   if (!*args[0])
     safe_str(T("#-1 FUNCTION REQUIRES ONE ARGUMENT"), buff, bp);
   else if ((match = lookup_desc(executor, args[0])) && match->height > 0)
@@ -7035,7 +7043,7 @@ FUNCTION(fun_idlesecs)
    * their least idle connection
    */
 
-  DESC *match = lookup_desc(executor, args[0]);
+  const DESC *match = lookup_desc(executor, args[0]);
   if (match)
     safe_number(difftime(mudtime, match->last_time), buff, bp);
   else
@@ -7049,7 +7057,7 @@ FUNCTION(fun_conn)
    * their longest-connected descriptor
    */
 
-  DESC *match = lookup_desc(executor, args[0]);
+  const DESC *match = lookup_desc(executor, args[0]);
   if (match)
     safe_number(difftime(mudtime, match->connected_at), buff, bp);
   else
@@ -7061,7 +7069,6 @@ FUNCTION(fun_lports)
 {
   DESC *d;
   int first = 1;
-  dbref victim;
   int powered = 1;
   int online = 1;
   int offline = 0;
@@ -7073,6 +7080,7 @@ FUNCTION(fun_lports)
 
   if (nargs && args[0] && *args[0]) {
     /* An argument was given. Find the victim and adjust perms */
+    dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
       safe_str(T(e_notvis), buff, bp);
