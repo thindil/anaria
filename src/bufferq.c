@@ -218,7 +218,7 @@ iter_bufferq(BUFFERQ *bq, char **p, dbref *player, int *type, time_t *timestamp)
  * \return size of buffer queue in 8k blocks
  */
 int
-bufferq_blocks(BUFFERQ *bq)
+bufferq_blocks(const BUFFERQ *bq)
 {
   if (bq && bq->buffer)
     return bq->buffer_size / (BUFFER_LEN + BUFFERQLINEOVERHEAD);
@@ -254,7 +254,7 @@ bufferq_lines(BUFFERQ *bq)
  * \retval 0 the buffer queue is not empty (has messages).
  */
 bool
-isempty_bufferq(BUFFERQ *bq)
+isempty_bufferq(const BUFFERQ *bq)
 {
   if (!bq || !bq->buffer)
     return 1;
