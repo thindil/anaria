@@ -536,7 +536,8 @@ translit_cmp(const void *aa, const void *bb)
 static enum translit_action
 translit_to_latin1(UChar32 c, char rep[4])
 {
-  Transliteration *t, s;
+  const Transliteration *t;
+  Transliteration s;
 
   if (c <= 0xFF) {
     return TRANS_KEEP;
