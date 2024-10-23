@@ -927,7 +927,6 @@ debug_dump_region(uint32_t region, FILE *fp)
 {
   Region *rp = regions + region;
   RegionHeader *rhp;
-  uint32_t offset, count;
 
   ASSERT(region < region_count);
   rhp = rp->in_memory;
@@ -945,6 +944,7 @@ debug_dump_region(uint32_t region, FILE *fp)
   fflush(fp);
 
   if (rhp) {
+    uint32_t offset, count;
     for (offset = FIRST_CHUNK_OFFSET_IN_REGION; offset < REGION_SIZE;
          offset += ChunkFullLen(region, offset)) {
       fprintf(fp, "chunk:%c%4s %-6s off:%04x full:%04x ",
@@ -957,7 +957,7 @@ debug_dump_region(uint32_t region, FILE *fp)
       if (ChunkIsFree(region, offset)) {
         fprintf(fp, "next:%04x\n", ChunkNextFree(region, offset));
       } else {
-        fprintf(fp, "doff:%04" PRIdS "x len:%04x ",
+        fprintf(fp, "doff:%04" PRIdS "x len:%04d ",
                 ChunkDataPtr(region, offset) - (char *) rhp,
                 ChunkLen(region, offset));
         count = ChunkDerefs(region, offset);
@@ -1633,12 +1633,13 @@ find_available_cache_region(void)
     rhp = mush_malloc(REGION_SIZE, "chunk region cache buffer");
     if (!rhp) {
       mush_panic("chunk region cache buffer allocation failure");
+    } else {
+      cached_region_count++;
+      rhp->region_id = INVALID_REGION_ID;
+      rhp->prev = NULL;
+      rhp->next = NULL;
+      return rhp;
     }
-    cached_region_count++;
-    rhp->region_id = INVALID_REGION_ID;
-    rhp->prev = NULL;
-    rhp->next = NULL;
-    return rhp;
   }
   if (cache_tail->region_id == INVALID_REGION_ID)
     return cache_tail;
@@ -1834,7 +1835,7 @@ find_best_region(uint32_t full_len, int derefs, uint32_t old_region)
   uint32_t best_region, region;
   int best_score, score;
   int free_bytes;
-  Region *rp;
+  const Region *rp;
 
   best_region = INVALID_REGION_ID;
   best_score = INT_MAX;
@@ -2256,7 +2257,7 @@ migrate_move(uint32_t region, uint32_t offset, int which, int align)
 {
   Region *rp = regions + region;
   uint32_t s_reg, s_off, s_len, o_off, length;
-  Region *srp;
+  const Region *srp;
 
   debug_log("migrate_move %d (%08x) to %04x%04x, alignment %d", which,
             m_references[which][0], region, offset, align);
@@ -2644,7 +2645,7 @@ acc_chunk_fork_file(void)
 
   j = 0;
   for (;;) {
-    snprintf(child_filename, sizeof child_filename, "%s.%d", CHUNK_SWAP_FILE,
+    snprintf(child_filename, sizeof child_filename, "%s.%u", CHUNK_SWAP_FILE,
              j);
     swap_fd_child = open(child_filename, O_RDWR | O_EXCL | O_CREAT, 0600);
     if (swap_fd_child >= 0)
