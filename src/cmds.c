@@ -151,7 +151,7 @@ COMMAND(cmd_sockset)
     return;
   }
 
-  for (i = 1; args_right[i] && i < MAX_ARG; i += 2)
+  for (i = 1; i < MAX_ARG && args_right[i]; i += 2)
     notify(executor, sockset(d, args_right[i], args_right[i + 1]));
 
   if (i == 1)
@@ -240,13 +240,13 @@ COMMAND(cmd_retry)
   const char *sp;
   PE_REGS *pe_regs = NULL;
   PE_REGS *pr;
-  int a;
 
   if (!parse_boolean(arg_left))
     return;
 
   if (rhs_present) {
     /* Now, to evaluate all of rsargs. Blah. */
+    int a;
     pe_regs = pe_regs_create(PE_REGS_ARG, "cmd_retry");
     for (a = 0; a < MAX_STACK_ARGS; a++) {
       sp = args_right[a + 1];
@@ -850,7 +850,7 @@ do_list_allocations(dbref player)
  * \param which 1 for builins, 2 for local, 3 for all
  */
 static void
-do_list(dbref player, char *arg, int lc, int which)
+do_list(dbref player, const char *arg, int lc, int which)
 {
   if (!arg || !*arg)
     notify(player, T("I don't understand what you want to @list."));
@@ -1095,7 +1095,7 @@ COMMAND(cmd_message)
   enum emit_type type;
   dbref speaker = SPOOF(executor, enactor, sw);
 
-  for (numargs = 1; args_right[numargs] && numargs < (MAX_STACK_ARGS + 3);
+  for (numargs = 1; numargs < (MAX_STACK_ARGS + 3) && args_right[numargs];
        numargs++)
     ;
 

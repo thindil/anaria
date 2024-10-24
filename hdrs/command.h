@@ -113,11 +113,11 @@ bool SW_BY_NAME(switch_mask, const char *);
 
 #define COMMAND(command_name)                                                  \
   void command_name(                                                           \
-    COMMAND_INFO *cmd, dbref executor, dbref enactor, dbref caller,            \
+    const COMMAND_INFO *cmd, dbref executor, dbref enactor, dbref caller,      \
     switch_mask sw, const char *raw, const char *switches, char *args_raw,     \
     char *arg_left, char *args_left[MAX_ARG], char *arg_right,                 \
     char *args_right[MAX_ARG], MQUE *queue_entry __attribute__((__unused__))); \
-  void command_name(COMMAND_INFO *cmd __attribute__((__unused__)),             \
+  void command_name(const COMMAND_INFO *cmd __attribute__((__unused__)),       \
                     dbref executor __attribute__((__unused__)),                \
                     dbref enactor __attribute__((__unused__)),                 \
                     dbref caller __attribute__((__unused__)),                  \
@@ -133,14 +133,14 @@ bool SW_BY_NAME(switch_mask, const char *);
 
 /** Common command prototype macro */
 #define COMMAND_PROTO(command_name)                                            \
-  void command_name(COMMAND_INFO *cmd, dbref player, dbref cause,              \
+  void command_name(const COMMAND_INFO *cmd, dbref player, dbref cause,              \
                     dbref caller, switch_mask sw, const char *raw,             \
                     const char *switches, char *args_raw, char *arg_left,      \
                     char *args_left[MAX_ARG], char *arg_right,                 \
                     char *args_right[MAX_ARG], MQUE *queue_entry)
 
 typedef struct command_info COMMAND_INFO;
-typedef void (*command_func)(COMMAND_INFO *, dbref, dbref, dbref, switch_mask,
+typedef void (*command_func)(const COMMAND_INFO *, dbref, dbref, dbref, switch_mask,
                              const char *, const char *, char *, char *,
                              char * [MAX_ARG], char *, char * [MAX_ARG],
                              MQUE *);
@@ -265,7 +265,7 @@ void reserve_aliases(void);
 void local_commands(void);
 void do_command_add(dbref player, char *name, int flags);
 void do_command_delete(dbref player, char *name);
-int run_command(COMMAND_INFO *cmd, dbref executor, dbref enactor,
+int run_command(const COMMAND_INFO *cmd, dbref executor, dbref enactor,
                 const char *cmd_evaled, switch_mask sw,
                 char switch_err[BUFFER_LEN], const char *cmd_raw, char *swp,
                 char *ap, char *ls, char *lsa[MAX_ARG], char *rs,

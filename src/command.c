@@ -1543,7 +1543,7 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
  * \retval 0 command hasn't been run (due to \@hook/ignore)
  */
 int
-run_command(COMMAND_INFO *cmd, dbref executor, dbref enactor,
+run_command(const COMMAND_INFO *cmd, dbref executor, dbref enactor,
             const char *cmd_evaled, switch_mask sw, char switch_err[BUFFER_LEN],
             const char *cmd_raw, char *swp, char *ap, char *ls,
             char *lsa[MAX_ARG], char *rs, char *rsa[MAX_ARG], MQUE *queue_entry)
