@@ -226,9 +226,9 @@ enum hook_type {
   HOOK_OVERRIDE,
   HOOK_EXTEND
 };
-extern void do_hook(dbref player, char *command, char *obj, char *attrname,
+extern void do_hook(dbref player, const char *command, const char *obj, const char *attrname,
                     enum hook_type flag, int inplace);
-extern void do_hook_list(dbref player, char *command, bool verbose);
+extern void do_hook_list(dbref player, const char *command, bool verbose);
 
 switch_mask switchmask(const char *switches);
 COMMAND_INFO *command_find(const char *name);
@@ -247,12 +247,12 @@ void command_splitup(dbref player, dbref cause, char *from, char *to,
                      char **args, COMMAND_INFO *cmd, int side);
 void command_argparse(dbref executor, dbref enactor, dbref caller,
                       NEW_PE_INFO *pe_info, char **from, char *to, char **argv,
-                      COMMAND_INFO *cmd, int side, int forcenoparse,
+                      const COMMAND_INFO *cmd, int side, int forcenoparse,
                       int pe_flags);
 char *command_parse(dbref player, char *string, MQUE *queue_entry);
 void do_list_commands(dbref player, int lc, int type);
 char *list_commands(int type);
-int command_check_with(dbref player, COMMAND_INFO *cmd, int noisy,
+int command_check_with(dbref player, const COMMAND_INFO *cmd, int noisy,
                        NEW_PE_INFO *pe_info);
 #define command_check(player, cmd, noisy)                                      \
   command_check_with(player, cmd, noisy, NULL)
@@ -267,11 +267,11 @@ void do_command_add(dbref player, char *name, int flags);
 void do_command_delete(dbref player, char *name);
 int run_command(const COMMAND_INFO *cmd, dbref executor, dbref enactor,
                 const char *cmd_evaled, switch_mask sw,
-                char switch_err[BUFFER_LEN], const char *cmd_raw, char *swp,
+                const char switch_err[BUFFER_LEN], const char *cmd_raw, char *swp,
                 char *ap, char *ls, char *lsa[MAX_ARG], char *rs,
                 char *rsa[MAX_ARG], MQUE *queue_entry);
 int cnf_add_command(char *name, char *opts);
-int cnf_hook_command(char *name, char *opts);
+int cnf_hook_command(const char *command, char *opts);
 
 #define SILENT_OR_NOISY(switches, default_silent)                              \
   (SW_ISSET(switches, SWITCH_SILENT)                                           \

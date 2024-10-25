@@ -46,10 +46,10 @@ PTAB ptab_command_perms; /**< Prefix table for command permissions */
 HASHTAB htab_reserved_aliases; /**< Hash table for reserved command aliases */
 
 static const char *command_isattr(char *command);
-static int switch_find(COMMAND_INFO *cmd, const char *sw);
+static int switch_find(const COMMAND_INFO *cmd, const char *sw);
 static void strccat(char *buff, char **bp, const char *from);
 static COMMAND_INFO *clone_command(char *original, char *clone);
-static int has_hook(struct hook_data *hook);
+static int has_hook(const struct hook_data *hook);
 extern int global_fun_invocations; /**< Counter for function invocations */
 extern int global_fun_recursions;  /**< Counter for function recursion */
 
@@ -473,7 +473,7 @@ switch_cmp(const void *a, const void *b)
 
 /* This has different semantics than a prefix table, or we'd use that. */
 static int
-switch_find(COMMAND_INFO *cmd, const char *sw)
+switch_find(const COMMAND_INFO *cmd, const char *sw)
 {
   SWITCH_VALUE *sw_val;
 
@@ -562,7 +562,7 @@ make_command(const char *name, int type, const char *flagstr,
     mush_strncpy(sw_copy, sw, BUFFER_LEN);
     pos = sw_copy;
     while (pos) {
-      char *thisone = split_token(&pos, ' ');
+      const char *thisone = split_token(&pos, ' ');
       st_insert(thisone, &switch_names);
     }
     break;
@@ -647,12 +647,12 @@ command_add(const char *name, int type, const char *flagstr,
 int
 cnf_add_command(char *name, char *opts)
 {
-  COMMAND_INFO *command;
   int flags = 0;
-  char *p, *one;
+  char *p;
 
   if (opts && *opts) {
     p = trim_space_sep(opts, ' ');
+    char *one;
     while ((one = split_token(&p, ' '))) {
       if (strcasecmp("noparse", one) == 0) {
         flags |= CMD_T_NOPARSE;
@@ -672,7 +672,7 @@ cnf_add_command(char *name, char *opts)
 
   name = trim_space_sep(name, ' ');
   upcasestr(name);
-  command = command_find(name);
+  const COMMAND_INFO *command = command_find(name);
   if (command || !ok_command_name(name))
     return 0;
   command_add(mush_strdup(name, "command.name"), flags, NULL, 0,
@@ -730,8 +730,7 @@ switchmask(const char *switches)
   static switch_mask sw = NULL;
   static int sm_bytes = 0;
   char buff[BUFFER_LEN];
-  char *p, *s;
-  int switchnum;
+  char *p;
 
   if (!sw || sm_bytes < switch_bytes) {
     sw = mush_realloc(sw, switch_bytes, "cmd.switch.vector");
@@ -743,6 +742,8 @@ switchmask(const char *switches)
     return NULL;
   strcpy(buff, switches);
   p = buff;
+  int switchnum;
+  char *s;
   while (p) {
     s = split_token(&p, ' ');
     switchnum = switch_find(NULL, s);
@@ -818,7 +819,7 @@ command_init_preconfig(void)
       strcpy(sw_copy, cmd->switches);
       pos = sw_copy;
       while (pos) {
-        char *sw = split_token(&pos, ' ');
+        const char *sw = split_token(&pos, ' ');
         st_insert(sw, &switch_names);
       }
     }
@@ -960,7 +961,7 @@ int rhs_present;
 void
 command_argparse(dbref executor, dbref enactor, dbref caller,
                  NEW_PE_INFO *pe_info, char **from, char *to, char *argv[],
-                 COMMAND_INFO *cmd, int right_side, int forcenoparse,
+                 const COMMAND_INFO *cmd, int right_side, int forcenoparse,
                  int pe_flags)
 {
   int parse, split, args, i, done;
@@ -1057,9 +1058,7 @@ command_argparse(dbref executor, dbref enactor, dbref caller,
 static const char *
 command_isattr(char *command)
 {
-  ATTR *a;
   char buff[BUFFER_LEN];
-  char *f, *t;
 
   if (((command[0] == '&') && (command[1])) ||
       ((command[0] == '@') && (command[1] == '_') && (command[2]))) {
@@ -1069,6 +1068,7 @@ command_isattr(char *command)
     else
       return command + 1;
   } else if (command[0] == '@') {
+    char *f, *t;
     f = command + 1;
     buff[0] = '@';
     t = buff + 1;
@@ -1078,7 +1078,7 @@ command_isattr(char *command)
     /* @-commands have priority over @-attributes with the same name */
     if (command_find(buff))
       return NULL;
-    a = atr_match(buff + 1);
+    ATTR *a = atr_match(buff + 1);
     if (a)
       return AL_NAME(a);
   }
@@ -1211,7 +1211,7 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
     replacer = "POSE";
     break;
   case SEMI_POSE_TOKEN:
-    if (*(p + 1) && *(p + 1) == ' ')
+    if (*(p + 1) == ' ')
       replacer = "POSE";
     else
       replacer = "SEMIPOSE";
@@ -1456,14 +1456,14 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
     safe_chr('/', commandraw, &c2);
     safe_str(swp, commandraw, &c2);
   }
-  if (*p && (*p == ' ')) {
+  if (*p == ' ') {
     safe_chr(' ', commandraw, &c2);
     p++;
   }
   if (cmd->type & CMD_T_ARGS) {
-    int lsa_index;
     if (lsa[1]) {
       safe_str(lsa[1], commandraw, &c2);
+      int lsa_index;
       for (lsa_index = 2; (lsa_index < MAX_ARG) && lsa[lsa_index];
            lsa_index++) {
         safe_chr(',', commandraw, &c2);
@@ -1478,11 +1478,11 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
     if (rhs_present) {
       safe_chr('=', commandraw, &c2);
       if (cmd->type & CMD_T_RS_ARGS) {
-        int rsa_index;
         /* This is counterintuitive, but rsa[]
          * starts at 1. */
         if (rsa[1]) {
           safe_str(rsa[1], commandraw, &c2);
+          int rsa_index;
           for (rsa_index = 2; (rsa_index < MAX_ARG) && rsa[rsa_index];
                rsa_index++) {
             safe_chr(',', commandraw, &c2);
@@ -1544,7 +1544,7 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
  */
 int
 run_command(const COMMAND_INFO *cmd, dbref executor, dbref enactor,
-            const char *cmd_evaled, switch_mask sw, char switch_err[BUFFER_LEN],
+            const char *cmd_evaled, switch_mask sw, const char switch_err[BUFFER_LEN],
             const char *cmd_raw, char *swp, char *ap, char *ls,
             char *lsa[MAX_ARG], char *rs, char *rsa[MAX_ARG], MQUE *queue_entry)
 {
@@ -1718,9 +1718,8 @@ generic_command_failure(dbref executor, dbref enactor, char *string,
 int
 restrict_command(dbref player, COMMAND_INFO *command, const char *xrestriction)
 {
-  struct command_perms_t *c;
+  const struct command_perms_t *c;
   char *message, *restriction, *rsave;
-  int clear;
   const FLAG *f;
   char lockstr[BUFFER_LEN];
   char *tp;
@@ -1739,7 +1738,7 @@ restrict_command(dbref player, COMMAND_INFO *command, const char *xrestriction)
   rsave = restriction = mush_strdup(xrestriction, "rc.string");
   message = strchr(restriction, '"');
   if (message) {
-    // Clear old message if there was one.      
+    // Clear old message if there was one.
     if (command->restrict_message) {
       mush_free((void *) command->restrict_message, "cmd_restrict_message");
       command->restrict_message = NULL;
@@ -1766,6 +1765,7 @@ restrict_command(dbref player, COMMAND_INFO *command, const char *xrestriction)
   powers = new_flag_bitmask("POWER");
 
   /* Parse old-style restriction into a boolexp */
+  int clear;
   while (restriction && *restriction) {
     if ((tp = strchr(restriction, ' ')))
       *tp++ = '\0';
@@ -1959,8 +1959,6 @@ do_command_add(dbref player, char *name, int flags)
 void
 do_command_clone(dbref player, char *original, char *clone)
 {
-  COMMAND_INFO *cmd;
-
   if (!Wizard(player)) {
     notify(player, T("Permission denied."));
     return;
@@ -1969,7 +1967,7 @@ do_command_clone(dbref player, char *original, char *clone)
   upcasestr(original);
   upcasestr(clone);
 
-  cmd = command_find(original);
+  const COMMAND_INFO *cmd = command_find(original);
   if (!cmd) {
     notify(player, T("No such command."));
     return;
@@ -1991,7 +1989,7 @@ do_command_clone(dbref player, char *original, char *clone)
  * \return pointer to a newly-allocated hook
  */
 static struct hook_data *
-new_hook(struct hook_data *from)
+new_hook(const struct hook_data *from)
 {
   struct hook_data *newhook = mush_malloc(sizeof(struct hook_data), "hook");
 
@@ -2066,9 +2064,7 @@ clone_command(char *original, char *clone)
 void
 do_command_delete(dbref player, char *name)
 {
-  int acount;
   const char *alias;
-  COMMAND_INFO *cptr;
   COMMAND_INFO *command;
 
   if (!God(player)) {
@@ -2090,7 +2086,8 @@ do_command_delete(dbref player, char *name)
         T("You can't delete built-in commands. @command/disable instead."));
       return;
     } else {
-      acount = 0;
+      int acount = 0;
+      const COMMAND_INFO *cptr;
       cptr = ptab_firstentry_new(&ptab_command, &alias);
       while (cptr) {
         if (cptr == command) {
@@ -2122,7 +2119,6 @@ do_command_delete(dbref player, char *name)
 COMMAND(cmd_command)
 {
   COMMAND_INFO *command;
-  SWITCH_VALUE *sw_val;
   char buff[BUFFER_LEN];
   char *bp = buff;
 
@@ -2219,6 +2215,7 @@ COMMAND(cmd_command)
       notify_format(executor, T("Failure Msg: %s"), command->restrict_message);
     if (command->sw.mask) {
       bp = buff;
+      SWITCH_VALUE *sw_val;
       for (sw_val = dyn_switch_list; sw_val->name; sw_val++)
         if (SW_ISSET(command->sw.mask, sw_val->value))
           strccat(buff, &bp, sw_val->name);
@@ -2322,7 +2319,7 @@ list_commands(int type)
  * \return 1 if player can use command, 0 if not
  */
 int
-command_check_with(dbref player, COMMAND_INFO *cmd, int noisy,
+command_check_with(dbref player, const COMMAND_INFO *cmd, int noisy,
                    NEW_PE_INFO *pe_info)
 {
 
@@ -2386,7 +2383,7 @@ command_check_byname_quiet(dbref player, const char *name, NEW_PE_INFO *pe_info)
  * \return 1 if valid, 0 if not
  */
 static int
-has_hook(struct hook_data *hook)
+has_hook(const struct hook_data *hook)
 {
   if (!hook || !GoodObject(hook->obj) || IsGarbage(hook->obj))
     return 0;
@@ -2467,7 +2464,7 @@ run_cmd_hook(struct hook_data *hook, dbref executor, const char *commandraw,
 
 /* Add/modify a hook from a cnf file */
 int
-cnf_hook_command(char *command, char *opts)
+cnf_hook_command(const char *command, char *opts)
 {
   dbref thing;
   char *attrname, *p, *one;
@@ -2580,7 +2577,7 @@ cnf_hook_command(char *command, char *opts)
  * it inplace
  */
 void
-do_hook(dbref player, char *command, char *obj, char *attrname,
+do_hook(dbref player, const char *command, const char *obj, const char *attrname,
         enum hook_type flag, int queue_type)
 {
   COMMAND_INFO *cmd;
@@ -2660,7 +2657,7 @@ do_hook(dbref player, char *command, char *obj, char *attrname,
  * \param verbose Report failures?
  */
 void
-do_hook_list(dbref player, char *command, bool verbose)
+do_hook_list(dbref player, const char *command, bool verbose)
 {
   COMMAND_INFO *cmd;
   int count = 0;
