@@ -261,7 +261,7 @@ build_ctable(CNode *root, CType code, int numbits)
 #ifdef STANDALONE
     printf(isprint(root->c) ? "Code for '%c':\t" : "Code for %d:\t", root->c);
     for (i = 0; i < numbits; i++)
-      printf("%d", (code >> i) & 1);
+      printf("%lu", (code >> i) & 1);
     printf("\n");
 #endif
     if (numbits > CODE_BITS) {
@@ -316,10 +316,11 @@ huff_init_compress(PENNFILE *f)
       do_rawlog(LT_ERR,
                 "Cannot allocate memory for compression tree. Aborting.");
       exit(1);
+    } else {
+      table[total].node->c = total;
+      table[total].node->left = (CNode *) NULL;
+      table[total].node->right = (CNode *) NULL;
     }
-    table[total].node->c = total;
-    table[total].node->left = (CNode *) NULL;
-    table[total].node->right = (CNode *) NULL;
   }
 
 #ifdef STANDALONE
@@ -403,7 +404,7 @@ huff_init_compress(PENNFILE *f)
 #ifdef NEVER
     printf("Freq. table:\n");
     for (count = indx; count >= 0; count--)
-      printf("%3d: %d\t", table[count].node->c, table[count].freq);
+      printf("%3d: %ld\t", table[count].node->c, table[count].freq);
     printf("\n");
 #endif
     node = slab_malloc(huffman_slab, table[indx].node);
@@ -411,19 +412,20 @@ huff_init_compress(PENNFILE *f)
       do_rawlog(LT_ERR,
                 "Cannot allocate memory for compression tree. Aborting.");
       exit(1);
-    }
-    node->left = table[indx].node;
-    node->right = table[indx - 1].node;
-    table[indx - 1].freq += table[indx].freq;
-    table[indx - 1].node = node;
-    for (count = indx - 1;
-         (count > 1) && (table[count - 1].freq <= table[count].freq); count--) {
-      temp = table[count].freq;
-      table[count].freq = table[count - 1].freq;
-      table[count - 1].freq = temp;
-      node = table[count].node;
-      table[count].node = table[count - 1].node;
-      table[count - 1].node = node;
+    } else {
+      node->left = table[indx].node;
+      node->right = table[indx - 1].node;
+      table[indx - 1].freq += table[indx].freq;
+      table[indx - 1].node = node;
+      for (count = indx - 1;
+           (count > 1) && (table[count - 1].freq <= table[count].freq); count--) {
+        temp = table[count].freq;
+        table[count].freq = table[count - 1].freq;
+        table[count - 1].freq = temp;
+        node = table[count].node;
+        table[count].node = table[count - 1].node;
+        table[count - 1].node = node;
+      }
     }
   }
 
@@ -523,13 +525,12 @@ struct compression_ops huffman_ops = {
 void
 main(argc, argv)
     int argc;
-    char *argv[];
+    const char *argv[];
 {
   FILE *input;
   char buffer[BUFFER_LEN];
   char otherbuf[BUFFER_LEN];
   char newbuffer[BUFFER_LEN];
-  char *p1, *p2;
   int count;
 
   if ((input = fopen(argv[1], "rb")) == NULL) {
@@ -538,6 +539,7 @@ main(argc, argv)
   }
   init_compress(input);
   fclose(input);
+  char *p1, *p2;
   do {
     printf("Enter text: ");
     fgets(buffer, 4095, stdin);
@@ -554,12 +556,12 @@ main(argc, argv)
       p1++;
     }
     printf("\n");
-    printf("Length: %d, Complength: %d\n", strlen(buffer), strlen(otherbuf));
+    printf("Length: %zu, Complength: %zu\n", strlen(buffer), strlen(otherbuf));
     printf("Uncompressing\n");
     strcpy(newbuffer, uncompress(otherbuf));
     printf("Text: %s!\n", newbuffer);
     printf("Strcoll(orig,uncomp) = %d\n", strcoll(newbuffer, buffer));
-    printf("strlen(orig) = %d, strlen(uncomp) = %d\n", strlen(buffer),
+    printf("strlen(orig) = %zu, strlen(uncomp) = %zu\n", strlen(buffer),
            strlen(newbuffer));
     p1 = buffer;
     p2 = newbuffer;
