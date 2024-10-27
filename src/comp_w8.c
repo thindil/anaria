@@ -161,7 +161,7 @@ static unsigned int hash_fn(const char *s, int hashtab_mask);
 static void
 output_previous_word(void)
 {
-  char *p;
+  const char *p;
   int i, j;
 
   word[wordpos++] = 0; /* word's trailing null */
@@ -286,7 +286,6 @@ word_text_uncompress(char const *s)
 {
 
   const char *p;
-  char c;
   int i;
   static char buf[BUFFER_LEN];
 
@@ -296,6 +295,7 @@ word_text_uncompress(char const *s)
   p = s;
   b = buf;
 
+  char c;
   while (*p) {
     c = *p;
     if (c == MARKER_CHAR) {
@@ -314,9 +314,10 @@ word_text_uncompress(char const *s)
           do_rawlog(LT_ERR, "Error in string decompression, i = %i", i);
           mush_panic("Fatal error in decompression");
         }
+      } else {
+        strncpy((char *) b, words[i], words_len[i]);
+        b += words_len[i] - 1;
       }
-      strncpy((char *) b, words[i], words_len[i]);
-      b += words_len[i] - 1;
     } else
       *b++ = c;
     p++;
