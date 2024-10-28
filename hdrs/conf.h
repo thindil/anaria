@@ -402,7 +402,7 @@ extern void validate_config(void);
    (Wizard(p) && (g->viewperms & CGP_WIZARD)) ||                               \
    (Hasprivs(p) && (g->viewperms & CGP_ADMIN)))
 
-int can_view_config_option(dbref player, PENNCONF *opt);
+int can_view_config_option(dbref player, const PENNCONF *opt);
 
 #define DUMP_INTERVAL (options.dump_interval)
 #define DUMP_NOFORK_MESSAGE (options.dump_message)

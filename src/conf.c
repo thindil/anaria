@@ -44,7 +44,7 @@ time_t mudtime; /**< game time, in seconds */
 
 static void show_compile_options(dbref player);
 static char *config_to_string(dbref player, PENNCONF *cp, int lc);
-int add_mssp(char *name, char *value);
+int add_mssp(char *name, const char *value);
 
 OPTTAB options;        /**< The table of configuration options */
 HASHTAB local_options; /**< Hash table for local config options */
@@ -637,7 +637,7 @@ find_priv_option(const char *name)
  */
 CONFIG_FUNC(cf_priv)
 {
-  struct priv_option *po;
+  const struct priv_option *po;
   privbits result = 0;
   if (!val || !*val)
     return 1;
@@ -807,12 +807,12 @@ save_config_option(PENNCONF *cp __attribute__((__unused__)))
 }
 
 int
-add_mssp(char *name, char *value)
+add_mssp(char *name, const char *value)
 {
   MSSP *opt = NULL, *last;
 
   /* Validate name and value */
-  while (*name && *name == ' ')
+  while (*name == ' ')
     name++;
   /* names/values cannot contain IAC(255), MSSP_VAR (1) or MSSP_VAL (2) */
   if (!name || (strchr(name, (char) 255) || strchr(name, (char) 1) ||
@@ -856,7 +856,6 @@ int
 config_set(const char *opt, char *val, int source, int restrictions)
 {
   PENNCONF *cp;
-  COMMAND_INFO *command;
   char *p;
 
   if (!val)
@@ -866,6 +865,7 @@ config_set(const char *opt, char *val, int source, int restrictions)
   if (!strcasecmp(opt, "restrict_command")) {
     if (!restrictions)
       return 0;
+    COMMAND_INFO *command;
     for (p = val; *p && !isspace(*p); p++)
       ;
     if (*p) {
@@ -1069,7 +1069,8 @@ config_set(const char *opt, char *val, int source, int restrictions)
     return 1;
   } else if (!strcasecmp(opt, "help_command") ||
              !strcasecmp(opt, "ahelp_command")) {
-    char *comm, *file;
+    const char *comm;
+    char *file;
     int admin = !strcasecmp(opt, "ahelp_command");
     if (!restrictions)
       return 0;
@@ -1111,12 +1112,11 @@ config_set(const char *opt, char *val, int source, int restrictions)
    * groups (log_wipe_passwd), or the file and message groups (@config/set
    * output_data=../../.bashrc? Ouch.), or options which only God can see.  */
   for (cp = conftable; cp->name; cp++) {
-    int i = 0;
     if ((!source ||
          (cp->group && strcmp(cp->group, "files") != 0 &&
           strcmp(cp->group, "messages") != 0 && !(cp->flags & CP_GODONLY))) &&
         !strcasecmp(cp->name, opt)) {
-      i = cp->handler(opt, val, cp->loc, cp->max, source);
+      int i = cp->handler(opt, val, cp->loc, cp->max, source);
       if (i) {
         if (source)
           cp->flags |= CP_CONFIGSET;
@@ -1130,11 +1130,10 @@ config_set(const char *opt, char *val, int source, int restrictions)
   }
   for (cp = hash_firstentry(&local_options); cp;
        cp = hash_nextentry(&local_options)) {
-    int i = 0;
     if ((!source || (cp->group && strcmp(cp->group, "files") != 0 &&
                      strcmp(cp->group, "messages") != 0)) &&
         !strcasecmp(cp->name, opt)) {
-      i = cp->handler(opt, val, cp->loc, cp->max, source);
+      int i = cp->handler(opt, val, cp->loc, cp->max, source);
       if (i) {
         if (source)
           cp->flags |= CP_CONFIGSET;
@@ -1531,7 +1530,7 @@ config_file_checks(void)
  * \retval 1 or 0
  */
 int
-can_view_config_option(dbref player, PENNCONF *opt)
+can_view_config_option(dbref player, const PENNCONF *opt)
 {
   PENNCONFGROUP *group;
 
@@ -1707,7 +1706,7 @@ display_config_value(PENNCONF *cp)
   else if (cp->handler == cf_dbref)
     safe_format(result, &bp, "#%d", *((dbref *) cp->loc));
   else if (cp->handler == cf_priv) {
-    struct priv_option *po;
+    const struct priv_option *po;
 
     po = find_priv_option(cp->name);
     if (po) {
