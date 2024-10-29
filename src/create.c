@@ -543,7 +543,9 @@ do_dig(dbref player, const char *name, char **argv, int tport,
 dbref
 do_create(dbref player, char *name, int cost, char *newdbref)
 {
-  char *flaglist;
+  dbref loc;
+  dbref thing;
+  char *flaglist, *flagname;
   char flagbuff[BUFFER_LEN];
 
   if (*name == '\0') {
@@ -562,8 +564,7 @@ do_create(dbref player, char *name, int cost, char *newdbref)
 
   if (can_pay_fees(player, cost)) {
     /* create the object */
-    dbref thing = new_object();
-    dbref loc;
+    thing = new_object();
 
     /* initialize everything */
     set_name(thing, name);
@@ -581,7 +582,7 @@ do_create(dbref player, char *name, int cost, char *newdbref)
     flaglist = trim_space_sep(flagbuff, ' ');
     if (*flaglist != '\0') {
       while (flaglist) {
-        const char *flagname = split_token(&flaglist, ' ');
+        flagname = split_token(&flaglist, ' ');
         twiddle_flag_internal("FLAG", thing, flagname, 0);
       }
     }
@@ -682,7 +683,7 @@ clone_object(dbref player, dbref thing, const char *newname, bool preserve)
  * \return dbref of the duplicate, or NOTHING.
  */
 dbref
-do_clone(dbref player, const char *name, const char *newname, bool preserve, char *newdbref,
+do_clone(dbref player, char *name, char *newname, bool preserve, char *newdbref,
          NEW_PE_INFO *pe_info)
 {
   dbref clone, thing;
