@@ -123,7 +123,7 @@ waitable_attr(dbref thing, const char *atr)
     return !strcmp(AL_NAME(a), "SEMAPHORE"); /* Only allow SEMAPHORE for now */
   } else { /* Attribute is set. Check for proper owner and flags and value */
     if ((AL_CREATOR(a) == GOD) && (AL_FLAGS(a) == SEMAPHORE_FLAGS)) {
-      char *v = atr_value(a);
+      const char *v = atr_value(a);
       if (!*v || is_strict_integer(v))
         return 1;
       else
@@ -393,13 +393,12 @@ queue_event(dbref enactor, const char *event, const char *fmt, ...)
 {
   char myfmt[BUFFER_LEN];
   char buff[BUFFER_LEN * 4];
-  va_list args;
   char *s, *snext;
   ATTR *a;
   PE_REGS *pe_regs;
   int argcount = 0;
   char *wenv[MAX_STACK_ARGS];
-  int i, len;
+  int i;
   MQUE *tmp;
   int pid;
 
@@ -455,12 +454,13 @@ queue_event(dbref enactor, const char *event, const char *fmt, ...)
 
   if (argcount > 0) {
     /* Build the arguments. */
+    va_list args;
     va_start(args, fmt);
     mush_vsnprintf(buff, sizeof buff, myfmt, args);
     buff[(BUFFER_LEN * 4) - 1] = '\0';
     va_end(args);
 
-    len = strlen(buff);
+    int len = strlen(buff);
     for (i = 0, s = buff; i < argcount && s; i++, s = snext) {
       snext = strchr(s, EVENT_DELIM_CHAR);
       if ((snext ? (snext - s) : (len - (s - buff))) > BUFFER_LEN) {
@@ -684,7 +684,7 @@ new_queue_actionlist_int(dbref executor, dbref enactor, dbref caller,
 
 void
 parse_que_attr(dbref executor, dbref enactor, char *actionlist,
-               PE_REGS *pe_regs, ATTR *a, bool force_debug)
+               PE_REGS *pe_regs, const ATTR *a, bool force_debug)
 {
   int flags = QUEUE_DEFAULT;
   char abuff[2048];
@@ -711,7 +711,6 @@ queue_include_attribute(dbref thing, const char *atrname, dbref executor,
   char *start, *command;
   int noparent = 0;
   PE_REGS *pe_regs = NULL;
-  int i;
   char abuff[2048];
 
   a = queue_attribute_getatr(thing, atrname, noparent);
@@ -735,6 +734,7 @@ queue_include_attribute(dbref thing, const char *atrname, dbref executor,
   pe_regs = pe_regs_create(PE_REGS_NEWATTR, "queue_include_attribute");
   if (args != NULL) {
     pe_regs->flags |= PE_REGS_ARG;
+    int i;
     for (i = 0; i < MAX_STACK_ARGS; i++) {
       if (args[i] && *args[i]) {
         pe_regs_setenv(pe_regs, i, args[i]);
@@ -826,11 +826,11 @@ queue_attribute_useatr(dbref executor, ATTR *a, dbref enactor, PE_REGS *pe_regs,
   int queue_type = QUEUE_DEFAULT | flags;
   char cmd_buff[BUFFER_LEN];
   char abuff[2048];
-  char *args[MAX_STACK_ARGS];
-  char match_space[BUFFER_LEN * 2];
-  ssize_t match_space_len = BUFFER_LEN * 2;
 
   if (input) {
+    char *args[MAX_STACK_ARGS];
+    char match_space[BUFFER_LEN * 2];
+    ssize_t match_space_len = BUFFER_LEN * 2;
     /* Attempt to match input against the attribute, accept either. */
     if (atr_single_match_r(a, AF_COMMAND | AF_LISTEN, ':', input, args,
                            match_space, match_space_len, cmd_buff, pe_regs)) {
@@ -1073,7 +1073,7 @@ do_top(int ncom)
 }
 
 void
-run_user_input(dbref player, int port, char *input)
+run_user_input(dbref player, int port, const char *input)
 {
   MQUE *entry;
 
@@ -1089,7 +1089,7 @@ run_user_input(dbref player, int port, char *input)
 }
 
 void
-run_http_command(dbref player, int port, char *method, NEW_PE_INFO *pe_info)
+run_http_command(dbref player, int port, const char *method, NEW_PE_INFO *pe_info)
 {
   MQUE *entry;
   char include_cmd[MAX_COMMAND_LEN];
@@ -1447,10 +1447,6 @@ COMMAND(cmd_notify_drain)
   char *pos;
   char const *aname;
   dbref thing;
-  int count;
-  int all;
-  int i;
-  PE_REGS *pe_regs;
 
   /* Figure out whether we're in notify or drain */
   drain = (cmd->name[1] == 'D');
@@ -1496,7 +1492,8 @@ COMMAND(cmd_notify_drain)
 
   /* Figure out how many times to notify */
   if (SW_ISSET(sw, SWITCH_SETQ)) {
-    pe_regs = pe_regs_create(PE_REGS_Q, "cmd_notify_drain");
+    PE_REGS *pe_regs = pe_regs_create(PE_REGS_Q, "cmd_notify_drain");
+    int i;
     for (i = 1; args_right[i]; i += 2) {
       if (args_right[i + 1]) {
         pe_regs_set(pe_regs, PE_REGS_Q | PE_REGS_NOCOPY, args_right[i],
@@ -1512,7 +1509,8 @@ COMMAND(cmd_notify_drain)
     }
     pe_regs_free(pe_regs);
   } else {
-    all = SW_ISSET(sw, SWITCH_ALL);
+    int all = SW_ISSET(sw, SWITCH_ALL);
+    int count;
     if (args_right[1] && *args_right[1]) {
       if (all) {
         notify(executor,
@@ -1737,11 +1735,10 @@ do_waitpid(dbref player, const char *pidstr, const char *timestr, bool until)
 
 FUNCTION(fun_pidinfo)
 {
-  char *r, *s;
+  char *s;
   const char *osep = " ";
   char *fields, field[] = "queue player time object attribute command";
   uint32_t pid;
-  MQUE *q;
   bool first = true;
 
   if (!is_strict_uinteger(args[0])) {
@@ -1750,7 +1747,7 @@ FUNCTION(fun_pidinfo)
   }
 
   pid = parse_uint32(args[0], NULL, 10);
-  q = im_find(queue_map, pid);
+  const MQUE *q = im_find(queue_map, pid);
 
   if (!q) {
     safe_str(T("#-1 INVALID PID"), buff, bp);
@@ -1773,7 +1770,7 @@ FUNCTION(fun_pidinfo)
 
   s = trim_space_sep(fields, ' ');
   do {
-    r = split_token(&s, ' ');
+    const char *r = split_token(&s, ' ');
     if (string_prefix("queue", r)) {
       if (!first)
         safe_str(osep, buff, bp);
@@ -1832,7 +1829,6 @@ FUNCTION(fun_lpids)
   char *attrib = NULL;
   bool first = true;
   const char *list;
-  char *elem;
 
   if (strcasecmp(called_as, "LPIDS") == 0) {
     /* lpids(player[,type]) */
@@ -1860,7 +1856,7 @@ FUNCTION(fun_lpids)
     if (nargs > 1 && args[1] && *args[1]) {
       list = args[1];
       while (list && *list) {
-        elem = next_in_list(&list);
+        const char *elem = next_in_list(&list);
         if (strcasecmp("wait", elem) == 0)
           qmask |= LPIDS_WAIT;
         else if (strcasecmp("semaphore", elem) == 0)
@@ -1978,10 +1974,9 @@ static void
 show_queue_env(dbref player, MQUE *q)
 {
   PE_REGS *regs;
-  int i = 0;
+  int i;
   PTAB qregs;
   const char *qreg_name;
-  char *qreg_val;
   int level;
 
   notify_format(player, "Environment:\n %%#: #%-8d %%!: #%-8d %%@: #%d",
@@ -2029,6 +2024,7 @@ show_queue_env(dbref player, MQUE *q)
 
   if (qregs.len) {
     notify(player, "Registers:");
+    char *qreg_val;
     for (qreg_val = ptab_firstentry_new(&qregs, &qreg_name); qreg_val;
          qreg_val = ptab_nextentry_new(&qregs, &qreg_name)) {
       int len = strlen(qreg_name);
@@ -2123,7 +2119,7 @@ do_queue(dbref player, const char *what, enum queue_type flag)
  * \param debug true to display expanded queue environment information.
  */
 void
-do_queue_single(dbref player, char *pidstr, bool debug)
+do_queue_single(dbref player, const char *pidstr, bool debug)
 {
   uint32_t pid;
   MQUE *q;
@@ -2388,8 +2384,8 @@ do_allrestart(dbref player)
 static void
 do_raw_restart(dbref victim)
 {
-  dbref thing;
   if (IsPlayer(victim)) {
+    dbref thing;
     for (thing = 0; thing < db_top; thing++) {
       if ((Owner(thing) == victim) && !IsGarbage(thing) && !(Halted(thing)))
         (void) queue_attribute_noparent(thing, "STARTUP", thing);

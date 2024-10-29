@@ -169,7 +169,7 @@ void do_halt(dbref owner, const char *ncom, dbref victim);
 bool queue_event(dbref enactor, const char *event, const char *fmt, ...)
   __attribute__((__format__(__printf__, 3, 4)));
 void parse_que_attr(dbref executor, dbref enactor, char *actionlist,
-                    PE_REGS *pe_regs, ATTR *a, bool force_debug);
+                    PE_REGS *pe_regs, const ATTR *a, bool force_debug);
 void insert_que(MQUE *queue_entry, MQUE *parent_queue);
 
 void new_queue_actionlist_int(dbref executor, dbref enactor, dbref caller,
@@ -194,8 +194,8 @@ int queue_attribute_useatr(dbref executor, ATTR *a, dbref enactor,
 int queue_include_attribute(dbref thing, const char *atrname, dbref executor,
                             dbref cause, dbref caller, char **args, int recurse,
                             MQUE *parent_queue);
-void run_user_input(dbref player, int port, char *input);
-void run_http_command(dbref player, int port, char *method,
+void run_user_input(dbref player, int port, const char *input);
+void run_http_command(dbref player, int port, const char *method,
                       NEW_PE_INFO *pe_info);
 
 #define queue_attribute_base(ex, at, en, nop, pereg, flag)                     \
