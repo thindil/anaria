@@ -96,7 +96,7 @@ do_real_open(dbref player, const char *direction, const char *linkto,
 {
   dbref loc = (pseudo != NOTHING) ? pseudo : speech_loc(player);
   dbref new_exit;
-  char *flaglist, *flagname;
+  char *flaglist;
   char flagbuff[BUFFER_LEN];
   char *name = NULL;
   char *alias = NULL;
@@ -142,7 +142,7 @@ do_real_open(dbref player, const char *direction, const char *linkto,
     flaglist = trim_space_sep(flagbuff, ' ');
     if (*flaglist != '\0') {
       while (flaglist) {
-        flagname = split_token(&flaglist, ' ');
+        const char *flagname = split_token(&flaglist, ' ');
         twiddle_flag_internal("FLAG", new_exit, flagname, 0);
       }
     }
@@ -468,8 +468,7 @@ dbref
 do_dig(dbref player, const char *name, char **argv, int tport,
        NEW_PE_INFO *pe_info)
 {
-  dbref room;
-  char *flaglist, *flagname;
+  char *flaglist;
   char flagbuff[BUFFER_LEN];
 
   /* we don't need to know player's location!  hooray! */
@@ -487,7 +486,7 @@ do_dig(dbref player, const char *name, char **argv, int tport,
     if (argv[3] && *argv[3] && !make_first_free_wrapper(player, argv[3]))
       return NOTHING;
 
-    room = new_object();
+    dbref room = new_object();
 
     /* Initialize everything */
     set_name(room, name);
@@ -499,7 +498,7 @@ do_dig(dbref player, const char *name, char **argv, int tport,
     flaglist = trim_space_sep(flagbuff, ' ');
     if (*flaglist != '\0') {
       while (flaglist) {
-        flagname = split_token(&flaglist, ' ');
+        const char *flagname = split_token(&flaglist, ' ');
         twiddle_flag_internal("FLAG", room, flagname, 0);
       }
     }
@@ -541,11 +540,9 @@ do_dig(dbref player, const char *name, char **argv, int tport,
  * \return dbref of new thing, or NOTHING.
  */
 dbref
-do_create(dbref player, char *name, int cost, char *newdbref)
+do_create(dbref player, const char *name, int cost, char *newdbref)
 {
-  dbref loc;
-  dbref thing;
-  char *flaglist, *flagname;
+  char *flaglist;
   char flagbuff[BUFFER_LEN];
 
   if (*name == '\0') {
@@ -564,7 +561,8 @@ do_create(dbref player, char *name, int cost, char *newdbref)
 
   if (can_pay_fees(player, cost)) {
     /* create the object */
-    thing = new_object();
+    dbref thing = new_object();
+    dbref loc;
 
     /* initialize everything */
     set_name(thing, name);
@@ -582,7 +580,7 @@ do_create(dbref player, char *name, int cost, char *newdbref)
     flaglist = trim_space_sep(flagbuff, ' ');
     if (*flaglist != '\0') {
       while (flaglist) {
-        flagname = split_token(&flaglist, ' ');
+        const char *flagname = split_token(&flaglist, ' ');
         twiddle_flag_internal("FLAG", thing, flagname, 0);
       }
     }
@@ -683,7 +681,7 @@ clone_object(dbref player, dbref thing, const char *newname, bool preserve)
  * \return dbref of the duplicate, or NOTHING.
  */
 dbref
-do_clone(dbref player, char *name, char *newname, bool preserve, char *newdbref,
+do_clone(dbref player, const char *name, const char *newname, bool preserve, char *newdbref,
          NEW_PE_INFO *pe_info)
 {
   dbref clone, thing;

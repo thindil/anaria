@@ -213,7 +213,7 @@ void shutdown_queues(void);
 /* From create.c */
 dbref do_dig(dbref player, const char *name, char **argv, int tport,
              NEW_PE_INFO *pe_info);
-dbref do_create(dbref player, char *name, int cost, char *newdbref);
+dbref do_create(dbref player, const char *name, int cost, char *newdbref);
 dbref do_real_open(dbref player, const char *direction, const char *linkto,
                    dbref pseudo, NEW_PE_INFO *pe_info);
 void do_open(dbref player, const char *direction, char **links,
