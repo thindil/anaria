@@ -143,11 +143,10 @@ static void
 db_grow(dbref newtop)
 {
   struct object *newdb;
-  dbref initialized;
   struct object *o;
 
   if (newtop > db_top) {
-    initialized = db_top;
+    dbref initialized = db_top;
     current_state.total = newtop;
     current_state.garbage += newtop - db_top;
     db_top = newtop;
@@ -976,7 +975,7 @@ db_paranoid_write(PENNFILE *f, int flag)
 
   do_rawlog(LT_CHECK, "PARANOID WRITE BEGINNING...\n");
 
-  penn_fprintf(f, "+V%d\n", dbflag * 256 + 2);
+  penn_fprintf(f, "+V%u\n", dbflag * 256 + 2);
   db_write_labeled_int(f, "dbversion", NDBF_VERSION);
   db_write_labeled_string(f, "savedtime", show_time(mudtime, 1));
   db_write_flags(f);
@@ -1199,10 +1198,8 @@ get_new_locks(dbref i, PENNFILE *f, int c)
 void
 db_free(void)
 {
-  dbref i;
-
   if (db) {
-
+    dbref i;
     for (i = 0; i < db_top; i++) {
       set_name(i, NULL);
       atr_free_all(i);
@@ -1981,7 +1978,7 @@ sqlite_logger(void *arg __attribute__((__unused__)), int errcode,
 void
 initialize_sqlite(void)
 {
-  sqlite3_config(SQLITE_CONFIG_LOG, sqlite_logger, NULL);
+  sqlite3_config(SQLITE_CONFIG_LOG, sqlite_logger, (char*)0);
   sqlite3_initialize();
 }
 
@@ -2373,11 +2370,10 @@ is_busy_status(int s)
 void
 close_sql_db(sqlite3 *db)
 {
-  int status;
-
   /* Finalize any cached prepared statements associated with this
      connection. */
   if (statement_cache) {
+    int status;
     if (!delete_all_stmts) {
       const char query[] = "DELETE FROM prepared_cache WHERE handle = ?";
       if ((status = sqlite3_prepare_v3(statement_cache, query, sizeof query,
