@@ -578,7 +578,7 @@ const char *do_get_attrib(dbref executor, dbref thing, const char *aname);
 void do_undestroy(dbref player, char *name);
 dbref free_get(void);
 int make_first_free(dbref object);
-int make_first_free_wrapper(dbref player, char *newdbref);
+int make_first_free_wrapper(dbref player, const char *newdbref);
 void fix_free_list(void);
 void purge(void);
 void do_purge(dbref player);

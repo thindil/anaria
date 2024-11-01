@@ -75,7 +75,7 @@
 
 dbref first_free = NOTHING; /**< Object at top of free list */
 
-static dbref what_to_destroy(dbref player, char *name, int confirm,
+static dbref what_to_destroy(dbref player, const char *name, int confirm,
                              NEW_PE_INFO *pe_info);
 static void pre_destroy(dbref player, dbref thing);
 void free_object(dbref thing);
@@ -212,7 +212,7 @@ special_object(dbref thing)
  * return NOTHING.
  */
 static dbref
-what_to_destroy(dbref player, char *name, int confirm, NEW_PE_INFO *pe_info)
+what_to_destroy(dbref player, const char *name, int confirm, NEW_PE_INFO *pe_info)
 {
   dbref thing;
 
@@ -925,7 +925,7 @@ clear_exit(dbref thing)
 }
 
 int
-make_first_free_wrapper(dbref player, char *newdbref)
+make_first_free_wrapper(dbref player, const char *newdbref)
 {
   dbref thing;
 
