@@ -234,7 +234,7 @@ void init_chatdb(void);
 int load_chatdb(PENNFILE *fp, bool restart);
 int save_chatdb(PENNFILE *fp);
 void do_cemit(dbref player, const char *name, const char *msg, int flags);
-void do_chan_user_flags(dbref player, char *name, const char *isyn, int flag,
+void do_chan_user_flags(dbref player, const char *name, const char *isyn, int flag,
                         int silent);
 void do_chan_wipe(dbref player, const char *name);
 void do_chan_lock(dbref player, const char *name, const char *lockstr,
@@ -255,7 +255,7 @@ enum chan_admin_op {
   CH_ADMIN_RENAME,
   CH_ADMIN_PRIV
 };
-void do_chan_admin(dbref player, char *name, const char *perms,
+void do_chan_admin(dbref player, const char *name, const char *perms,
                    enum chan_admin_op flag);
 enum cmatch_type find_channel(const char *p, CHAN **chan, dbref player);
 enum cmatch_type find_channel_partial(const char *p, CHAN **chan, dbref player);
@@ -270,7 +270,7 @@ enum ok_chan_name { NAME_OK = 0, NAME_INVALID, NAME_TOO_LONG, NAME_NOT_UNIQUE };
 
 enum ok_chan_name ok_channel_name(const char *n, CHAN *unique);
 
-int eval_chan_lock(CHAN *c, dbref p, enum clock_type type);
+int eval_chan_lock(const CHAN *c, dbref p, enum clock_type type);
 
 /** Ways to match channels by partial name */
 enum chan_match_type {

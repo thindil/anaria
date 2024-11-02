@@ -57,14 +57,14 @@ static int load_labeled_chanusers(PENNFILE *fp, CHAN *ch, bool restart);
 static void insert_channel(CHAN **ch);
 static void remove_channel(CHAN *ch);
 static void insert_obj_chan(dbref who, CHAN **ch);
-static void remove_obj_chan(dbref who, CHAN *ch);
+static void remove_obj_chan(dbref who, const CHAN *ch);
 void remove_all_obj_chan(dbref thing);
 static void chan_chown(CHAN *c, dbref victim);
 void chan_chownall(dbref old, dbref newowner);
 static int insert_user(CHANUSER *user, CHAN *ch);
 static int remove_user(CHANUSER *u, CHAN *ch);
 static int save_channel(PENNFILE *fp, CHAN *ch);
-static int save_chanuser(PENNFILE *fp, CHANUSER *user);
+static int save_chanuser(PENNFILE *fp, const CHANUSER *user);
 static void channel_wipe(dbref player, CHAN *chan);
 static int yesno(const char *str);
 static int canstilladd(dbref player);
@@ -72,11 +72,11 @@ static enum cmatch_type find_channel_partial_on(const char *name, CHAN **chan,
                                                 dbref player);
 static enum cmatch_type find_channel_partial_off(const char *name, CHAN **chan,
                                                  dbref player);
-static char *list_cuflags(CHANUSER *u, int verbose);
+static char *list_cuflags(const CHANUSER *u, int verbose);
 static void channel_join_self(dbref player, const char *name);
 static void channel_leave_self(dbref player, const char *name);
 static void do_channel_who(dbref player, CHAN *chan);
-void chat_player_announce(DESC *desc_player, char *msg, int ungag);
+void chat_player_announce(const DESC *desc_player, char *msg, int ungag);
 static void channel_send(CHAN *channel, dbref player, int flags,
                          const char *origmessage);
 static void list_partial_matches(dbref player, const char *name,
@@ -378,12 +378,14 @@ new_user(dbref who, const void *hint)
 {
   CHANUSER *u;
   u = slab_malloc(chanuser_slab, hint);
-  if (!u)
+  if (!u) {
     mush_panic("Couldn't allocate memory in new_user in extchat.c");
-  CUdbref(u) = who;
-  CUtype(u) = CU_DEFAULT_FLAGS;
-  CUtitle(u) = NULL;
-  CUnext(u) = NULL;
+  } else {
+    CUdbref(u) = who;
+    CUtype(u) = CU_DEFAULT_FLAGS;
+    CUtitle(u) = NULL;
+    CUnext(u) = NULL;
+  }
   return u;
 }
 
@@ -690,7 +692,7 @@ insert_obj_chan(dbref who, CHAN **ch)
 
 /* Remove a channel from the obj's chanlist, and free the chanlist ptr */
 static void
-remove_obj_chan(dbref who, CHAN *ch)
+remove_obj_chan(dbref who, const CHAN *ch)
 {
   CHANLIST *p, *q;
 
@@ -876,7 +878,7 @@ save_channel(PENNFILE *fp, CHAN *ch)
 
 /* Save the channel's user list. Return 1 on success, 0 on failure */
 static int
-save_chanuser(PENNFILE *fp, CHANUSER *user)
+save_chanuser(PENNFILE *fp, const CHANUSER *user)
 {
   db_write_labeled_dbref(fp, "   dbref", CUdbref(user));
   db_write_labeled_int(fp, "    flags", CUtype(user));
@@ -1187,7 +1189,6 @@ void
 do_channel(dbref player, const char *name, const char *target, const char *com)
 {
   CHAN *chan = NULL;
-  CHANUSER *u;
   dbref victim;
 
   if (!name || !*name) {
@@ -1294,7 +1295,7 @@ do_channel(dbref player, const char *name, const char *target, const char *com)
       notify(player, T("Guests may not leave channels."));
       return;
     }
-    u = onchannel(victim, chan);
+    CHANUSER *u = onchannel(victim, chan);
     if (remove_user(u, chan)) {
       if (!Channel_Quiet(chan) && !DarkLegal(victim)) {
         channel_send(chan, victim, CB_CHECKQUIET | CB_PRESENCE | CB_POSE,
@@ -1427,7 +1428,7 @@ channel_leave_self(dbref player, const char *name)
 int
 parse_chat(dbref player, char *command)
 {
-  char *arg1;
+  const char *arg1;
   char *arg2;
   char *s;
   char ch;
@@ -1526,7 +1527,7 @@ do_chat_by_name(dbref player, const char *name, const char *msg, int source)
 void
 do_chat(dbref player, CHAN *chan, const char *arg1)
 {
-  CHANUSER *u;
+  const CHANUSER *u;
   char type;
   bool canhear;
 
@@ -1596,7 +1597,7 @@ void
 do_cemit(dbref player, const char *name, const char *msg, int flags)
 {
   CHAN *chan = NULL;
-  CHANUSER *u;
+  const CHANUSER *u;
   int override_checks = 0;
   int cb_flags = CB_EMIT;
 
@@ -1678,7 +1679,7 @@ do_cemit(dbref player, const char *name, const char *msg, int flags)
  * \param flag what to do with the channel.
  */
 void
-do_chan_admin(dbref player, char *name, const char *perms,
+do_chan_admin(dbref player, const char *name, const char *perms,
               enum chan_admin_op flag)
 {
   CHAN *chan = NULL;
@@ -1915,7 +1916,7 @@ ok_channel_name(const char *n, CHAN *unique)
  * \param silent if 1, no notification of actions.
  */
 void
-do_chan_user_flags(dbref player, char *name, const char *isyn, int flag,
+do_chan_user_flags(dbref player, const char *name, const char *isyn, int flag,
                    int silent)
 {
   CHAN *c = NULL;
@@ -2231,7 +2232,7 @@ do_channel_list(dbref player, const char *partname, int types)
 }
 
 static char *
-list_cuflags(CHANUSER *u, int verbose)
+list_cuflags(const CHANUSER *u, int verbose)
 {
   static char tbuf1[BUFFER_LEN];
   char *bp;
@@ -2412,7 +2413,7 @@ FUNCTION(fun_ctitle)
    *   b) You must pass the join-lock
    */
   CHAN *c;
-  CHANUSER *u;
+  const CHANUSER *u;
   dbref thing;
   int ok;
   int can_ex;
@@ -2468,7 +2469,7 @@ FUNCTION(fun_cstatus)
    * you must be Priv_Who or <object> must not be hidden
    */
   CHAN *c;
-  CHANUSER *u;
+  const CHANUSER *u;
   dbref thing;
 
   if (!args[0] || !*args[0]) {
@@ -3007,10 +3008,8 @@ FUNCTION(fun_cwho)
   int matchcond = 0;
   int priv = 0;
   int skip_gagged = 0;
-  int show;
   CHAN *chan = NULL;
   CHANUSER *u;
-  dbref who;
 
   switch (find_channel(args[0], &chan, executor)) {
   case CMATCH_NONE:
@@ -3058,6 +3057,8 @@ FUNCTION(fun_cwho)
 
   priv = Priv_Who(executor);
 
+  dbref who;
+  int show;
   for (u = ChanUsers(chan); u; u = u->next) {
     who = CUdbref(u);
     show = 1;
@@ -3168,11 +3169,12 @@ extern DESC *descriptor_list;
  * \param ungag if 1, remove any channel gags the player has.
  */
 void
-chat_player_announce(DESC *desc_player, char *msg, int ungag)
+chat_player_announce(const DESC *desc_player, char *msg, int ungag)
 {
   DESC *d;
   CHAN *c;
-  CHANUSER *up = NULL, *uv;
+  CHANUSER *up = NULL;
+  const CHANUSER *uv;
   char buff[BUFFER_LEN], *bp;
   char buff2[BUFFER_LEN], *bp2;
   dbref viewer;
@@ -3312,12 +3314,10 @@ channel_description(dbref player)
 
 FUNCTION(fun_channels)
 {
-  dbref it;
   char sep = ' ';
   CHAN *c;
   CHANLIST *cl;
   CHANUSER *u;
-  bool can_ex, priv_who;
   int first = 1;
 
   /* There are these possibilities:
@@ -3331,12 +3331,12 @@ FUNCTION(fun_channels)
    */
   if (nargs >= 1) {
     /* Given an argument, return list of channels it's on */
-    it = match_result(executor, args[0], NOTYPE, MAT_EVERYTHING);
+    dbref it = match_result(executor, args[0], NOTYPE, MAT_EVERYTHING);
     if (GoodObject(it)) {
       if (!delim_check(buff, bp, nargs, args, 2, &sep))
         return;
-      can_ex = Can_Examine(executor, it);
-      priv_who = Priv_Who(executor);
+      bool can_ex = Can_Examine(executor, it);
+      bool priv_who = Priv_Who(executor);
       for (cl = Chanlist(it); cl; cl = cl->next) {
         if (can_ex || (Chan_Can_See(cl->chan, executor) &&
                        (u = onchannel(it, cl->chan)) &&
@@ -3461,11 +3461,12 @@ FUNCTION(fun_cemit)
 FUNCTION(fun_crecall)
 {
   CHAN *chan;
-  CHANUSER *u;
+  const CHANUSER *u;
   int start = -1, num_lines;
   bool recall_timestring = false;
   time_t recall_from = 0;
-  char *p = NULL, *buf, *name;
+  char *p = NULL, *buf;
+  const char *name;
   time_t timestamp;
   char *stamp;
   dbref speaker;
@@ -3744,7 +3745,6 @@ channel_send(CHAN *channel, dbref player, int flags, const char *origmessage)
   CHANUSER *speaker;
   dbref current;
   char *bp;
-  const char *blockstr = "";
   int na_flags = NA_INTER_LOCK;
   static const char someone[] = "Someone";
   dbref mogrifier = NOTHING;
@@ -3803,7 +3803,7 @@ channel_send(CHAN *channel, dbref player, int flags, const char *origmessage)
       argv[3] = playername;
       argv[4] = title;
 
-      blockstr = mogrify(mogrifier, "MOGRIFY`BLOCK", player, 5, argv, "");
+      const char *blockstr = mogrify(mogrifier, "MOGRIFY`BLOCK", player, 5, argv, "");
       if (blockstr && *blockstr) {
         notify(player, blockstr);
         return;
@@ -3990,7 +3990,7 @@ void
 do_chan_recall(dbref player, const char *name, char *lineinfo[], int quiet)
 {
   CHAN *chan;
-  CHANUSER *u;
+  const CHANUSER *u;
   char *lines;
   const char *startpos;
   int num_lines;
@@ -4166,7 +4166,7 @@ do_chan_buffer(dbref player, const char *name, const char *lines)
  * \return true or false
  */
 int
-eval_chan_lock(CHAN *c, dbref p, enum clock_type type)
+eval_chan_lock(const CHAN *c, dbref p, enum clock_type type)
 {
   NEW_PE_INFO *pe_info;
 
@@ -4204,7 +4204,7 @@ eval_chan_lock(CHAN *c, dbref p, enum clock_type type)
 char *
 parse_chat_alias(dbref player, char *command)
 {
-  char *alias;
+  const char *alias;
   char *message;
   char *bp;
   char channame[BUFFER_LEN];
@@ -4270,7 +4270,7 @@ COMMAND(cmd_addcom)
 {
   char buff[BUFFER_LEN];
   char *bp = buff;
-  ATTR *a;
+  const ATTR *a;
   CHAN *chan = NULL;
 
   if (!USE_MUXCOMM) {
