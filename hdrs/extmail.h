@@ -99,7 +99,7 @@ extern void do_mail_nuke(dbref player);
 extern void do_mail_change_folder(dbref player, char *fld, char *newname);
 extern void do_mail_unfolder(dbref player, char *fld);
 extern void do_mail_list(dbref player, const char *msglist);
-extern void do_mail_read(dbref player, char *msglist);
+extern void do_mail_read(dbref player, const char *msglist);
 extern void do_mail_review(dbref player, const char *name, const char *msglist);
 extern void do_mail_retract(dbref player, const char *name,
                             const char *msglist);
@@ -109,10 +109,10 @@ extern void do_mail_unread(dbref player, const char *msglist);
 extern void do_mail_status(dbref player, const char *msglist,
                            const char *status);
 extern void do_mail_purge(dbref player);
-extern void do_mail_file(dbref player, char *msglist, char *folder);
+extern void do_mail_file(dbref player, const char *msglist, char *folder);
 extern void do_mail_tag(dbref player, const char *msglist);
 extern void do_mail_untag(dbref player, const char *msglist);
-extern void do_mail_fwd(dbref player, char *msglist, char *tolist);
+extern void do_mail_fwd(dbref player, const char *msglist, char *tolist);
 extern void do_mail_send(dbref player, char *tolist, char *message,
                          mail_flag flags, int silent, int nosig);
 

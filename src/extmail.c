@@ -102,7 +102,7 @@ static void do_mail_flags(dbref player, const char *msglist, mail_flag flag,
 static char *mail_list_time(const char *the_time, bool flag);
 static MAIL *mail_fetch(dbref player, int num);
 static MAIL *real_mail_fetch(dbref player, int num, int folder);
-static MAIL *mailfun_fetch(dbref player, int nargs, char *arg1, char *arg2);
+static MAIL *mailfun_fetch(dbref player, int nargs, const char *arg1, const char *arg2);
 static void count_mail(dbref player, int folder, int *rcount, int *ucount,
                        int *ccount);
 static int real_send_mail(dbref player, dbref target, char *subject,
@@ -113,10 +113,10 @@ static void send_mail(dbref player, dbref target, char *subject, char *message,
 static int send_mail_alias(dbref player, char *aname, char *subject,
                            char *message, mail_flag flags, int silent,
                            int nosig);
-static void filter_mail(dbref from, dbref player, char *subject, char *message,
+static void filter_mail(dbref from, dbref player, const char *subject, const char *message,
                         int mailnumber, mail_flag flags);
 static MAIL *find_insertion_point(dbref player);
-static int get_folder_number(dbref player, char *name);
+static int get_folder_number(dbref player, const char *name);
 static char *get_folder_name(dbref player, int fld);
 static int player_folder(dbref player);
 static int parse_folder(dbref player, char *folder_string);
@@ -125,14 +125,14 @@ static int parse_msglist(const char *msglist, struct mail_selector *ms,
                          dbref player);
 static int parse_message_spec(dbref player, const char *s, int *msglow,
                               int *msghigh, int *folder);
-static char *status_chars(MAIL *mp);
-static char *status_string(MAIL *mp);
+static char *status_chars(const MAIL *mp);
+static char *status_string(const MAIL *mp);
 static int sign(int x);
-static char *get_message(MAIL *mp);
-static char *get_compressed_message(MAIL *mp);
-static char *get_subject(MAIL *mp);
+static char *get_message(const MAIL *mp);
+static char *get_compressed_message(const MAIL *mp);
+static char *get_subject(const MAIL *mp);
 static char *get_sender(MAIL *mp, int full, int len, bool *pisplayer);
-static int was_sender(dbref player, MAIL *mp);
+static int was_sender(dbref player, const MAIL *mp);
 void do_mail_reviewread(dbref player, dbref target, const char *msglist);
 void do_mail_reviewlist(dbref player, dbref target);
 
@@ -172,7 +172,7 @@ int mdb_top = 0; /**< total number of messages in mail db */
 
 /* Return the uncompressed text of a @mail in a static buffer */
 static char *
-get_message(MAIL *mp)
+get_message(const MAIL *mp)
 {
   static char text[BUFFER_LEN * 2];
   char tbuf[BUFFER_LEN * 2];
@@ -193,7 +193,7 @@ get_message(MAIL *mp)
 
 /* Return the compressed text of a @mail in a static buffer */
 static char *
-get_compressed_message(MAIL *mp)
+get_compressed_message(const MAIL *mp)
 {
   static char text[BUFFER_LEN * 2];
 
@@ -206,13 +206,13 @@ get_compressed_message(MAIL *mp)
 
 /* Return the subject of a mail message, or (no subject) */
 static char *
-get_subject(MAIL *mp)
+get_subject(const MAIL *mp)
 {
   static char sbuf[SUBJECT_LEN + 1];
-  char *p;
   if (mp->subject) {
     strncpy(sbuf, uncompress(mp->subject), SUBJECT_LEN);
     sbuf[SUBJECT_LEN] = '\0';
+    char *p;
     /* Stop at a return or a tab */
     for (p = sbuf; *p; p++) {
       if ((*p == '\r') || (*p == '\n') || (*p == '\t')) {
@@ -274,7 +274,7 @@ get_sender(MAIL *mp, int full, int len, bool *pisplayer)
 
 /* Was this player the sender of this message? */
 static int
-was_sender(dbref player, MAIL *mp)
+was_sender(dbref player, const MAIL *mp)
 {
   /* If the dbrefs don't match, fail. */
   if (mp->from != player)
@@ -308,7 +308,6 @@ void
 do_mail_change_folder(dbref player, char *fld, char *newname)
 {
   int pfld;
-  char *p;
 
   if (!fld || !*fld) {
     /* Check mail in all folders */
@@ -330,6 +329,7 @@ do_mail_change_folder(dbref player, char *fld, char *newname)
       notify(player, T("MAIL: Folder name too long"));
       return;
     }
+    char *p;
     for (p = newname; p && *p; p++) {
       if (!isalnum(*p)) {
         notify(player, T("MAIL: Illegal folder name"));
@@ -613,7 +613,7 @@ do_mail_flags(dbref player, const char *msglist, mail_flag flag, bool negate)
  * \param folder name or number of folder to put messages in.
  */
 void
-do_mail_file(dbref player, char *msglist, char *folder)
+do_mail_file(dbref player, const char *msglist, char *folder)
 {
   MAIL *mp;
   struct mail_selector ms;
@@ -667,7 +667,7 @@ do_mail_file(dbref player, char *msglist, char *folder)
  * \param msglist list of messages to read.
  */
 void
-do_mail_read(dbref player, char *msglist)
+do_mail_read(dbref player, const char *msglist)
 {
   MAIL *mp;
   char tbuf1[BUFFER_LEN];
@@ -1216,7 +1216,7 @@ do_mail_purge(dbref player)
  * \param tolist list of recipients to forwared to.
  */
 void
-do_mail_fwd(dbref player, char *msglist, char *tolist)
+do_mail_fwd(dbref player, const char *msglist, char *tolist)
 {
   MAIL *mp;
   MAIL *last;
@@ -1225,7 +1225,7 @@ do_mail_fwd(dbref player, char *msglist, char *tolist)
   mail_flag folder;
   folder_array i;
   const char *head;
-  MAIL *temp;
+  const MAIL *temp;
   dbref target;
   int num_recpts = 0;
   const char **start;
@@ -1360,7 +1360,7 @@ do_mail_send(dbref player, char *tolist, char *message, mail_flag flags,
     /* Now locate a target */
     if (is_strict_integer(current)) {
       /* reply to a mail message */
-      MAIL *temp;
+      const MAIL *temp;
 
       num = parse_integer(current);
 
@@ -1487,7 +1487,8 @@ send_mail(dbref player, dbref target, char *subject, char *message,
     return;
   } else {
     /* We have a forward list. Run through it. */
-    char *fwdstr, *orig, *curr;
+    char *fwdstr, *orig;
+    const char *curr;
     dbref fwd;
     orig = safe_atr_value(a, "atrval.mailforwardlist");
     fwdstr = trim_space_sep(orig, ' ');
@@ -1742,7 +1743,6 @@ do_mail_nuke(dbref player)
 void
 do_mail_debug(dbref player, const char *action, const char *victim)
 {
-  dbref target;
   MAIL *mp, *nextp;
   int i;
 
@@ -1751,7 +1751,7 @@ do_mail_debug(dbref player, const char *action, const char *victim)
     return;
   }
   if (strcasecmp("clear", action) == 0) {
-    target =
+    dbref target =
       match_result(player, victim, TYPE_PLAYER, MAT_PMATCH | MAT_ABSOLUTE);
     if (target == NOTHING) {
       notify_format(player, T("%s: No such player."), victim);
@@ -2109,7 +2109,6 @@ FUNCTION(fun_mail)
    */
 
   MAIL *mp;
-  dbref player;
   int rc, uc, cc;
 
   if (nargs == 0) {
@@ -2119,7 +2118,7 @@ FUNCTION(fun_mail)
   }
   /* Try mail(<player>) */
   if (nargs == 1) {
-    player = match_result(executor, args[0], TYPE_PLAYER,
+    dbref player = match_result(executor, args[0], TYPE_PLAYER,
                           MAT_ME | MAT_ABSOLUTE | MAT_PMATCH | MAT_TYPE);
     if (GoodObject(player)) {
       if (!controls(executor, player)) {
@@ -2151,7 +2150,7 @@ FUNCTION(fun_mail)
  * and return the matching message or NULL
  */
 static MAIL *
-mailfun_fetch(dbref player, int nargs, char *arg1, char *arg2)
+mailfun_fetch(dbref player, int nargs, const char *arg1, const char *arg2)
 {
   dbref target;
   int msg;
@@ -2362,7 +2361,7 @@ FUNCTION(fun_mailstats)
 /* ARGSUSED */
 FUNCTION(fun_mailtime)
 {
-  MAIL *mp;
+  const MAIL *mp;
 
   mp = mailfun_fetch(executor, nargs, args[0], args[1]);
   if (!mp)
@@ -2387,7 +2386,7 @@ FUNCTION(fun_mailstatus)
 /* ARGSUSED */
 FUNCTION(fun_mailsubject)
 {
-  MAIL *mp;
+  const MAIL *mp;
 
   mp = mailfun_fetch(executor, nargs, args[0], args[1]);
   if (!mp)
@@ -2689,7 +2688,7 @@ load_mail(PENNFILE *fp)
 }
 
 static int
-get_folder_number(dbref player, char *name)
+get_folder_number(dbref player, const char *name)
 {
   ATTR *a;
   char str[BUFFER_LEN], pat[BUFFER_LEN], *res, *p;
@@ -2716,7 +2715,6 @@ get_folder_name(dbref player, int fld)
   static char str[BUFFER_LEN];
   char pat[BUFFER_LEN];
   static char *old;
-  char *r;
   ATTR *a;
 
   /* Get the name of the folder, or "nameless" */
@@ -2730,7 +2728,7 @@ get_folder_name(dbref player, int fld)
   mush_strncpy(str, atr_value(a), BUFFER_LEN);
   old = (char *) string_match(str, pat);
   if (old) {
-    r = old + strlen(pat);
+    char *r = old + strlen(pat);
     while (*r != ':')
       r++;
     *r = '\0';
@@ -2823,7 +2821,7 @@ void
 set_player_folder(dbref player, int fnum)
 {
   /* Set a player's folder to fnum */
-  ATTR *a;
+  const ATTR *a;
   char tbuf1[50];
 
   snprintf(tbuf1, sizeof tbuf1, "%d", fnum);
@@ -2838,14 +2836,12 @@ set_player_folder(dbref player, int fnum)
 static int
 parse_folder(dbref player, char *folder_string)
 {
-  int fnum;
-
   /* Given a string, return a folder #, or -1 The string is just a number,
    * for now. Later, this will be where named folders are handled */
   if (!folder_string || !*folder_string)
     return -1;
   if (isdigit(*folder_string)) {
-    fnum = atoi(folder_string);
+    int fnum = atoi(folder_string);
     if ((fnum < 0) || (fnum > MAX_FOLDERS))
       return -1;
     else
@@ -2858,7 +2854,6 @@ parse_folder(dbref player, char *folder_string)
 static int
 mail_match(dbref player, MAIL *mp, struct mail_selector ms, int num)
 {
-  int diffdays;
   mail_flag mpflag;
 
   /* Does a piece of mail match the mail_selector? */
@@ -2876,7 +2871,7 @@ mail_match(dbref player, MAIL *mp, struct mail_selector ms, int num)
   if (ms.days != -1) {
     /* Get the time now, subtract mp->time, and compare the results with
      * ms.days (in manner of ms.day_comp) */
-    diffdays = (int) (difftime(mudtime, mp->time) / 86400);
+    int diffdays = (int) (difftime(mudtime, mp->time) / 86400);
     if (sign(diffdays - ms.days) != ms.day_comp)
       return 0;
     else
@@ -3023,7 +3018,7 @@ parse_msglist(const char *msglist, struct mail_selector *ms, dbref player)
 }
 
 static char *
-status_chars(MAIL *mp)
+status_chars(const MAIL *mp)
 {
   /* Return a short description of message flags */
   static char res[10];
@@ -3042,7 +3037,7 @@ status_chars(MAIL *mp)
 }
 
 static char *
-status_string(MAIL *mp)
+status_string(const MAIL *mp)
 {
   /* Return a longer description of message flags */
   static char tbuf1[BUFFER_LEN];
@@ -3286,12 +3281,11 @@ send_mail_alias(dbref player, char *aname, char *subject, char *message,
  * \param flags the flags of the @mail.
  */
 void
-filter_mail(dbref from, dbref player, char *subject, char *message,
+filter_mail(dbref from, dbref player, const char *subject, const char *message,
             int mailnumber, mail_flag flags)
 {
-  ATTR *f;
+  const ATTR *f;
   char buff[BUFFER_LEN];
-  char buf[FOLDER_NAME_LEN + 1];
   int j = 0;
   static char tbuf1[6];
   PE_REGS *pe_regs;
@@ -3318,6 +3312,7 @@ filter_mail(dbref from, dbref player, char *subject, char *message,
   pe_regs_free(pe_regs);
 
   if (*buff) {
+    char buf[FOLDER_NAME_LEN + 1];
     snprintf(buf, sizeof buf, "0:%d", mailnumber);
     do_mail_file(player, buf, buff);
   }
