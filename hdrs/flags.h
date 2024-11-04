@@ -146,7 +146,7 @@ void do_flag_enable(const char *ns, dbref player, const char *name);
 void do_flag_restrict(const char *ns, dbref player, const char *name,
                       char *args_right[]);
 void do_flag_type(const char *ns, dbref player, const char *name,
-                  char *type_string);
+                  const char *type_string);
 void do_flag_add(const char *ns, dbref player, const char *name,
                  char *args_right[]);
 void do_flag_letter(const char *ns, dbref player, const char *name,

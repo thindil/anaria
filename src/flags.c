@@ -63,7 +63,7 @@ static bool has_flag_ns(const FLAGSPACE *n, dbref thing, const FLAG *f);
 static FLAG *flag_read(PENNFILE *in);
 static FLAG *flag_read_oldstyle(PENNFILE *in);
 static void flag_read_all_oldstyle(PENNFILE *in, const char *ns);
-static void flag_write(PENNFILE *out, FLAG *f, const char *name);
+static void flag_write(PENNFILE *out, const FLAG *f, const char *name);
 static FLAG *flag_hash_lookup(const FLAGSPACE *n, const char *name, int type);
 static FLAG *clone_flag(const FLAG *f);
 static FLAG *new_flag(void);
@@ -91,7 +91,7 @@ struct flagcache {
   slab *flagset_slab;
 };
 
-static struct flagcache *new_flagcache(FLAGSPACE *, int);
+static struct flagcache *new_flagcache(const FLAGSPACE *, int);
 static void free_flagcache(struct flagcache *);
 static void flagcache_rebucket(FLAGSPACE *, int);
 static object_flag_type flagcache_find_ns(FLAGSPACE *, const object_flag_type);
@@ -274,7 +274,6 @@ flag_add(FLAGSPACE *n, const char *name, FLAG *f)
    */
   if ((f->bitpos >= n->flagbits) || (n->flags[f->bitpos] == NULL)) {
     /* It's a canonical flag */
-    int i;
     if (f->bitpos >= n->flagbits) {
       /* Oops, we need a bigger array */
       n->flags = mush_realloc(n->flags, (f->bitpos + 1) * sizeof(FLAG *),
@@ -283,6 +282,7 @@ flag_add(FLAGSPACE *n, const char *name, FLAG *f)
         mush_panic("Unable to reallocate flags array!\n");
 
       /* Make sure the new space is full of NULLs */
+      int i;
       for (i = n->flagbits; i <= f->bitpos; i++)
         n->flags[i] = NULL;
     }
@@ -519,7 +519,7 @@ flag_read(PENNFILE *in)
 }
 
 static FLAG *
-flag_alias_read(PENNFILE *in, char *alias, FLAGSPACE *n)
+flag_alias_read(PENNFILE *in, char *alias, const FLAGSPACE *n)
 {
   FLAG *f;
   char *c;
@@ -622,7 +622,7 @@ flag_read_all(PENNFILE *in, const char *ns)
 
 /* Write a flag out to a file */
 static void
-flag_write(PENNFILE *out, FLAG *f, const char *name)
+flag_write(PENNFILE *out, const FLAG *f, const char *name)
 {
   char tmp[2] = {'\0', '\0'};
   db_write_labeled_string(out, " name", name);
@@ -637,7 +637,7 @@ flag_write(PENNFILE *out, FLAG *f, const char *name)
 
 /* Write a flag alias out to a file */
 static void
-flag_alias_write(PENNFILE *out, FLAG *f, const char *name)
+flag_alias_write(PENNFILE *out, const FLAG *f, const char *name)
 {
   db_write_labeled_string(out, " name", f->name);
   db_write_labeled_string(out, "  alias", name);
@@ -974,7 +974,7 @@ letter_to_flagptr(const FLAGSPACE *n, char c, int type)
  */
 
 static struct flagcache *
-new_flagcache(FLAGSPACE *n, int initial_size)
+new_flagcache(const FLAGSPACE *n, int initial_size)
 {
   struct flagcache *cache;
 
@@ -1377,7 +1377,7 @@ has_all_bits(const char *ns, const object_flag_type source,
 {
   unsigned int i;
   int ok = 1;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   Flagspace_Lookup(n, ns);
   for (i = 0; i < FlagBytes(n); i++)
     ok &= ((*(bitmask + i) & *(source + i)) == *(bitmask + i));
@@ -1413,7 +1413,7 @@ has_any_bits(const char *ns, const object_flag_type source,
 {
   unsigned int i;
   int ok = 0;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   Flagspace_Lookup(n, ns);
   for (i = 0; i < FlagBytes(n); i++)
     ok |= (*(bitmask + i) & *(source + i));
@@ -1432,8 +1432,8 @@ const char *
 bits_to_string(const char *ns, object_flag_type bitmask, dbref privs,
                dbref thing)
 {
-  FLAG *f;
-  FLAGSPACE *n;
+  const FLAG *f;
+  const FLAGSPACE *n;
   int i;
   int first = 1;
   static char buf[BUFFER_LEN];
@@ -1467,8 +1467,9 @@ object_flag_type
 string_to_bits(const char *ns, const char *str)
 {
   object_flag_type bitmask;
-  char *copy, *s, *sp;
-  FLAG *f;
+  char *copy, *s;
+  const char *sp;
+  const FLAG *f;
   FLAGSPACE *n;
 
   Flagspace_Lookup(n, ns);
@@ -1640,9 +1641,9 @@ unparse_flags(dbref thing, dbref player)
   /* print out the flag symbols (letters) */
   static char buf[BUFFER_LEN];
   char *p;
-  FLAG *f;
+  const FLAG *f;
   int i;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
 
   Flagspace_Lookup(n, "FLAG");
   p = buf;
@@ -1707,7 +1708,7 @@ decompile_flags_generic(dbref player, dbref thing, const char *name,
 {
   FLAG *f;
   int i;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   Flagspace_Lookup(n, ns);
   for (i = 0; i < n->flagbits; i++)
     if ((f = n->flags[i])) {
@@ -2241,7 +2242,7 @@ add_flag_generic(const char *ns, const char *name, const char letter, int type,
   FLAGSPACE *n;
   Flagspace_Lookup(n, ns);
   char tmp[BUFFER_LEN];
-  char *ucname;
+  const char *ucname;
 
   if (fp) {
     *fp = NULL;
@@ -2363,7 +2364,7 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
                  char *args_right[])
 {
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   int perms, negate_perms;
   char tmp[BUFFER_LEN];
 
@@ -2424,12 +2425,11 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
  * \param type_string list of types.
  */
 void
-do_flag_type(const char *ns, dbref player, const char *name, char *type_string)
+do_flag_type(const char *ns, dbref player, const char *name, const char *type_string)
 {
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   int type;
-  dbref it;
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
@@ -2457,6 +2457,7 @@ do_flag_type(const char *ns, dbref player, const char *name, char *type_string)
     /* Are there any objects with the flag that don't match these
      * types?
      */
+    dbref it;
     for (it = 0; it < db_top; it++) {
       if (!(type & Typeof(it)) && has_flag_ns(n, it, f)) {
         notify_format(player,
@@ -2477,7 +2478,7 @@ do_flag_type(const char *ns, dbref player, const char *name, char *type_string)
 void
 set_flag_type_by_name(const char *ns, const char *name, privbits type)
 {
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   FLAG *f;
   Flagspace_Lookup(n, ns);
   f = flag_hash_lookup(n, name, NOTYPE);
@@ -2509,7 +2510,7 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
   int perms = F_ANY;
   int negate_perms = F_ANY;
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   enum flag_res newflag;
   char tmp[BUFFER_LEN];
 
@@ -2758,7 +2759,7 @@ do_flag_letter(const char *ns, dbref player, const char *name,
                const char *letter)
 {
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
@@ -2812,7 +2813,7 @@ void
 do_flag_disable(const char *ns, dbref player, const char *name)
 {
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
@@ -2851,7 +2852,8 @@ do_flag_disable(const char *ns, dbref player, const char *name)
 void
 do_flag_delete(const char *ns, dbref player, const char *name)
 {
-  FLAG *f, *tmpf;
+  FLAG *f;
+  const FLAG *tmpf;
   const char *flagname;
   dbref i;
   int got_one;
@@ -2926,7 +2928,7 @@ void
 do_flag_enable(const char *ns, dbref player, const char *name)
 {
   FLAG *f;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
@@ -2998,9 +3000,9 @@ list_all_flags(const char *ns, const char *name, dbref privs, int which)
   int i, numptrs = 0;
   static char buf[BUFFER_LEN];
   char *bp;
-  char *p;
+  const char *p;
   int disallowed;
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
 
   Flagspace_Lookup(n, ns);
   disallowed = God(privs) ? F_INTERNAL : (F_INTERNAL | F_DISABLED);
@@ -3070,7 +3072,7 @@ list_all_flags(const char *ns, const char *name, dbref privs, int which)
 const char *
 flag_list_to_lock_string(object_flag_type flags, object_flag_type powers)
 {
-  FLAGSPACE *n;
+  const FLAGSPACE *n;
   FLAG *f;
   int i, first = 1;
   static char buff[BUFFER_LEN];
