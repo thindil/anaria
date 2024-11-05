@@ -102,7 +102,7 @@ void do_userfn(char *buff, char **bp, dbref obj, ATTR *attrib, int nargs,
 
 FUN *func_hash_lookup(const char *name);
 FUN *builtin_func_hash_lookup(const char *name);
-int check_func(dbref player, FUN *fp);
+int check_func(dbref player, const FUN *fp);
 int restrict_function(const char *name, const char *restriction);
 int alias_function(dbref player, const char *function, const char *alias);
 int do_function_alias(dbref player, const char *function, const char *alias);
@@ -112,9 +112,9 @@ void do_function_restore(dbref player, const char *name);
 void do_list_functions(dbref player, int lc, const char *type);
 char *list_functions(const char *);
 void do_function(dbref player, const char *name, char **argv, int preserve);
-void do_function_toggle(dbref player, char *name, int toggle);
-void do_function_report(dbref player, char *name);
-void do_function_delete(dbref player, char *name);
+void do_function_toggle(dbref player, const char *name, int toggle);
+void do_function_report(dbref player, const char *name);
+void do_function_delete(dbref player, const char *name);
 void do_function_clone(dbref player, const char *function, const char *clone);
 
 void function_init_postconfig(void);

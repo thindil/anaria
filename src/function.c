@@ -80,7 +80,6 @@ add_private_vocab(const char *name, const char *category)
 {
   sqlite3 *sqldb;
   sqlite3_stmt *inserter;
-  int status;
 
   if (!functable) {
     return;
@@ -111,6 +110,7 @@ add_private_vocab(const char *name, const char *category)
   if (inserter) {
     sqlite3_bind_text(inserter, 1, name, -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(inserter, 2, category, -1, SQLITE_STATIC);
+    int status;
     do {
       status = sqlite3_step(inserter);
     } while (is_busy_status(status));
@@ -192,7 +192,7 @@ suggest_name(const char *badname, const char *category)
   sqlite3_stmt *finder;
   int status;
   int ulen;
-  char *utf8;
+  const char *utf8;
   char *suggestion = NULL;
 
   if (!functable) {
@@ -964,7 +964,7 @@ list_functions(const char *type)
   const char **ptrs;
   static char buff[BUFFER_LEN];
   char *bp;
-  int nptrs = 0, i;
+  int nptrs = 0;
   int which = 0;
   /* 0x1 for builtin, 0x2 for @function */
 
@@ -1006,6 +1006,7 @@ list_functions(const char *type)
   bp = buff;
   if (nptrs > 0) {
     safe_str(ptrs[0], buff, &bp);
+    int i;
     for (i = 1; i < nptrs; i++) {
       if (strcmp(ptrs[i], ptrs[i - 1])) {
         safe_chr(' ', buff, &bp);
@@ -1113,7 +1114,7 @@ function_init_postconfig(void)
  * \retval 0 permission denied.
  */
 int
-check_func(dbref player, FUN *fp)
+check_func(dbref player, const FUN *fp)
 {
   if (!fp)
     return 0;
@@ -1594,7 +1595,8 @@ do_function(dbref player, const char *name, char **argv, int preserve)
   dbref thing;
   FUN *fp;
   size_t userfn_count = htab_user_function.entries;
-  char ucnameb[BUFFER_LEN], *ucname;
+  char ucnameb[BUFFER_LEN];
+  const char *ucname;
 
   /* if no arguments, just give the list of user functions, by walking
    * the function hash table, and looking up all functions marked
@@ -1839,7 +1841,7 @@ do_function_restore(dbref player, const char *name)
  * \param name name of the function to delete.
  */
 void
-do_function_delete(dbref player, char *name)
+do_function_delete(dbref player, const char *name)
 {
   /* Deletes a user-defined function.
    * For security, you must control the object the function uses
@@ -1901,7 +1903,7 @@ do_function_delete(dbref player, char *name)
  * \param toggle if 1, enable; if 0, disable.
  */
 void
-do_function_toggle(dbref player, char *name, int toggle)
+do_function_toggle(dbref player, const char *name, int toggle)
 {
   FUN *fp;
 
@@ -1939,7 +1941,7 @@ do_function_toggle(dbref player, char *name, int toggle)
  * \param name name of the function.
  */
 void
-do_function_report(dbref player, char *name)
+do_function_report(dbref player, const char *name)
 {
   FUN *fp, *bfp;
 
