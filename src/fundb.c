@@ -632,11 +632,11 @@ FUNCTION(fun_num) { safe_dbref(match_thing(executor, args[0]), buff, bp); }
 FUNCTION(fun_rnum)
 {
   dbref place = match_thing(executor, args[0]);
-  char *name = args[1];
-  dbref thing;
   if ((place != NOTHING) &&
       (Can_Examine(executor, place) || (Location(executor) == place) ||
        (enactor == place))) {
+    const char *name = args[1];
+    dbref thing;
     switch (thing = match_result(place, name, NOTYPE,
                                  MAT_POSSESSION | MAT_CARRIED_EXIT)) {
     case NOTHING:
@@ -689,9 +689,7 @@ dbwalk(char *buff, char **bp, dbref executor, dbref enactor, int type,
        int listening, int *retcount, NEW_PE_INFO *pe_info)
 {
   dbref result;
-  int first;
   int nthing;
-  dbref thing;
   int validloc;
   dbref startdb;
   int privwho = Priv_Who(executor);
@@ -715,7 +713,8 @@ dbwalk(char *buff, char **bp, dbref executor, dbref enactor, int type,
   if (GoodObject(loc) && validloc &&
       (Can_Examine(executor, loc) || (Location(executor) == loc) ||
        (enactor == loc))) {
-    first = 1;
+    int first = 1;
+    dbref thing;
     DOLIST_VISIBLE (thing, startdb, executor) {
       /* Skip if:
        * - We're not checking this type
@@ -963,7 +962,6 @@ FUNCTION(fun_visible)
   dbref it = match_thing(executor, args[0]);
   dbref thing;
   char *name;
-  ATTR *a;
 
   if (!GoodObject(it)) {
     safe_str(T(e_notvis), buff, bp);
@@ -978,7 +976,7 @@ FUNCTION(fun_visible)
   }
   if (name) {
     char tmp[BUFFER_LEN];
-    a = atr_get(thing, strupper_r(name, tmp, sizeof tmp));
+    ATTR *a = atr_get(thing, strupper_r(name, tmp, sizeof tmp));
     safe_chr((a && Can_Read_Attr(it, thing, a)) ? '1' : '0', buff, bp);
   } else {
     safe_boolean(Can_Examine(it, thing), buff, bp);
@@ -1048,7 +1046,8 @@ FUNCTION(fun_hasflag)
 /* ARGSUSED */
 FUNCTION(fun_hastype)
 {
-  char *r, *s;
+  const char *r;
+  char *s;
   int found = 0;
   dbref it = NOTHING;
   /* Special check for dbref to allow for hastype(#12345, garbage) */
@@ -1270,7 +1269,7 @@ FUNCTION(fun_lockowner)
   dbref it;
   char *p;
   lock_type ltype;
-  lock_list *ll;
+  const lock_list *ll;
 
   if ((p = strchr(args[0], '/')))
     *(p++) = '\0';
@@ -1375,7 +1374,8 @@ FUNCTION(fun_elock)
 FUNCTION(fun_lockfilter)
 {
   dbref victim;
-  char *r, *s;
+  const char *r;
+  char *s;
   char delim = ' ';
   int first = 1;
   boolexp elock = TRUE_BOOLEXP;
@@ -1562,7 +1562,6 @@ FUNCTION(fun_room)
 /* ARGSUSED */
 FUNCTION(fun_rloc)
 {
-  int i;
   int deep = parse_integer(args[1]);
   dbref it = match_thing(executor, args[0]);
 
@@ -1576,6 +1575,7 @@ FUNCTION(fun_rloc)
   else if (!Can_Locate(executor, it))
     safe_str(T(e_perm), buff, bp);
   else {
+    int i;
     for (i = 0; i < deep; i++) {
       if (!GoodObject(it) || IsRoom(it))
         break;
@@ -1799,10 +1799,8 @@ FUNCTION(fun_fullalias)
 /* ARGSUSED */
 FUNCTION(fun_name)
 {
-  dbref it;
-
   if (nargs == 1) {
-    it = match_thing(executor, args[0]);
+    dbref it = match_thing(executor, args[0]);
     if (GoodObject(it))
       safe_str(shortname(it), buff, bp);
     else
@@ -1843,7 +1841,7 @@ FUNCTION(fun_fullname)
     if (IsExit(it)) {
       ATTR *a = atr_get_noparent(it, "ALIAS");
       if (a) {
-        char *aliases = atr_value(a);
+        const char *aliases = atr_value(a);
         if (aliases && *aliases) {
           safe_chr(';', buff, bp);
           safe_str(aliases, buff, bp);
@@ -1868,7 +1866,6 @@ FUNCTION(fun_accname)
 FUNCTION(fun_iname)
 {
   dbref it = match_thing(executor, args[0]);
-  char tbuf1[BUFFER_LEN];
 
   if (GoodObject(it)) {
     /* You must either be see_all, control it, or be inside it */
@@ -1877,6 +1874,7 @@ FUNCTION(fun_iname)
       safe_str(T(e_perm), buff, bp);
       return;
     }
+    char tbuf1[BUFFER_LEN];
     if (nameformat(executor, it, tbuf1,
                    IsExit(it) ? shortname(it) : (char *) accented_name(it), 1,
                    pe_info))
@@ -2485,7 +2483,7 @@ FUNCTION(fun_following)
   dbref thing;
   ATTR *a;
   char *s;
-  char *res;
+  const char *res;
 
   thing = match_controlled(executor, args[0]);
   if (!GoodObject(thing)) {
