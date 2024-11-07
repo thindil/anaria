@@ -77,7 +77,8 @@ enum json_query {
 
 FUNCTION(fun_json_query)
 {
-  cJSON *json = NULL, *curr = NULL;
+  cJSON *json = NULL;
+  const cJSON *curr = NULL;
   enum json_query query_type = JSON_QUERY_TYPE;
   int i, path;
 
@@ -122,7 +123,7 @@ FUNCTION(fun_json_query)
   case JSON_QUERY_TYPE: {
     sqlite3 *sqldb = get_shared_db();
     sqlite3_stmt *op;
-    char *utf8;
+    const char *utf8;
     int ulen, status;
     op = prepare_statement(sqldb, "VALUES (json_type(?))", "json_query.type");
     if (!op) {
@@ -227,7 +228,7 @@ FUNCTION(fun_json_query)
   case JSON_QUERY_EXTRACT: {
     sqlite3 *sqldb = get_shared_db();
     sqlite3_stmt *op;
-    char *utf8;
+    const char *utf8;
     int ulen, status;
 
     op = prepare_statement(sqldb, "VALUES (json_extract(?, ?))",
@@ -277,7 +278,7 @@ FUNCTION(fun_json_mod)
 {
   sqlite3 *sqldb = get_shared_db();
   sqlite3_stmt *op = NULL;
-  char *utf8;
+  const char *utf8;
   int status;
   int ulen;
 
@@ -412,11 +413,12 @@ FUNCTION(fun_json_map)
 {
   ufun_attrib ufun;
   PE_REGS *pe_regs;
-  char *osep, osepd[2] = {' ', '\0'};
+  const char *osep;
+  char osepd[2] = {' ', '\0'};
   sqlite3 *sqldb = get_shared_db();
   sqlite3_stmt *mapper;
   sqlite3_str *rbuff;
-  char *utf8;
+  const char *utf8;
   int ulen;
   int status, i;
   int rows = 0;
@@ -686,7 +688,7 @@ FUNCTION(fun_isjson)
 {
   sqlite3 *sqldb;
   sqlite3_stmt *verify;
-  char *utf8;
+  const char *utf8;
   int ulen, status;
 
   sqldb = get_shared_db();
