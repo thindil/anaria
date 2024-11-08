@@ -34,7 +34,7 @@
 enum itemfun_op { IF_DELETE, IF_REPLACE, IF_INSERT };
 static void freearr_member(char *p);
 extern const unsigned char *tables;
-static int find_list_position(char *numstr, int total, bool insert);
+static int find_list_position(const char *numstr, int total, bool insert);
 
 /** Convert list to array.
  * Chops up a list of words into an array of words. The list is
@@ -50,7 +50,8 @@ static int find_list_position(char *numstr, int total, bool insert);
 int
 list2arr_ansi(char *r[], int max, char *list, char sep, int nullok)
 {
-  char *p, *lp;
+  char *lp;
+  const char *p;
   int i;
   ansi_string *as;
   char *aptr;
@@ -194,7 +195,7 @@ freearr(char *r[], int size)
  * \param insert Are we inserting into the list at this position?
  */
 static int
-find_list_position(char *numstr, int total, bool insert)
+find_list_position(const char *numstr, int total, bool insert)
 {
   int i;
   bool negative = false;
@@ -234,12 +235,15 @@ FUNCTION(fun_munge)
    * This rearranged list is returned by MUNGE.
    * A fourth argument (separator) is optional.
    */
-  char list1[BUFFER_LEN], *lp, rlist[BUFFER_LEN];
+  char list1[BUFFER_LEN], rlist[BUFFER_LEN];
+  const char *lp;
   char **ptrs1, **ptrs2, **results;
   char **ptrs3;
   int i, j, nptrs1, nptrs2, nresults;
   ufun_attrib ufun;
-  char sep, isep[2] = {'\0', '\0'}, *osep, osepd[2] = {'\0', '\0'};
+  char sep, isep[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   int first;
   PE_REGS *pe_regs;
 
@@ -273,8 +277,9 @@ FUNCTION(fun_munge)
    * make it a straight copy of ptrs2 and freearr() on ptrs2. */
   ptrs3 = mush_calloc(MAX_SORTSIZE, sizeof(char *), "ptrarray");
 
-  if (!ptrs1 || !ptrs2)
+  if (!ptrs1 || !ptrs2) {
     mush_panic("Unable to allocate memory in fun_munge");
+  }
   nptrs1 = list2arr_ansi(ptrs1, MAX_SORTSIZE, list1, sep, 1);
   nptrs2 = list2arr_ansi(ptrs2, MAX_SORTSIZE, args[2], sep, 1);
   memcpy(ptrs3, ptrs2, MAX_SORTSIZE * sizeof(char *));
@@ -343,7 +348,8 @@ FUNCTION(fun_elements)
   char **ptrs;
   char *wordlist;
   char *s, *r, sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!delim_check(buff, bp, nargs, args, 3, &sep))
     return;
@@ -357,8 +363,9 @@ FUNCTION(fun_elements)
 
   ptrs = mush_calloc(MAX_SORTSIZE, sizeof(char *), "ptrarray");
   wordlist = mush_malloc(BUFFER_LEN, "string");
-  if (!ptrs || !wordlist)
+  if (!ptrs || !wordlist) {
     mush_panic("Unable to allocate memory in fun_elements");
+  }
 
   /* Turn the first list into an array. */
   strcpy(wordlist, args[0]);
@@ -393,8 +400,10 @@ FUNCTION(fun_matchall)
    */
 
   int wcount;
-  char *r, *s, *b, sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *r, *b;
+  char *s, sep;
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!delim_check(buff, bp, nargs, args, 3, &sep))
     return;
@@ -428,8 +437,10 @@ FUNCTION(fun_graball)
    * what matchall() is to match().
    */
 
-  char *r, *s, *b, sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *r, *b;
+  char *s, sep;
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   ansi_string *as = NULL;
 
   if (!delim_check(buff, bp, nargs, args, 3, &sep))
@@ -593,7 +604,8 @@ FUNCTION(fun_filter)
   int check_bool = 0;
   int funccount;
   int i;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!delim_check(buff, bp, nargs, args, 3, &sep))
     return;
@@ -654,7 +666,8 @@ FUNCTION(fun_shuffle)
   char *words[MAX_SORTSIZE];
   int n, i, j;
   char sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!delim_check(buff, bp, nargs, args, 2, &sep))
     return;
@@ -691,7 +704,8 @@ FUNCTION(fun_sort)
   int nptrs;
   SortType sort_type;
   char sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!nargs || !*args[0])
     return;
@@ -721,7 +735,8 @@ FUNCTION(fun_sortkey)
   SortType sort_type;
   PE_REGS *pe_regs;
   char sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   int i;
   char result[BUFFER_LEN];
   ufun_attrib ufun;
@@ -772,7 +787,8 @@ FUNCTION(fun_sortby)
   char *ptrs[MAX_SORTSIZE];
   char sep;
   int nptrs;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   ufun_attrib ufun;
 
   if (!nargs || !*args[0])
@@ -821,7 +837,8 @@ FUNCTION(fun_setmanip)
   int found = 0;
   SortType sort_type = UNKNOWN_LIST;
   int osepl = 0;
-  char *osep = NULL, osepd[2] = {'\0', '\0'};
+  const char *osep = NULL;
+  char osepd[2] = {'\0', '\0'};
   s_rec *sp1, *sp2;
   ListTypeInfo *lti;
 
@@ -944,7 +961,8 @@ FUNCTION(fun_unique)
   char **ary;
   int orign, n, i;
   int osepl = 0;
-  char *osep = NULL, osepd[2] = {'\0', '\0'};
+  const char *osep = NULL;
+  char osepd[2] = {'\0', '\0'};
   SortType sort_type = ALPHANUM_LIST;
   ListTypeInfo *lti;
   s_rec *sp;
@@ -1121,7 +1139,7 @@ FUNCTION(fun_first)
 
   if (has_markup(args[0])) {
     ansi_string *as = NULL;
-    char *q;
+    const char *q;
     as = parse_ansi_string(args[0]);
     p = trim_space_sep(as->text, sep);
     q = split_token(&p, sep);
@@ -1143,7 +1161,7 @@ FUNCTION(fun_randword)
   char **ptrs;
   int nptrs;
   char sep;
-  char *osep;
+  const char *osep;
   char osepd[2] = {'\0', '\0'};
   int separg = 2;
   int randcount = 1;
@@ -1268,7 +1286,8 @@ FUNCTION(fun_last)
 {
   /* read last word from a string */
 
-  char *p, *r;
+  const char *p;
+  char *r;
   char sep;
   ansi_string *as = NULL;
 
@@ -1307,7 +1326,8 @@ FUNCTION(fun_last)
 /* ARGSUSED */
 FUNCTION(fun_grab)
 {
-  char *r, *s, sep;
+  const char *r;
+  char *s, sep;
   ansi_string *as = NULL;
 
   if (!delim_check(buff, bp, nargs, args, 3, &sep))
@@ -1344,7 +1364,8 @@ FUNCTION(fun_namegraball)
    * grabnameall(#1 #2 #3,god) -> #1
    */
 
-  char *r, *s, sep;
+  const char *r;
+  char *s, sep;
   dbref victim;
   dbref absolute;
   int first = 1;
@@ -1402,7 +1423,7 @@ FUNCTION(fun_namegrab)
   char *r, *s, sep;
   dbref victim;
   dbref absolute;
-  char *exact_res, *res;
+  const char *exact_res, *res;
 
   exact_res = res = NULL;
 
@@ -1451,7 +1472,8 @@ FUNCTION(fun_match)
    * function.
    */
 
-  char *s, *r;
+  char *s;
+  const char *r;
   char sep;
   int wcount = 1;
 
@@ -1478,7 +1500,8 @@ FUNCTION(fun_match)
 FUNCTION(fun_wordpos)
 {
   int charpos, i;
-  char *cp, *tp, *xp;
+  char *cp, *xp;
+  const char *tp;
   char sep;
 
   if (!is_integer(args[1])) {
@@ -1730,9 +1753,10 @@ FUNCTION(fun_ldelete)
   char *wordlist;
   int first = 0;
   char *s, *r, sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   int delimarg = 3;
-  char *replace = NULL;
+  const char *replace = NULL;
 
   if (!strcmp(called_as, "LREPLACE")) {
     delimarg = 4;
@@ -1751,8 +1775,9 @@ FUNCTION(fun_ldelete)
 
   ptrs = mush_calloc(MAX_SORTSIZE, sizeof(char *), "ptrarray");
   wordlist = mush_malloc(BUFFER_LEN, "string");
-  if (!ptrs || !wordlist)
+  if (!ptrs || !wordlist) {
     mush_panic("Unable to allocate memory in fun_ldelete");
+  }
 
   /* Turn the first list into an array. */
   strcpy(wordlist, args[0]);
@@ -1795,10 +1820,9 @@ FUNCTION(fun_ldelete)
 FUNCTION(fun_insert)
 {
   /* insert a word at position X of a list */
-  int nwords, pos, i;
+  int nwords, pos;
   char **ptrs;
   char *wordlist;
-  int first = 1;
   char sep;
 
   if (!delim_check(buff, bp, nargs, args, 4, &sep))
@@ -1806,8 +1830,9 @@ FUNCTION(fun_insert)
 
   ptrs = mush_calloc(MAX_SORTSIZE, sizeof(char *), "ptrarray");
   wordlist = mush_malloc(BUFFER_LEN, "string");
-  if (!ptrs || !wordlist)
+  if (!ptrs || !wordlist) {
     mush_panic("Unable to allocate memory in fun_insert");
+  }
 
   /* Turn the first list into an array. */
   strcpy(wordlist, args[0]);
@@ -1821,6 +1846,8 @@ FUNCTION(fun_insert)
     /* Nowhere to insert */
     safe_strl(args[0], arglens[0], buff, bp);
   } else {
+    int i;
+    int first = 1;
     for (i = 0; i < nwords; i++) {
       if (i == pos) {
         if (first)
@@ -1851,7 +1878,8 @@ FUNCTION(fun_insert)
 /* ARGSUSED */
 FUNCTION(fun_member)
 {
-  char *s, *t;
+  char *s;
+  const char *t;
   char sep;
   int el;
 
@@ -1902,7 +1930,7 @@ FUNCTION(fun_before)
 FUNCTION(fun_after)
 {
   ansi_string *as;
-  char *p, *delim;
+  const char *p, *delim;
   size_t len, count;
   size_t start;
 
@@ -1930,7 +1958,8 @@ FUNCTION(fun_revwords)
   char **words;
   int count, origcount;
   char sep;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
 
   if (!delim_check(buff, bp, nargs, args, 2, &sep))
     return;
@@ -2225,7 +2254,8 @@ FUNCTION(fun_step)
   char sep;
   int n;
   int step;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   PE_REGS *pe_regs = NULL;
   ufun_attrib ufun;
   char rbuff[BUFFER_LEN];
@@ -2306,7 +2336,8 @@ FUNCTION(fun_map)
   char sep;
   int funccount;
   char place[16];
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   char rbuff[BUFFER_LEN];
   char **ptrs = NULL;
   int nptrs, i;
@@ -2448,9 +2479,9 @@ FUNCTION(fun_table)
   size_t field_width = 10;
   size_t col = 0;
   size_t offset, col_len;
-  char sep, osep, *cp, *t;
+  char sep, osep, *cp;
+  const char *t;
   char aligntype = '<';
-  char *fwidth;
   ansi_string *as;
 
   if (!delim_check(buff, bp, nargs, args, 5, &osep))
@@ -2471,7 +2502,7 @@ FUNCTION(fun_table)
       line_length = 2;
   }
   if (nargs > 1) {
-    fwidth = args[1];
+    const char *fwidth = args[1];
     if ((*fwidth) == '<' || (*fwidth) == '>' || (*fwidth) == '-') {
       aligntype = *(fwidth++);
     }
@@ -2600,7 +2631,7 @@ FUNCTION(fun_regreplace)
   PCRE2_SIZE search, prelen;
   size_t searchlen;
   int funccount;
-  PCRE2_SIZE *offsets;
+  const PCRE2_SIZE *offsets;
 
   if (called_as[strlen(called_as) - 1] == 'I') {
     flags |= PCRE2_CASELESS;
@@ -2924,7 +2955,7 @@ FUNCTION(fun_regmatch)
   /* Now, only for those that have a pattern, copy text */
   for (i = 0; i < nqregs; i++) {
     char *regname;
-    char *named_subpattern = NULL;
+    const char *named_subpattern = NULL;
     int subpattern = 0;
     if ((regname = strchr(qregs[i], ':'))) {
       /* subexpr:register */
@@ -2974,14 +3005,16 @@ FUNCTION(fun_regmatch)
  * as well as reglmatch() and reglmatchall(). */
 FUNCTION(fun_regrab)
 {
-  char *r, *s, *b, sep;
+  char *r, *s, sep;
+  const char *b;
   size_t rlen;
   pcre2_code *re;
   pcre2_match_data *md;
   int errcode;
   PCRE2_SIZE erroffset;
   int flags = re_compile_flags;
-  char *osep, osepd[2] = {'\0', '\0'};
+  const char *osep;
+  char osepd[2] = {'\0', '\0'};
   char **ptrs;
   int nptrs, i;
   bool all = 0, pos = 0;
