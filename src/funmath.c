@@ -1159,8 +1159,6 @@ log2(double x)
 FUNCTION(fun_log)
 {
   NVAL num;
-  NVAL base = 10.0;
-  bool base_is_e = false;
 
   if (!is_number(args[0])) {
     safe_str(T(e_nums), buff, bp);
@@ -1173,6 +1171,8 @@ FUNCTION(fun_log)
     return;
   }
   if (nargs == 2) {
+    NVAL base = 10.0;
+    bool base_is_e = false;
     if (!is_number(args[1])) {
       if (args[1][0] == 'e' && args[1][1] == '\0') {
         base_is_e = true;
@@ -1364,7 +1364,6 @@ frac(double v, double *RESTRICT n, double *RESTRICT d, double error)
 FUNCTION(fun_fraction)
 {
   double num = 0, denom = 0;
-  int whole = 0;
   NVAL n;
 
   if (!is_number(args[0])) {
@@ -1383,6 +1382,7 @@ FUNCTION(fun_fraction)
   }
 
   if (is_good_number(n)) {
+    int whole = 0;
     if (nargs > 1 && parse_boolean(args[1])) {
       whole = floor(n);
       n = n - whole;
