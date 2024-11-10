@@ -174,9 +174,8 @@ FUNCTION(fun_message)
   }
 
   if (nargs == 14) {
-    char *word, *list;
-
-    list = trim_space_sep(args[13], ' ');
+    const char *word;
+    char *list = trim_space_sep(args[13], ' ');
 
     do {
       word = split_token(&list, ' ');
@@ -427,7 +426,7 @@ listq_walk(const char *cur, int count __attribute__((__unused__)),
            void *userdata)
 {
   struct st_qreg_data *st_data = (struct st_qreg_data *) userdata;
-  char *name;
+  const char *name;
 
   name = (char *) cur + 1;
 
@@ -467,8 +466,8 @@ FUNCTION(fun_listq)
     st_data.wild = args[0];
   }
   if (nargs >= 2) {
-    char *list, *item;
-    list = trim_space_sep(args[1], ' ');
+    const char *item;
+    char *list = trim_space_sep(args[1], ' ');
     while ((item = split_token(&list, ' '))) {
       if (!*item)
         continue;
@@ -836,8 +835,7 @@ FUNCTION(fun_die)
   unsigned int n;
   unsigned int die;
   unsigned int count;
-  unsigned int total = 0;
-  int show_all = 0, first = 1;
+  int show_all = 0;
 
   if (!is_uinteger(args[0]) || !is_uinteger(args[1])) {
     safe_str(T(e_uints), buff, bp);
@@ -853,6 +851,7 @@ FUNCTION(fun_die)
     return;
   }
   if (show_all) {
+    int first = 1;
     for (count = 0; count < n; count++) {
       if (first)
         first = 0;
@@ -861,6 +860,7 @@ FUNCTION(fun_die)
       safe_uinteger(get_random_u32(1, die), buff, bp);
     }
   } else {
+    unsigned int total = 0;
     for (count = 0; count < n; count++)
       total += get_random_u32(1, die);
 
@@ -1186,7 +1186,8 @@ sound_hash(const char *str, int len, enum sound_hash_type type)
 {
   sqlite3 *sqldb = get_shared_db();
   sqlite3_stmt *hasher;
-  char *utf8, *result = NULL;
+  const char *utf8;
+  char *result = NULL;
   int ulen;
   int status;
 
@@ -1335,7 +1336,7 @@ FUNCTION(fun_scan)
 {
   dbref thing = executor;
   char *cmdptr = args[0];
-  char *prefstr, *thispref;
+  char *prefstr;
   int scan_type = 0;
 
   if (nargs > 1) {
@@ -1357,6 +1358,7 @@ FUNCTION(fun_scan)
 
   if (nargs == 3 && arglens[2]) {
     prefstr = trim_space_sep(args[2], ' ');
+    const char *thispref;
     while ((thispref = split_token(&prefstr, ' '))) {
       if (strcasecmp("room", thispref) == 0)
         scan_type |= CHECK_HERE | CHECK_NEIGHBORS;
