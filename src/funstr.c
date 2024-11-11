@@ -45,11 +45,11 @@
 #endif
 
 #define MAX_COLS 32 /**< Maximum number of columns for align() */
-static int wraplen(char *str, size_t maxlen);
+static int wraplen(const char *str, size_t maxlen);
 static int align_one_line(char *buff, char **bp, int ncols, int cols[MAX_COLS],
                           int calign[MAX_COLS], char *ptrs[MAX_COLS],
                           ansi_string *as[MAX_COLS], ansi_data adata[MAX_COLS],
-                          int linenum, char *fieldsep, int fslen, char *linesep,
+                          int linenum, const char *fieldsep, int fslen, const char *linesep,
                           int lslen, char filler);
 static int comp_gencomp(dbref executor, char *left, char *right,
                         const char *type);
@@ -509,7 +509,7 @@ FUNCTION(fun_comp)
 /* ARGSUSED */
 FUNCTION(fun_pos)
 {
-  char *pos;
+  const char *pos;
 
   pos = strstr(args[1], args[0]);
   if (pos)
@@ -540,24 +540,23 @@ FUNCTION(fun_lpos)
 /* ARGSUSED */
 FUNCTION(fun_strmatch)
 {
-  char *ret[36];
-  int matches;
-  int i;
   char *qregs[NUMQ];
-  int nqregs;
-  char match_space[BUFFER_LEN * 2];
-  ssize_t match_space_len = BUFFER_LEN * 2;
+  int matches;
 
   /* matches a wildcard pattern for an _entire_ string */
 
   if (nargs > 2) {
+    char match_space[BUFFER_LEN * 2];
+    ssize_t match_space_len = BUFFER_LEN * 2;
+    char *ret[36];
     matches = wild_match_case_r(args[1], args[0], 0, ret, NUMQ, match_space,
                                 match_space_len, NULL, 0);
     safe_boolean(matches, buff, bp);
 
     if (matches) {
       /* Now, assign the captures, if we have returns. */
-      nqregs = list2arr(qregs, NUMQ, args[2], ' ', 0);
+      int nqregs = list2arr(qregs, NUMQ, args[2], ' ', 0);
+      int i;
 
       for (i = 0; i < nqregs; i++) {
         if (ValidQregName(qregs[i])) {
@@ -696,7 +695,7 @@ FUNCTION(fun_tr)
     }
     /* Tack it onto the string */
     /* Do we have a range? */
-    if (*(c + 1) && *(c + 1) == '-' && *(c + 2)) {
+    if (*(c + 1) == '-' && *(c + 2)) {
       dest = *(c + 2);
       if (!goodchr(dest)) {
         safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
@@ -734,7 +733,7 @@ FUNCTION(fun_tr)
     }
     /* Tack it onto the string */
     /* Do we have a range? */
-    if (*(c + 1) && *(c + 1) == '-' && *(c + 2)) {
+    if (*(c + 1) == '-' && *(c + 2)) {
       dest = *(c + 2);
       if (!goodchr(dest)) {
         safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
@@ -865,7 +864,8 @@ FUNCTION(fun_repeat)
   while (times) {
     if (times & 1) {
       if (safe_strl(args[0], arglens[0], buff, bp)) {
-        char *ts, *te;
+        char *ts;
+        const char *te;
         ts = strrchr(buff, TAG_START);
         te = strrchr(buff, TAG_END);
         if (ts && te && ts > te) {
@@ -877,7 +877,8 @@ FUNCTION(fun_repeat)
     }
     times = times >> 1;
     if (safe_str(args[0], args[0], &ap)) {
-      char *ts, *te;
+      char *ts;
+      const char *te;
       *ap = '\0';
       ts = strrchr(args[0], TAG_START);
       te = strrchr(args[0], TAG_END);
@@ -1133,7 +1134,7 @@ FUNCTION(fun_foreach)
   PE_REGS *pe_regs;
   int placenr = 0;
   int funccount;
-  char *oldbp;
+  const char *oldbp;
   char start, end;
   char result[BUFFER_LEN];
   char placestr[10];
@@ -1261,7 +1262,6 @@ FUNCTION(fun_trim)
   int trim_style_arg, trim_char_arg;
   ansi_string *as;
   int s, e;
-  char *delims;
   char totrim[0x100] = {'\0'};
 
   /* Alas, PennMUSH and TinyMUSH used different orders for the arguments.
@@ -1300,7 +1300,7 @@ FUNCTION(fun_trim)
     trim = TRIM_BOTH;
 
   if (nargs > trim_char_arg && args[trim_char_arg] && *args[trim_char_arg]) {
-    delims = args[trim_char_arg];
+    char *delims = args[trim_char_arg];
     while (*delims) {
       totrim[*delims] = 1;
       delims++;
@@ -1486,7 +1486,7 @@ FUNCTION(fun_stripaccents)
     if (converter) {
       int len;
       int status;
-      char *utf8;
+      const char *utf8;
 
       utf8 = latin1_to_utf8(args[0], arglens[0], &len, "string");
       sqlite3_bind_text(converter, 1, utf8, len, free_string);
@@ -1518,7 +1518,7 @@ FUNCTION(fun_stripaccents)
 FUNCTION(fun_edit)
 {
   int i, j;
-  char *needle;
+  const char *needle;
   size_t nlen;
   char *search, *ptr;
   ansi_string *orig, *repl;
@@ -1598,7 +1598,7 @@ FUNCTION(fun_brackets)
  * or else the last space, or else -1.
  */
 static int
-wraplen(char *str, size_t maxlen)
+wraplen(const char *str, size_t maxlen)
 {
   size_t i, last = -1;
 
@@ -1729,7 +1729,7 @@ static int
 align_one_line(char *buff, char **bp, int ncols, int cols[MAX_COLS],
                int calign[MAX_COLS], char *ptrs[MAX_COLS],
                ansi_string *as[MAX_COLS], ansi_data adata[MAX_COLS],
-               int linenum, char *fieldsep, int fslen, char *linesep, int lslen,
+               int linenum, const char *fieldsep, int fslen, const char *linesep, int lslen,
                char filler)
 {
   static char line[BUFFER_LEN];
@@ -1975,7 +1975,7 @@ FUNCTION(fun_align)
   static ansi_string *as[MAX_COLS];
   static ansi_data adata[MAX_COLS];
   static char *ptrs[MAX_COLS];
-  char *ansistr;
+  const char *ansistr;
   char filler;
   char *fieldsep;
   int fslen;
@@ -2176,9 +2176,10 @@ FUNCTION(fun_speak)
   ufun_attrib transufun;
   ufun_attrib nullufun;
   dbref speaker = NOTHING;
-  char *speaker_str;
+  const char *speaker_str;
   const char *speaker_name;
-  char *open, *close;
+  char *open;
+  const char *close;
   char *start, *end = NULL;
   bool transform = 0, null = 0, say = 0, starting_fragment = 0;
   int funccount;
@@ -2359,7 +2360,7 @@ FUNCTION(fun_speak)
     start = strstr(end, open);
     if (start) {
       /* Copy text not being transformed. */
-      if (start && *start && (start - end > (ptrdiff_t) strlen(open)))
+      if (*start && (start - end > (ptrdiff_t) strlen(open)))
         safe_str(chopstr(end, start - end + 1), buff, bp);
       start += strlen(open);
       end = NULL;
