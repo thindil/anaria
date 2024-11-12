@@ -537,7 +537,7 @@ do_convtime_gd(const char *str, struct tm *ttm)
    * Formats of the time string are taken from the file listed in the
    * DATEMSK env variable
    */
-  struct tm *tc;
+  const struct tm *tc;
 
   tc = getdate(str);
 
@@ -692,7 +692,7 @@ FUNCTION(fun_convtime)
 /* ARGSUSED */
 FUNCTION(fun_isdaylight)
 {
-  struct tm *ltime;
+  const struct tm *ltime;
   time_t when = mudtime;
 
   if (nargs >= 1 && args[0] && *args[0]) {
