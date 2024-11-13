@@ -99,13 +99,13 @@ static PENNFILE *db_open_write(const char *);
 static int fail_commands(dbref player);
 void do_readcache(dbref player);
 int check_alias(const char *command, const char *list);
-static int list_check(dbref thing, dbref player, char type, char end, char *str,
+static int list_check(dbref thing, dbref player, char type, char end, const char *str,
                       int just_match, MQUE *queue_entry, int queue_flags);
 int alias_list_check(dbref thing, const char *command, const char *type);
 int loc_alias_check(dbref loc, const char *command, const char *type);
-void do_poor(dbref player, char *arg1);
+void do_poor(dbref player, const char *arg1);
 void do_writelog(dbref player, char *str, int ltype);
-void bind_and_queue(dbref executor, dbref enactor, char *action,
+void bind_and_queue(dbref executor, dbref enactor, const char *action,
                     const char *arg, int num, MQUE *queue_entry,
                     int queue_type);
 void do_uptime(dbref player, int mortal);
@@ -165,7 +165,7 @@ release_fd(void)
  * \param flag type of dump.
  */
 void
-do_dump(dbref player, char *num, enum dump_type flag)
+do_dump(dbref player, const char *num, enum dump_type flag)
 {
   if (Wizard(player)) {
 #ifdef ALWAYS_PARANOID
@@ -1097,7 +1097,7 @@ passwd_filter(const char *cmd)
                              re_match_flags, pass_md, re_match_ctx)) > 0) {
     /* It's a password */
     PCRE2_SIZE bufflen = BUFFER_LEN;
-    PCRE2_SIZE *ovec = pcre2_get_ovector_pointer(pass_md);
+    const PCRE2_SIZE *ovec = pcre2_get_ovector_pointer(pass_md);
     pcre2_substring_copy_bynumber(pass_md, 1, (PCRE2_UCHAR *) buff, &bufflen);
     bp = buff + bufflen;
     safe_chr(' ', buff, &bp);
@@ -1108,7 +1108,7 @@ passwd_filter(const char *cmd)
                 pcre2_match(newpass_ptn, (const PCRE2_UCHAR *) cmd, cmdlen, 0,
                             re_match_flags, newpass_md, re_match_ctx)) > 0) {
     PCRE2_SIZE bufflen = BUFFER_LEN;
-    PCRE2_SIZE *ovec = pcre2_get_ovector_pointer(newpass_md);
+    const PCRE2_SIZE *ovec = pcre2_get_ovector_pointer(newpass_md);
     pcre2_substring_copy_bynumber(newpass_md, 1, (PCRE2_UCHAR *) buff,
                                   &bufflen);
     bp = buff + bufflen;
@@ -1483,7 +1483,7 @@ check_alias(const char *command, const char *list)
  * \retval 0 no match was made.
  */
 static int
-list_check(dbref thing, dbref player, char type, char end, char *str,
+list_check(dbref thing, dbref player, char type, char end, const char *str,
            int just_match, MQUE *queue_entry, int queue_flags)
 {
   int match = 0;
@@ -1541,9 +1541,9 @@ int
 loc_alias_check(dbref loc, const char *command, const char *type)
 {
   ATTR *a;
-  char alias[BUFFER_LEN];
   a = atr_get_noparent(loc, type);
   if (a) {
+    char alias[BUFFER_LEN];
     strcpy(alias, atr_value(a));
     return (check_alias(command, alias));
   } else
@@ -1623,7 +1623,7 @@ Listener(dbref thing)
  * \param arg1 the amount of money to reset all players to.
  */
 void
-do_poor(dbref player, char *arg1)
+do_poor(dbref player, const char *arg1)
 {
   int amt = atoi(arg1);
   dbref a;
@@ -1683,7 +1683,7 @@ do_writelog(dbref player, char *str, int ltype)
  * \param queue_type QUEUE_* values
  */
 void
-bind_and_queue(dbref executor, dbref enactor, char *action, const char *arg,
+bind_and_queue(dbref executor, dbref enactor, const char *action, const char *arg,
                int num, MQUE *queue_entry, int queue_type)
 {
   char *command;
@@ -1725,7 +1725,7 @@ bind_and_queue(dbref executor, dbref enactor, char *action, const char *arg,
  * \return string of obj/attrib pairs with matching $commands.
  */
 char *
-scan_list(dbref executor, dbref looker, char *command, int flag)
+scan_list(dbref executor, dbref looker, const char *command, int flag)
 {
   static char tbuf[BUFFER_LEN];
   char *tp;
@@ -1854,7 +1854,7 @@ scan_list(dbref executor, dbref looker, char *command, int flag)
     }
   }
   *tp = '\0';
-  if (*tbuf && *tbuf == ' ')
+  if (*tbuf == ' ')
     return tbuf + 1; /* atrname comes with leading spaces */
   return tbuf;
 }
@@ -1868,7 +1868,7 @@ scan_list(dbref executor, dbref looker, char *command, int flag)
  * \param flag bitflags for where to scan.
  */
 void
-do_scan(dbref player, char *command, int flag)
+do_scan(dbref player, const char *command, int flag)
 {
   /* scan for possible matches of user-def'ed commands */
   char atrname[BUFFER_LEN];
@@ -2014,7 +2014,8 @@ void
 do_dolist(dbref executor, char *list, char *command, dbref enactor,
           unsigned int flags, MQUE *queue_entry, int queue_type)
 {
-  char *curr, *objstring;
+  const char *curr;
+  char *objstring;
   char outbuf[BUFFER_LEN];
   char *bp;
   int place;
@@ -2090,7 +2091,7 @@ linux_uptime(dbref player __attribute__((__unused__)))
 
   /* Current time */
   {
-    struct tm *t;
+    const struct tm *t;
     t = localtime(&mudtime);
     strftime(tbuf1, sizeof tbuf1, "Server uptime: %I:%M%p ", t);
     nl = tbuf1 + strlen(tbuf1);
@@ -2098,12 +2099,11 @@ linux_uptime(dbref player __attribute__((__unused__)))
   /* System uptime */
   fp = fopen("/proc/uptime", "r");
   if (fp) {
-    time_t uptime;
-    const char *fmt;
     if (fgets(line, sizeof line, fp)) {
       /* First part of this line is uptime in seconds.milliseconds. We
          only care about seconds. */
-      uptime = strtol(line, NULL, 10);
+      time_t uptime = strtol(line, NULL, 10);
+      const char *fmt;
       if (uptime > 86400)
         fmt = "up $d days, $2h:$2M,";
       else
@@ -2342,7 +2342,7 @@ void
 do_uptime(dbref player, int mortal)
 {
   char tbuf1[BUFFER_LEN];
-  struct tm *when;
+  const struct tm *when;
   ldiv_t secs;
 
   when = localtime(&globals.first_start_time);

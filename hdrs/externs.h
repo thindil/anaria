@@ -51,7 +51,7 @@ void dump_database(void);
 void NORETURN mush_panic(const char *message);
 void NORETURN mush_panicf(const char *fmt, ...)
   __attribute__((__format__(__printf__, 1, 2)));
-char *scan_list(dbref executor, dbref looker, char *command, int flag);
+char *scan_list(dbref executor, dbref looker, const char *command, int flag);
 
 #ifdef WIN32
 /* From timer.c */
@@ -236,7 +236,7 @@ int parse_chat(dbref player, char *command);
 bool fork_and_dump(int forking);
 void reserve_fd(void);
 void release_fd(void);
-void do_scan(dbref player, char *command, int flag);
+void do_scan(dbref player, const char *command, int flag);
 
 /* From look.c */
 #define LOOK_NORMAL 0      /* You typed "look" */

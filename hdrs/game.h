@@ -73,7 +73,7 @@ void do_restart_com(dbref player, const char *arg1);
 
 /* From game.c */
 enum dump_type { DUMP_NORMAL, DUMP_DEBUG, DUMP_PARANOID, DUMP_NOFORK };
-extern void do_dump(dbref player, char *num, enum dump_type flag);
+extern void do_dump(dbref player, const char *num, enum dump_type flag);
 enum shutdown_type { SHUT_NORMAL, SHUT_PANIC, SHUT_PARANOID };
 extern void do_shutdown(dbref player, enum shutdown_type panic_flag);
 extern void do_dolist(dbref executor, char *list, char *command, dbref enactor,
