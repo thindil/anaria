@@ -67,27 +67,27 @@ sqlite3 *help_db = NULL;
 static int help_init = 0;
 
 static void do_new_spitfile(dbref, const char *, sqlite3_int64, help_file *);
-static const char *string_spitfile(help_file *help_dat, char *arg1);
+static const char *string_spitfile(help_file *help_dat, const char *arg1);
 
-static bool help_entry_exists(help_file *, const char *, sqlite3_int64 *);
-static struct help_entry *help_find_entry(help_file *help_dat, const char *,
+static bool help_entry_exists(const help_file *, const char *, sqlite3_int64 *);
+static struct help_entry *help_find_entry(const help_file *help_dat, const char *,
                                           sqlite3_int64);
 static void help_free_entry(struct help_entry *);
 static char **list_matching_entries(const char *pattern, help_file *help_dat,
                                     int *len);
 static void free_entry_list(char **, int len);
 
-static const char *normalize_entry(help_file *help_dat, const char *arg1);
+static const char *normalize_entry(const help_file *help_dat, const char *arg1);
 
-static bool help_delete_entries(help_file *h);
+static bool help_delete_entries(const help_file *h);
 static bool help_populate_entries(help_file *h);
 static bool help_build_index(help_file *h);
 
 static bool is_index_entry(const char *, int *);
-static char *entries_from_offset(help_file *, int);
+static char *entries_from_offset(const help_file *, int);
 
 static bool needs_rebuild(help_file *h, sqlite3_int64 *pcurrmodts);
-static bool update_timestamp(help_file *h, sqlite3_int64 currmodts);
+static bool update_timestamp(const help_file *h, sqlite3_int64 currmodts);
 
 /** Linked list of help topic names. */
 typedef struct TLIST {
@@ -98,7 +98,7 @@ typedef struct TLIST {
 tlist *top = NULL; /**< Pointer to top of linked list of topic names */
 
 static char *
-help_search(dbref executor, help_file *h, char *_term, char *delim,
+help_search(dbref executor, const help_file *h, const char *_term, const char *delim,
             int *matches)
 {
   char results[BUFFER_LEN];
@@ -107,7 +107,7 @@ help_search(dbref executor, help_file *h, char *_term, char *delim,
   int status;
   bool first = 1;
   int count = 0;
-  char *utf8;
+  const char *utf8;
   int ulen;
 
   if (!_term || !*_term) {
@@ -133,7 +133,6 @@ help_search(dbref executor, help_file *h, char *_term, char *delim,
     status = sqlite3_step(searcher);
     if (status == SQLITE_ROW) {
       char *topic, *snippet;
-      int topiclen, snippetlen;
       count += 1;
       if (delim) {
         if (first) {
@@ -142,12 +141,12 @@ help_search(dbref executor, help_file *h, char *_term, char *delim,
           safe_str(delim, results, &rp);
         }
         topic = (char *) sqlite3_column_text(searcher, 0);
-        topiclen = sqlite3_column_bytes(searcher, 0);
+        int topiclen = sqlite3_column_bytes(searcher, 0);
         safe_strl(topic, topiclen, results, &rp);
       } else {
         topic = (char *) sqlite3_column_text(searcher, 0);
         snippet = (char *) sqlite3_column_text(searcher, 1);
-        snippetlen = sqlite3_column_bytes(searcher, 1);
+        int snippetlen = sqlite3_column_bytes(searcher, 1);
         snippet =
           utf8_to_latin1(snippet, snippetlen, NULL, 1, "help.search.results");
         notify_format(executor, "%s%s%s: %s", ANSI_HILITE, topic, ANSI_END,
@@ -171,10 +170,10 @@ help_search(dbref executor, help_file *h, char *_term, char *delim,
 }
 
 static void
-help_search_find(dbref player, help_file *h, char *arg_left)
+help_search_find(dbref player, const help_file *h, const char *arg_left)
 {
   sqlite3_stmt *finder;
-  char *pattern;
+  const char *pattern;
   int rc, len;
   bool first = 1;
   sqlite3_str *output;
@@ -533,7 +532,6 @@ build_help_file(help_file *h)
 {
   sqlite3 *sqldb = get_shared_db();
   sqlite3_int64 currmodts = 0;
-  int status;
 
   if (needs_rebuild(h, &currmodts)) {
     sqlite3_stmt *add_cat;
@@ -548,7 +546,7 @@ build_help_file(help_file *h)
       "INSERT INTO suggest_keys(cat) VALUES (upper(?)) ON CONFLICT DO NOTHING",
       "suggest.addcat");
     sqlite3_bind_text(add_cat, 1, h->command, -1, SQLITE_STATIC);
-    status = sqlite3_step(add_cat);
+    int status = sqlite3_step(add_cat);
     sqlite3_reset(add_cat);
     if (status != SQLITE_DONE) {
       do_rawlog(LT_ERR, "Unable to add %s to suggestions: %s", h->command,
@@ -675,7 +673,7 @@ add_help_file(const char *command_name, const char *filename, int admin)
 /** Remove existing entries from a help file.
  */
 static bool
-help_delete_entries(help_file *h)
+help_delete_entries(const help_file *h)
 {
   sqlite3_stmt *deleter;
   int status;
@@ -737,7 +735,7 @@ cleanup:
 }
 
 static bool
-update_timestamp(help_file *h, sqlite3_int64 currmodts)
+update_timestamp(const help_file *h, sqlite3_int64 currmodts)
 {
   sqlite3_stmt *updater;
   int status;
@@ -845,10 +843,10 @@ do_new_spitfile(dbref player, const char *the_topic, sqlite3_int64 topicid,
 }
 
 static bool
-help_entry_exists(help_file *help_dat, const char *the_topic,
+help_entry_exists(const help_file *help_dat, const char *the_topic,
                   sqlite3_int64 *topicid)
 {
-  char *name;
+  const char *name;
   sqlite3_stmt *finder;
   int status;
   char *like;
@@ -874,10 +872,9 @@ help_entry_exists(help_file *help_dat, const char *the_topic,
 }
 
 static struct help_entry *
-help_find_entry(help_file *help_dat, const char *the_topic,
+help_find_entry(const help_file *help_dat, const char *the_topic,
                 sqlite3_int64 topicid)
 {
-  char *name;
   sqlite3_stmt *finder;
   int status;
 
@@ -896,7 +893,7 @@ help_find_entry(help_file *help_dat, const char *the_topic,
                                "LIKE ?2 ESCAPE '$' ORDER BY name LIMIT 1",
                                "help.find.entry.by_name");
     like = escape_like(the_topic, '$', NULL);
-    name = sqlite3_mprintf("%s%%", like);
+    const char *name = sqlite3_mprintf("%s%%", like);
     free_string(like);
 
     sqlite3_bind_text(finder, 1, help_dat->command, -1, SQLITE_STATIC);
@@ -938,7 +935,7 @@ help_free_entry(struct help_entry *h)
 }
 
 static void
-write_topic(help_file *h, const char *body)
+write_topic(const help_file *h, const char *body)
 {
   sqlite3 *sqldb = get_shared_db();
   int64_t entryid = 0;
@@ -1197,13 +1194,13 @@ FUNCTION(fun_textentries)
 FUNCTION(fun_textsearch)
 {
   sqlite3_stmt *finder;
-  char *pattern;
+  const char *pattern;
   int len;
   int count = 0;
   char *utf8;
   const char *osep = " ";
 
-  help_file *h;
+  const help_file *h;
   h = hashfind(strupper(args[0]), &help_files);
   if (!h) {
     safe_str(T("#-1 NO SUCH FILE"), buff, bp);
@@ -1244,7 +1241,7 @@ FUNCTION(fun_textsearch)
 }
 
 static const char *
-normalize_entry(help_file *help_dat, const char *arg1)
+normalize_entry(const help_file *help_dat, const char *arg1)
 {
   static char the_topic[LINE_SIZE + 2];
 
@@ -1260,7 +1257,7 @@ normalize_entry(help_file *help_dat, const char *arg1)
 }
 
 static const char *
-string_spitfile(help_file *help_dat, char *arg1)
+string_spitfile(help_file *help_dat, const char *arg1)
 {
   struct help_entry *entry = NULL;
   char the_topic[LINE_SIZE + 2];
@@ -1290,7 +1287,7 @@ string_spitfile(help_file *help_dat, char *arg1)
 }
 
 static int
-get_help_nentries(help_file *h)
+get_help_nentries(const help_file *h)
 {
   int count = 0;
   sqlite3_stmt *total;
@@ -1318,14 +1315,14 @@ list_matching_entries(const char *pattern, help_file *help_dat, int *len)
   sqlite3_stmt *lister;
   int status;
   char *patcopy = mush_strdup(pattern, "string");
-  char *like;
+  const char *like;
   int likelen;
   int matches = 0;
 
   if (wildcard_count(patcopy, 1) >= 0) {
     /* Quick way out, use the other kind of matching */
     char the_topic[LINE_SIZE + 2];
-    struct help_entry *entry = NULL;
+    const struct help_entry *entry = NULL;
     strcpy(the_topic, normalize_entry(help_dat, patcopy));
     mush_free(patcopy, "string");
     entry = help_find_entry(help_dat, the_topic, -1);
@@ -1434,7 +1431,7 @@ help_build_index(help_file *h)
  * entries' tables), 1-indexed.
  */
 static char *
-entries_from_offset(help_file *h, int off)
+entries_from_offset(const help_file *h, int off)
 {
 
   sqlite3_stmt *indexer;
@@ -1829,7 +1826,7 @@ FUNCTION(fun_suggest)
 {
   const char *sep = " ";
   sqlite3_stmt *words;
-  char *cat8, *word8;
+  const char *cat8, *word8;
   int catlen, wordlen;
   int status;
   bool first = 1;
