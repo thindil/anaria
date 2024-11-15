@@ -277,7 +277,7 @@ hash_resize(HASHTAB *htab, int newsize, int hashseed_offset)
 bool
 hash_add(HASHTAB *htab, const char *key, void *hashdata)
 {
-  char *keycopy;
+  const char *keycopy;
   int keylen;
 
   if (hash_find(htab, key) != NULL)
@@ -330,10 +330,10 @@ hash_delete(HASHTAB *htab, const char *key)
 void
 hash_flush(HASHTAB *htab, int size)
 {
-  int i;
   struct hash_bucket *resized;
 
   if (htab->entries) {
+    int i;
     for (i = 0; i < htab->hashsize; i++) {
       if (htab->buckets[i].key) {
         hash_delete_bucket(htab, &htab->buckets[i]);
