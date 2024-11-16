@@ -76,13 +76,13 @@ void
 update_pending_info_slaves(void)
 {
   time_t now;
-  int newsock;
 
   time(&now);
 
   if (info_slave_state == INFO_SLAVE_PENDING && now > info_queue_time + 30) {
     /* rerun any pending queries that got lost */
     info_queue_time = now;
+    int newsock;
     for (newsock = 0; newsock < pending_max; newsock++)
       if (FD_ISSET(newsock, &info_pending))
         query_info_slave(newsock);
@@ -215,7 +215,7 @@ void
 query_info_slave(int fd)
 {
   struct request_dgram req;
-  struct hostname_info *hi;
+  const struct hostname_info *hi;
   char buf[BUFFER_LEN], *bp;
   ssize_t slen;
 
