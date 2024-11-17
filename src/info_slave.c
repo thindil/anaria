@@ -189,7 +189,7 @@ got_request(evutil_socket_t fd, short what __attribute__((__unused__)),
   struct request_dgram req;
   struct is_data *data;
   ssize_t len;
-  struct hostname_info *hi;
+  const struct hostname_info *hi;
 
   len = recv(fd, &req, sizeof req, 0);
   if (len != sizeof req) {
@@ -742,7 +742,7 @@ time_string(void)
 {
   static char buffer[100];
   time_t now;
-  struct tm *ltm;
+  const struct tm *ltm;
 
   now = time(NULL);
   ltm = localtime(&now);
