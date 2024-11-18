@@ -178,7 +178,7 @@ im_find(intmap *im, im_key key)
 bool
 im_exists(intmap *im, im_key key)
 {
-  patricia *node;
+  const patricia *node;
 
   if (!im->root)
     return 0;
