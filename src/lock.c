@@ -109,7 +109,7 @@ StrTree lock_names; /**< String tree of lock names */
 
 static void free_one_lock_list(lock_list *ll);
 static int delete_lock(dbref player, dbref thing, lock_type type);
-static int can_write_lock(dbref player, dbref thing, lock_list *lock);
+static int can_write_lock(dbref player, dbref thing, const lock_list *lock);
 static lock_list *getlockstruct_noparent(dbref thing, lock_type type);
 
 slab *lock_slab = NULL;
@@ -185,7 +185,7 @@ do_list_locks(dbref player, const char *arg, int lc, const char *label)
  * \return string of lock flag characters.
  */
 const char *
-lock_flags(lock_list *ll)
+lock_flags(const lock_list *ll)
 {
   return privs_to_letters(lock_privs, L_FLAGS(ll));
 }
@@ -228,7 +228,7 @@ list_lock_flags_long(char *buff, char **bp)
  * \return string of lock flag names, space-separated.
  */
 const char *
-lock_flags_long(lock_list *ll)
+lock_flags_long(const lock_list *ll)
 {
   return privs_to_string(lock_privs, L_FLAGS(ll));
 }
@@ -280,7 +280,7 @@ define_lock(lock_type name, privbits flags)
 }
 
 static int
-can_write_lock(dbref player, dbref thing, lock_list *lock)
+can_write_lock(dbref player, dbref thing, const lock_list *lock)
 {
   if (God(player))
     return 1;
@@ -433,7 +433,7 @@ get_lockproto(lock_type type)
 int
 add_lock(dbref player, dbref thing, lock_type type, boolexp key, privbits flags)
 {
-  lock_list *ll, **t;
+  lock_list *ll;
 
   if (!GoodObject(thing)) {
     return 0;
@@ -476,7 +476,7 @@ add_lock(dbref player, dbref thing, lock_type type, boolexp key, privbits flags)
         free_boolexp(key);
         return 0;
       }
-      t = &Locks(thing);
+      lock_list **t = &Locks(thing);
       while (*t && strcasecmp(L_TYPE(*t), L_TYPE(ll)) < 0)
         t = &L_NEXT(*t);
       L_NEXT(ll) = *t;
@@ -505,7 +505,7 @@ int
 add_lock_raw(dbref player, dbref thing, lock_type type, boolexp key,
              privbits flags)
 {
-  lock_list *ll, **t;
+  lock_list *ll;
   lock_type real_type = type;
 
   if (!GoodObject(thing)) {
@@ -530,7 +530,7 @@ add_lock_raw(dbref player, dbref thing, lock_type type, boolexp key,
     } else {
       ll->flags = flags;
     }
-    t = &Locks(thing);
+    lock_list **t = &Locks(thing);
     while (*t && strcasecmp(L_TYPE(*t), L_TYPE(ll)) < 0)
       t = &L_NEXT(*t);
     L_NEXT(ll) = *t;
@@ -611,7 +611,7 @@ lock_type
 check_lock_type(dbref player, dbref thing, lock_type name, bool silent)
 {
   lock_type ll;
-  char *user_name;
+  const char *user_name;
   char *colon;
 
   /* Special-case for basic locks. */
@@ -662,7 +662,6 @@ void
 do_unlock(dbref player, const char *name, lock_type type)
 {
   dbref thing;
-  lock_type real_type;
 
   /* check for '@unlock <object>/<atr>'  */
   if (strchr(name, '/')) {
@@ -670,6 +669,7 @@ do_unlock(dbref player, const char *name, lock_type type)
     return;
   }
   if ((thing = match_controlled(player, name)) != NOTHING) {
+    lock_type real_type;
     if ((real_type = check_lock_type(player, thing, type, 0)) != NULL) {
       if (getlock(thing, real_type) == TRUE_BOOLEXP) {
         if (!AreQuiet(player, thing))
@@ -886,7 +886,7 @@ fail_lock(dbref player, dbref thing, lock_type ltype, const char *def,
 bool
 lock_visual(dbref thing, lock_type ltype)
 {
-  lock_list *l = getlockstruct(thing, ltype);
+  const lock_list *l = getlockstruct(thing, ltype);
   if (l)
     return l->flags & LF_VISUAL;
   else
