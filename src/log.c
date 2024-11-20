@@ -450,7 +450,7 @@ do_rawlog_vlvl(enum log_type logtype,
                const char *fmt, va_list args)
 {
   struct log_stream *log;
-  struct tm *ttm;
+  const struct tm *ttm;
   char timebuf[48];
   char tbuf1[BUFFER_LEN + 50];
 
@@ -605,7 +605,8 @@ do_log_recall(dbref player, enum log_type type, int lines)
   dbref dummy_dbref = NOTHING;
   int dummy_type = 0, nlines = 0;
   time_t dummy_ts;
-  char *line, *p;
+  const char *line;
+  char *p;
   struct log_stream *log;
 
   if (lines <= 0)
