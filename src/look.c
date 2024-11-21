@@ -305,7 +305,6 @@ examine_helper_veiled(dbref player, dbref thing __attribute__((__unused__)),
                       void *args __attribute__((__unused__)))
 {
   char fbuf[BUFFER_LEN];
-  char *r;
 
   if (EX_PUBLIC_ATTRIBS && !strcmp(AL_NAME(atr), "DESCRIBE") &&
       !strcmp(pattern, "*"))
@@ -322,7 +321,7 @@ examine_helper_veiled(dbref player, dbref thing __attribute__((__unused__)),
       notify_format(player, T("%s%s [#%d%s]%s is veiled"), ANSI_HILITE,
                     AL_NAME(atr), Owner(AL_CREATOR(atr)), fbuf, ANSI_END);
   } else {
-    r = safe_atr_value(atr, "atrval.examine");
+    char *r = safe_atr_value(atr, "atrval.examine");
     if (GoodObject(parent))
       notify_format(player, "%s#%d/%s [#%d%s]:%s %s", ANSI_HILITE, parent,
                     AL_NAME(atr), Owner(AL_CREATOR(atr)), fbuf, ANSI_END, r);
@@ -542,7 +541,6 @@ look_description(dbref player, dbref thing, const char *def,
 {
   /* Show thing's description to player, obeying DESCFORMAT if set */
   char buff[BUFFER_LEN];
-  char fbuff[BUFFER_LEN];
   ufun_attrib ufun;
   char *bp = buff;
 
@@ -563,6 +561,7 @@ look_description(dbref player, dbref thing, const char *def,
     }
     /* We have a DESCFORMAT, evaluate it into fbuff and use it */
     /* If we have a DESCRIBE, pass the evaluated version as %0 */
+    char fbuff[BUFFER_LEN];
     call_ufun(&ufun, fbuff, player, player, pe_info, pe_regs);
     if (pe_regs)
       pe_regs_free(pe_regs);
@@ -599,7 +598,6 @@ void
 do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
 {
   dbref thing = NOTHING;
-  dbref loc;
   int nearthis = 0;
   bool outside = (key & LOOK_OUTSIDE);
   key &= ~LOOK_OUTSIDE;
@@ -613,7 +611,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
       notify(player, T("You can't see through that."));
       return;
     }
-    loc = Location(Location(player));
+    dbref loc = Location(Location(player));
 
     if (!GoodObject(loc))
       return;
@@ -719,7 +717,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
     look_room(player, thing, key, pe_info);
     return;
   } else if (!nearthis && !Long_Fingers(player) && !See_All(player)) {
-    ATTR *desc;
+    const ATTR *desc;
 
     desc = atr_get(thing, "DESCRIBE");
     if ((desc && AF_Nearby(desc)) || (!desc && !READ_REMOTE_DESC)) {
@@ -1300,7 +1298,7 @@ decompile_helper(dbref player, dbref thing __attribute__((__unused__)),
                  void *args)
 {
   struct dh_args *dh = args;
-  ATTR *ptr;
+  const ATTR *ptr;
   char *avalue;
   int avlen;
   char msg[BUFFER_LEN];
