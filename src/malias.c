@@ -75,7 +75,7 @@ static PRIV malias_priv_table[] = {
   {"Owner", 'O', ALIAS_OWNER, ALIAS_OWNER},
   {NULL, '\0', 0, 0}};
 
-static const char *get_shortprivs(struct mail_alias *m);
+static const char *get_shortprivs(const struct mail_alias *m);
 
 /***********************************************************
 ***** User-commands *****
@@ -123,7 +123,7 @@ do_malias_create(dbref player, char *alias, char *tolist)
 {
   char *head, *tail, spot;
   struct mail_alias *m;
-  char *na;
+  const char *na;
   const char *buff, *good, *scan;
   int i = 0;
   dbref target;
@@ -377,7 +377,7 @@ FUNCTION(fun_malias)
  * \param desc description to set.
  */
 void
-do_malias_desc(dbref player, char *alias, char *desc)
+do_malias_desc(dbref player, char *alias, const char *desc)
 {
   struct mail_alias *m;
 
@@ -403,7 +403,7 @@ do_malias_desc(dbref player, char *alias, char *desc)
  * \param owner name of the new owner.
  */
 void
-do_malias_chown(dbref player, char *alias, char *owner)
+do_malias_chown(dbref player, char *alias, const char *owner)
 {
   struct mail_alias *m;
   dbref no = NOTHING;
@@ -653,14 +653,13 @@ do_malias_stats(dbref player)
 void
 do_malias_nuke(dbref player)
 {
-  struct mail_alias *m;
-  int i;
-
   if (!God(player)) {
     notify(player, T("MAIL: Only god can do that!"));
     return;
   }
   if (ma_size) { /* aliases defined ? */
+    int i;
+    struct mail_alias *m;
     for (i = 0; i < ma_top; i++) {
       m = &malias[i];
       if (m->name)
@@ -686,7 +685,7 @@ do_malias_nuke(dbref player)
  * \param type if 1, setting nprivs, if 0, mprivs.
  */
 void
-do_malias_privs(dbref player, char *alias, char *privs, int type)
+do_malias_privs(dbref player, char *alias, const char *privs, int type)
 {
   struct mail_alias *m;
   int *p;
@@ -894,7 +893,7 @@ do_malias_remove(dbref player, char *alias, char *tolist)
 ***********************************************************/
 
 static const char *
-get_shortprivs(struct mail_alias *m)
+get_shortprivs(const struct mail_alias *m)
 {
   static char privs[10];
   strcpy(privs, "--  -- ");
@@ -931,7 +930,7 @@ get_shortprivs(struct mail_alias *m)
  * \retval 0 player is not a member of the malias.
  */
 int
-ismember(struct mail_alias *m, dbref player)
+ismember(const struct mail_alias *m, dbref player)
 {
   int i;
   for (i = 0; i < m->size; i++) {
@@ -1014,7 +1013,7 @@ load_malias(PENNFILE *fp)
   int i, j;
   char buffer[BUFFER_LEN];
   struct mail_alias *m;
-  char *s;
+  const char *s;
 
   ma_top = getref(fp);
 
@@ -1079,7 +1078,7 @@ void
 save_malias(PENNFILE *fp)
 {
   int i, j;
-  struct mail_alias *m;
+  const struct mail_alias *m;
 
   putref(fp, ma_top);
 

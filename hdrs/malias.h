@@ -31,15 +31,15 @@ struct mail_alias {
 
 /* From malias.c */
 struct mail_alias *get_malias(dbref player, char *alias);
-int ismember(struct mail_alias *m, dbref player);
-void do_malias_privs(dbref player, char *alias, char *privs, int typs);
+int ismember(const struct mail_alias *m, dbref player);
+void do_malias_privs(dbref player, char *alias, const char *privs, int typs);
 void do_malias_mprivs(dbref player, char *alias, char *privs);
 extern void do_malias(dbref player, char *arg1, char *arg2);
 extern void do_malias_create(dbref player, char *alias, char *tolist);
 extern void do_malias_members(dbref player, char *alias);
 extern void do_malias_list(dbref player);
-extern void do_malias_desc(dbref player, char *alias, char *desc);
-extern void do_malias_chown(dbref player, char *alias, char *owner);
+extern void do_malias_desc(dbref player, char *alias, const char *desc);
+extern void do_malias_chown(dbref player, char *alias, const char *owner);
 extern void do_malias_rename(dbref player, char *alias, char *newname);
 extern void do_malias_destroy(dbref player, char *alias);
 extern void do_malias_all(dbref player);
