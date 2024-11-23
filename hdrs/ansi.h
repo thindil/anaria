@@ -134,10 +134,10 @@ int write_raw_ansi_data(ansi_data *old, ansi_data *cur, int ansi_format,
      */
 
 int define_ansi_data(ansi_data *store, const char *str);
-int write_ansi_data(ansi_data *cur, char *buff, char **bp);
+int write_ansi_data(const ansi_data *cur, char *buff, char **bp);
 int write_ansi_close(char *buff, char **bp);
 
-void nest_ansi_data(ansi_data *old, ansi_data *cur);
+void nest_ansi_data(const ansi_data *old, ansi_data *cur);
 
 #define MARKUP_COLOR 'c'
 #define MARKUP_COLOR_STR "c"
@@ -210,7 +210,7 @@ typedef struct _ansi_string {
 
 int ansi_strcmp(const char *astr, const char *bstr);
 char *remove_markup(const char *orig, size_t *stripped_len);
-void sanitize_moniker(char *input, char *buff, char **bp);
+void sanitize_moniker(const char *input, char *buff, char **bp);
 char *skip_leading_ansi(const char *p, const char *bound);
 
 int has_markup(const char *test);
