@@ -107,7 +107,8 @@ slab *memcheck_slab = NULL;
 static MEM *
 lookup_check(const char *ref)
 {
-  MEM **links, *prev;
+  MEM **links;
+  const MEM *prev;
   int n;
 
   /* Empty list */
@@ -139,7 +140,7 @@ lookup_check(const char *ref)
       links = chk->links;
       n = chk->link_count - 1;
       prev = NULL;
-    } else if (cmp < 0) { /* Went too far, try the next lowest link */
+    } else { /* Went too far, try the next lowest link */
       n -= 1;
       prev = chk;
     }
@@ -223,12 +224,12 @@ static void
 insert_check(const char *ref)
 {
   MEM *chk, *node, *prev;
-  int n;
 
   chk = alloc_memcheck_node(ref);
 
   /* Empty list */
   if (!memcheck_head->links[0]) {
+    int n;
     for (n = 0; n < chk->link_count; n += 1)
       memcheck_head->links[n] = chk;
     return;
