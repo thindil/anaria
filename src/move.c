@@ -357,7 +357,7 @@ can_move(dbref player, const char *direction)
  * \return location dbref, or NOTHING
  */
 dbref
-find_var_dest(dbref player, dbref exit_obj, char *exit_name,
+find_var_dest(dbref player, dbref exit_obj, const char *exit_name,
               NEW_PE_INFO *pe_info)
 {
   char buff[BUFFER_LEN];
@@ -395,7 +395,7 @@ void
 do_move(dbref player, const char *direction, enum move_type type,
         NEW_PE_INFO *pe_info)
 {
-  dbref exit_m, loc, var_dest;
+  dbref loc, var_dest;
   if (!strcasecmp(direction, "home") && can_move(player, "home")) {
     /* send him home */
     /* but steal all his possessions */
@@ -428,7 +428,7 @@ do_move(dbref player, const char *direction, enum move_type type,
       else if (type == MOVE_ZONE)
         matchtype |= MAT_REMOTES;
     }
-    exit_m = match_result(player, direction, TYPE_EXIT, matchtype);
+    dbref exit_m = match_result(player, direction, TYPE_EXIT, matchtype);
     switch (exit_m) {
     case NOTHING:
       /* try to force the object */
@@ -1050,12 +1050,11 @@ move_wrapper(dbref player, const char *command, NEW_PE_INFO *pe_info)
 void
 do_follow(dbref player, const char *arg, NEW_PE_INFO *pe_info)
 {
-  dbref leader;
   if (!Mobile(player))
     return;
   if (arg && *arg) {
     /* Who do we want to follow? */
-    leader = match_result(player, arg, NOTYPE, MAT_NEARBY);
+    dbref leader = match_result(player, arg, NOTYPE, MAT_NEARBY);
     if (leader == AMBIGUOUS) {
       notify(player, T("I can't tell which one to follow."));
       return;
@@ -1107,10 +1106,9 @@ do_follow(dbref player, const char *arg, NEW_PE_INFO *pe_info)
 void
 do_unfollow(dbref player, const char *arg)
 {
-  dbref leader;
   if (arg && *arg) {
     /* Who do we want to stop following? */
-    leader = match_result(player, arg, NOTYPE, MAT_OBJECTS);
+    dbref leader = match_result(player, arg, NOTYPE, MAT_OBJECTS);
     if (leader == AMBIGUOUS) {
       notify(player, T("I can't tell which one to stop following."));
       return;
@@ -1145,10 +1143,9 @@ do_unfollow(dbref player, const char *arg)
 void
 do_dismiss(dbref player, const char *arg)
 {
-  dbref follower;
   if (arg && *arg) {
     /* Who do we want to stop leading? */
-    follower = match_result(player, arg, NOTYPE, MAT_OBJECTS);
+    dbref follower = match_result(player, arg, NOTYPE, MAT_OBJECTS);
     if (!GoodObject(follower)) {
       notify(player, T("I don't recognize who you want to dismiss."));
       return;
@@ -1179,10 +1176,9 @@ do_dismiss(dbref player, const char *arg)
 void
 do_desert(dbref player, const char *arg)
 {
-  dbref who;
   if (arg && *arg) {
     /* Who do we want to stop leading? */
-    who = match_result(player, arg, NOTYPE, MAT_OBJECTS);
+    dbref who = match_result(player, arg, NOTYPE, MAT_OBJECTS);
     if (!GoodObject(who)) {
       notify(player, T("I don't recognize who you want to desert."));
       return;
@@ -1247,10 +1243,10 @@ add_following(dbref follower, dbref leader)
 static void
 add_follow(dbref leader, dbref follower, int noisy)
 {
-  char msg[BUFFER_LEN];
   add_follower(leader, follower);
   add_following(follower, leader);
   if (noisy) {
+    char msg[BUFFER_LEN];
     snprintf(msg, sizeof msg, T("You begin following %s."),
              AName(leader, AN_SYS, NULL));
     notify_format(leader, T("%s begins following you."),
@@ -1293,12 +1289,12 @@ del_following(dbref follower, dbref leader)
 }
 
 static void
-del_follow(dbref leader, dbref follower, int noisy)
+del_follow(dbref follower, dbref leader, int noisy)
 {
-  char msg[BUFFER_LEN];
   del_follower(leader, follower);
   del_following(follower, leader);
   if (noisy) {
+    char msg[BUFFER_LEN];
     snprintf(msg, sizeof msg, T("You stop following %s."),
              AName(leader, AN_SYS, NULL));
     notify_format(leader, T("%s stops following you."),
@@ -1314,7 +1310,7 @@ list_followers(dbref player)
 {
   ATTR *a;
   char tbuf1[BUFFER_LEN];
-  char *s, *sp;
+  char *s;
   static char buff[BUFFER_LEN];
   char *bp;
   dbref who;
@@ -1326,7 +1322,7 @@ list_followers(dbref player)
   bp = buff;
   s = trim_space_sep(tbuf1, ' ');
   while (s) {
-    sp = split_token(&s, ' ');
+    const char *sp = split_token(&s, ' ');
     who = parse_dbref(sp);
     if (GoodObject(who)) {
       if (!first)
@@ -1345,7 +1341,7 @@ list_following(dbref player)
 {
   ATTR *a;
   char tbuf1[BUFFER_LEN];
-  char *s, *sp;
+  char *s;
   static char buff[BUFFER_LEN];
   char *bp;
   dbref who;
@@ -1357,7 +1353,7 @@ list_following(dbref player)
   bp = buff;
   s = trim_space_sep(tbuf1, ' ');
   while (s) {
-    sp = split_token(&s, ' ');
+    const char *sp = split_token(&s, ' ');
     who = parse_dbref(sp);
     if (GoodObject(who)) {
       if (!first)
@@ -1375,7 +1371,7 @@ static int
 is_following(dbref follower, dbref leader)
 {
   ATTR *a;
-  char *s, *sp;
+  char *s;
   char tbuf1[BUFFER_LEN];
   /* There are probably fewer dbrefs on the follower's FOLLOWING list
    * than the leader's FOLLOWERS list, so we check the former
@@ -1386,7 +1382,7 @@ is_following(dbref follower, dbref leader)
   strcpy(tbuf1, atr_value(a));
   s = trim_space_sep(tbuf1, ' ');
   while (s) {
-    sp = split_token(&s, ' ');
+    const char *sp = split_token(&s, ' ');
     if (parse_dbref(sp) == leader)
       return 1;
   }
