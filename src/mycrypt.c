@@ -199,7 +199,7 @@ check_mux_password(const char *saved, const char *password)
   char decoded[BUFFER_LEN];
   char *dp;
   char *start, *end;
-  char *algo;
+  const char *algo;
 
   start = (char *) saved;
 
@@ -314,7 +314,7 @@ char *
 password_hash(const char *key, const char *algo)
 {
   static char buff[BUFFER_LEN];
-  static char *salts =
+  static const char *salts =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   char s1, s2;
   char *bp;
