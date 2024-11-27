@@ -285,7 +285,7 @@ slab_set_opt(slab *sl, enum slab_options opt,
  * \return new page, NOT linked into the allocator's list of pages
  */
 static struct slab_page *
-slab_alloc_page(struct slab *sl)
+slab_alloc_page(const struct slab *sl)
 {
   struct slab_page *sp;
   uint8_t *page = NULL;
