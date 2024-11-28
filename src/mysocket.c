@@ -102,7 +102,7 @@ time_string(void)
 {
   static char buffer[100];
   time_t now;
-  struct tm *ltm;
+  const struct tm *ltm;
 
   now = time(NULL);
   ltm = localtime(&now);
@@ -138,7 +138,7 @@ is_blocking_err(int code)
  * \return static hostname_info structure with hostname and port.
  */
 struct hostname_info *
-hostname_convert(struct sockaddr *host, int len)
+hostname_convert(const struct sockaddr *host, int len)
 {
   static struct hostname_info hi;
   static char hostname[NI_MAXHOST];
@@ -160,7 +160,7 @@ hostname_convert(struct sockaddr *host, int len)
  * \return static hostname_info structure with ip address and port.
  */
 struct hostname_info *
-ip_convert(struct sockaddr *host, int len)
+ip_convert(const struct sockaddr *host, int len)
 {
   static struct hostname_info hi;
   static char hostname[NI_MAXHOST];
@@ -186,7 +186,7 @@ ip_convert(struct sockaddr *host, int len)
  * \return file descriptor for connected socket, or -1 for failure.
  */
 int
-make_socket_conn(const char *host, int socktype, struct sockaddr *myiterface,
+make_socket_conn(const char *host, int socktype, const struct sockaddr *myiterface,
                  socklen_t myilen, Port_t port, bool nonb)
 {
   struct addrinfo hints, *server, *save;
@@ -278,7 +278,8 @@ make_socket(Port_t port, int socktype, union sockaddr_u *addr, socklen_t *len,
    * Unix Network Programming, vol 1.  If getaddrinfo() isn't
    * present on the system, we'll use our own version, also from UNPv1. */
   struct addrinfo *server, *save, hints;
-  char portbuf[NI_MAXSERV], *cport;
+  char portbuf[NI_MAXSERV];
+  const char *cport;
   int res;
 
   memset(&hints, 0, sizeof(struct addrinfo));
@@ -469,7 +470,7 @@ connect_unix_socket(const char *filename, int socktype)
  * \return number of bytes written or -1 on failure.
  */
 ssize_t
-send_with_creds(int s, void *buf, size_t len)
+send_with_creds(int s, const void *buf, size_t len)
 {
   ssize_t slen;
 /* Linux and OS X can get credentials on the receiving end via a

@@ -58,21 +58,21 @@ union sockaddr_u {
 /* What htons expects. Is this even used anymore? */
 typedef unsigned short Port_t;
 
-struct hostname_info *hostname_convert(struct sockaddr *host, int len);
-struct hostname_info *ip_convert(struct sockaddr *host, int len);
+struct hostname_info *hostname_convert(const struct sockaddr *host, int len);
+struct hostname_info *ip_convert(const struct sockaddr *host, int len);
 
 /* Open a socket for listening */
 int make_socket(Port_t port, int socktype, union sockaddr_u *addr,
                 socklen_t *len, const char *host);
 /* Connect somewhere using TCP */
 int make_socket_conn(const char *host, int socktype,
-                     struct sockaddr *myiterface, socklen_t myilen, Port_t port,
+                     const struct sockaddr *myiterface, socklen_t myilen, Port_t port,
                      bool nonb);
 
 int make_unix_socket(const char *filename, int socktype);
 int connect_unix_socket(const char *filename, int socktype);
 
-ssize_t send_with_creds(int, void *, size_t);
+ssize_t send_with_creds(int, const void *, size_t);
 ssize_t recv_with_creds(int, void *, size_t, int *, int *);
 
 void make_nonblocking(int s);
