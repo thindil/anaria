@@ -94,7 +94,7 @@ time_string(void)
 {
   static char buffer[100];
   time_t now;
-  struct tm *ltm;
+  const struct tm *ltm;
 
   now = time(NULL);
   ltm = localtime(&now);
@@ -412,7 +412,8 @@ get_dh2048(void)
   DH *dh = NULL;
 
 #ifdef HAVE_DH_SET0_PQG
-  BIGNUM *p, *g;
+  BIGNUM *p;
+  const BIGNUM *g;
   p = BN_bin2bn(dh2048_p, sizeof(dh2048_p), NULL);
   if (!p) {
     lock_file(stderr);
@@ -606,7 +607,6 @@ ssl_accept(SSL *ssl)
   int ret;
   int state = 0;
   X509 *peer;
-  char buf[256];
 
   if ((ret = SSL_accept(ssl)) <= 0) {
     switch (SSL_get_error(ssl, ret)) {
@@ -634,6 +634,7 @@ ssl_accept(SSL *ssl)
     if ((peer = SSL_get_peer_certificate(ssl))) {
       if (SSL_get_verify_result(ssl) == X509_V_OK) {
         /* The client sent a certificate which verified OK */
+        char buf[256];
         X509_NAME_oneline(X509_get_subject_name(peer), buf, 256);
         lock_file(stderr);
         fprintf(stderr, "%s SSL client certificate accepted: %s", time_string(),
@@ -709,11 +710,10 @@ int
 ssl_write(SSL *ssl, int state, int net_read_ready, int net_write_ready,
           const char *buf, int bufsize, int *offset)
 {
-  int r;
   if ((net_write_ready && bufsize) ||
       (net_read_ready && !(state & MYSSL_WBOR))) {
     state &= ~(MYSSL_WBOR | MYSSL_WB);
-    r = SSL_write(ssl, buf + *offset, bufsize);
+    int r = SSL_write(ssl, buf + *offset, bufsize);
     switch (SSL_get_error(ssl, r)) {
     case SSL_ERROR_NONE:
       /* We wrote something, but maybe not all */
