@@ -124,7 +124,7 @@ int process_output(DESC *d);
 void init_text_queue(struct text_queue *q);
 
 static int str_type(const char *str);
-int notify_type(DESC *d);
+int notify_type(const DESC *d);
 static int output_ansichange(ansi_data *states, int *ansi_ptr, int ansi_format,
                              const char **ptr, char *buff, char **bp);
 
@@ -399,7 +399,7 @@ str_type(const char *str)
  * \return bitwise MSG_* flags giving the type of message to send
  */
 int
-notify_type(DESC *d)
+notify_type(const DESC *d)
 {
   int type = MSG_PLAYER;
   int colorstyle;
@@ -1179,25 +1179,17 @@ notify_internal(dbref target, dbref executor, dbref speaker, dbref *skips,
 {
   int output_type = MSG_INTERNAL; /**< The way to render the message for the
                                      current target/descriptor */
-  int last_output_type = -1; /**< For players, the way the msg was rendered for
-                                the previous descriptor */
   const char *spoofstr =
     NULL;           /**< Pointer to the rendered nospoof prefix to use */
-  int spooflen = 0; /**< Length of the rendered nospoof prefix */
   const char *msgstr = NULL; /**< Pointer to the rendered message */
-  int msglen = 0;            /**< Length of the rendered message */
   const char *prefixstr = NULL;
-  int prefixlen = 0;
   static char buff[BUFFER_LEN],
     *bp; /**< Buffer used for processing the format attr */
   char *formatmsg =
     NULL; /**< Pointer to the rendered, formatted message. Must be free()d! */
   int cache = 1;  /**< Are we using a cached version of the message? */
-  int prompt = 0; /**< Show a prompt? */
   int heard = 1;  /**< After formatting, did this object hear something? */
   DESC *d;        /**< descriptor to loop through connected players */
-  int listen_lock_checked = 0,
-      listen_lock_passed = 0; /**< Has the Listen \@lock been checked/passed? */
   ATTR *a;                    /**< attr pointer, for \@listen and \@infilter */
 
   /* Check interact locks */
@@ -1267,12 +1259,12 @@ notify_internal(dbref target, dbref executor, dbref speaker, dbref *skips,
                           (UFUN_OBJECT | UFUN_REQUIRE_ATTR |
                            (format->checkprivs ? 0 : UFUN_IGNORE_PERMS)))) {
       PE_REGS *pe_regs = NULL;
-      int i;
 
       cache = 0;
       if (format->numargs ||
           (format->targetarg >= 0 && format->targetarg < MAX_STACK_ARGS)) {
         pe_regs = pe_regs_create(PE_REGS_ARG, "notify_internal");
+        int i;
         for (i = 0; i < format->numargs && i < MAX_STACK_ARGS; i++) {
           pe_regs_setenv_nocopy(pe_regs, i, format->args[i]);
         }
@@ -1299,6 +1291,10 @@ notify_internal(dbref target, dbref executor, dbref speaker, dbref *skips,
     if ((Connected(target) ||
          (USABLE(HTTP_HANDLER) && target == HTTP_HANDLER)) &&
         (heard || (flags & NA_PROMPT))) {
+      int prefixlen = 0;
+      int spooflen = 0; /**< Length of the rendered nospoof prefix */
+      int last_output_type = -1; /**< For players, the way the msg was rendered for
+                                    the previous descriptor */
       /* Send text to the player's descriptors */
       for (d = descriptor_list; d; d = d->next) {
         if (!d->connected || d->player != target)
@@ -1346,8 +1342,9 @@ notify_internal(dbref target, dbref executor, dbref speaker, dbref *skips,
           spooflen = 0;
         }
 
-        prompt = ((flags & NA_PROMPT) &&
+        int prompt = ((flags & NA_PROMPT) &&
                   (d->conn_flags & (CONN_TELNET | CONN_WEBSOCKETS)));
+        int msglen = 0;            /**< Length of the rendered message */
 
         /* No point re-rendering this string if we're outputting to an identical
          * client */
@@ -1469,6 +1466,8 @@ notify_internal(dbref target, dbref executor, dbref speaker, dbref *skips,
     if (heard && !(flags & NA_NORELAY)) {
       /* Check @listen */
       a = atr_get_noparent(target, "LISTEN");
+      int listen_lock_checked = 0,
+          listen_lock_passed = 0; /**< Has the Listen \@lock been checked/passed? */
       if (a) {
         char match_space[BUFFER_LEN * 2];
         ssize_t match_space_len = BUFFER_LEN * 2;
@@ -1649,8 +1648,10 @@ void
 notify_list(dbref speaker, dbref thing, const char *atr, const char *msg,
             int flags, dbref skip)
 {
-  char *fwdstr, *orig, *curr;
-  char tbuf1[BUFFER_LEN], *prefix = NULL;
+  char *fwdstr, *orig;
+  const char *curr;
+  char tbuf1[BUFFER_LEN];
+  const char *prefix = NULL;
   dbref fwd;
   ATTR *a;
 
@@ -1743,14 +1744,15 @@ make_text_block(const char *s, int n)
   if (!p)
     mush_panic("Out of memory");
   p->buf = mush_malloc(n, "text_block_buff");
-  if (!p->buf)
+  if (!p->buf) {
     mush_panic("Out of memory");
-
-  memcpy(p->buf, s, n);
-  p->nchars = n;
-  p->start = p->buf;
-  p->nxt = NULL;
-  return p;
+  } else {
+    memcpy(p->buf, s, n);
+    p->nchars = n;
+    p->start = p->buf;
+    p->nxt = NULL;
+    return p;
+  }
 }
 
 /** Free a text_block structure.
@@ -1873,8 +1875,8 @@ queue_write(DESC *d, const char *b, int n)
   if ((n == 2) && (b[0] == '\r') && (b[1] == '\n')) {
     return queue_eol(d);
   }
-  if (n > BUFFER_LEN)
-    n = BUFFER_LEN;
+  if (n >= BUFFER_LEN)
+    n = BUFFER_LEN - 1;
 
   memcpy(buff, b, n);
   buff[n] = '\0';
