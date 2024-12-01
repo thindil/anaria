@@ -241,7 +241,7 @@ parse_boolean(char const *str)
       return 0;
     /* Negative dbrefs are false - actually anything starting #-,
      * which will also cover our error messages. */
-    if (*clean == '#' && *(clean + 1) && (*(clean + 1) == '-'))
+    if (*clean == '#' && (*(clean + 1) == '-'))
       return 0;
     /* Non-zero numbers are true, zero is false */
     if (is_strict_number(clean))
@@ -601,7 +601,7 @@ is_integer_list(char const *str)
 
   start = (char *) str;
   do {
-    while (*start && *start == ' ')
+    while (*start == ' ')
       start++;
     if (!*start)
       return 1;
@@ -960,7 +960,7 @@ pe_regs_create_real(int pr_flags, const char *name)
 
 /* Delete the _value_ of a single val, leave its name alone */
 void
-pe_reg_val_free_val(PE_REG_VAL *val)
+pe_reg_val_free_val(const PE_REG_VAL *val)
 {
   /* Don't do anything if it's NOCOPY or if it's an integer. */
   if (val->type & (PE_REGS_INT | PE_REGS_NOCOPY))
@@ -1729,10 +1729,10 @@ pi_regs_get_ilev(NEW_PE_INFO *pe_info, int type)
 const char *
 pe_regs_intname(int num)
 {
-  static char buff[32];
   if (num < 10 && num >= 0) {
     return envid[num];
   } else {
+    static char buff[32];
     snprintf(buff, sizeof buff, "%d", num);
     return buff;
   }
@@ -1866,7 +1866,7 @@ free_pe_info(NEW_PE_INFO *pe_info)
  * \param name name of the calling function, for memory checking
  */
 NEW_PE_INFO *
-make_pe_info(char *name __attribute__((__unused__)))
+make_pe_info(const char *name __attribute__((__unused__)))
 {
   NEW_PE_INFO *pe_info;
 

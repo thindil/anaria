@@ -270,7 +270,7 @@ int process_expression(char *buff, char **bp, char const **str, dbref executor,
                        NEW_PE_INFO *pe_info);
 
 void free_pe_info(NEW_PE_INFO *pe_info);
-NEW_PE_INFO *make_pe_info(char *name);
+NEW_PE_INFO *make_pe_info(const char *name);
 NEW_PE_INFO *pe_info_from(NEW_PE_INFO *old_pe_info, int flags,
                           PE_REGS *pe_regs);
 
