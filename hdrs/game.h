@@ -111,7 +111,7 @@ extern void do_firstexit(dbref player, const char **what);
 
 /* From player.c */
 extern void do_password(dbref executor, dbref enactor, const char *old,
-                        const char *newobj, MQUE *queue_entry);
+                        const char *newobj, const MQUE *queue_entry);
 
 /* From predicat.c */
 extern void do_switch(dbref executor, char *expression, char **argv,

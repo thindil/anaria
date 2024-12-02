@@ -383,7 +383,6 @@ dbref
 email_register_player(DESC *d, const char *name, const char *email,
                       const char *host, const char *ip)
 {
-  char *p;
   char passwd[20];
   static char elems[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -430,6 +429,7 @@ email_register_player(DESC *d, const char *name, const char *email,
      * command.  If there's an @, we check whatever's after the last @
      * (since @foo.bar:user@host is a valid email).
      */
+    char *p;
     if ((p = strrchr(email, '@'))) {
       p++;
       if (!Site_Can_Register(p)) {
@@ -538,7 +538,8 @@ make_player(const char *name, const char *password, const char *host,
 {
   dbref player;
   char temp[SBUF_LEN];
-  char *flaglist, *flagname;
+  char *flaglist;
+  const char *flagname;
   char flagbuff[BUFFER_LEN];
 
   player = new_object();
@@ -605,7 +606,7 @@ make_player(const char *name, const char *password, const char *host,
  */
 void
 do_password(dbref executor, dbref enactor, const char *old, const char *newobj,
-            MQUE *queue_entry)
+            const MQUE *queue_entry)
 {
   char new_eval[BUFFER_LEN];
   if (!queue_entry->port) {
@@ -650,11 +651,9 @@ do_password(dbref executor, dbref enactor, const char *old, const char *newobj,
 void
 check_last(dbref player, const char *host, const char *ip)
 {
-  char *s;
+  const char *s;
   ATTR *a;
   ATTR *h;
-  char last_time[MAX_COMMAND_LEN / 8];
-  char last_place[MAX_COMMAND_LEN];
 
   /* compare to last connect see if player gets salary */
   s = show_time(mudtime, 0);
@@ -664,6 +663,8 @@ check_last(dbref player, const char *host, const char *ip)
   /* tell the player where he last connected from */
   if (!Guest(player)) {
     h = atr_get_noparent(player, "LASTSITE");
+    char last_place[MAX_COMMAND_LEN];
+    char last_time[MAX_COMMAND_LEN / 8];
     if (h && a) {
       strcpy(last_place, atr_value(h));
       strcpy(last_time, atr_value(a));
