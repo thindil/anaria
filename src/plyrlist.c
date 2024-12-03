@@ -70,7 +70,7 @@ add_player_name(sqlite3 *sqldb, const char *name, dbref player)
 {
   sqlite3_stmt *adder;
   int ulen;
-  char *utf8;
+  const char *utf8;
   int status;
 
   init_hft();
@@ -136,7 +136,7 @@ add_player_alias(dbref player, const char *alias, bool intransaction)
   s = trim_space_sep(tbuf1, ALIAS_DELIMITER);
   while (s) {
     sp = split_token(&s, ALIAS_DELIMITER);
-    while (sp && *sp && *sp == ' ')
+    while (sp && *sp == ' ')
       sp++;
     if (sp && *sp) {
       add_player_name(sqldb, sp, player);
@@ -162,12 +162,10 @@ add_player_alias(dbref player, const char *alias, bool intransaction)
 dbref
 lookup_player(const char *name)
 {
-  dbref d;
-
   if (!name || !*name)
     return NOTHING;
   if (*name == NUMBER_TOKEN) {
-    d = parse_objid(name);
+    dbref d = parse_objid(name);
     if (GoodObject(d) && IsPlayer(d))
       return d;
     else
@@ -187,7 +185,7 @@ lookup_player_name(const char *name)
 {
   sqlite3_stmt *looker;
   dbref d = NOTHING;
-  char *utf8;
+  const char *utf8;
   int ulen;
   int status;
   sqlite3 *sqldb = get_shared_db();
