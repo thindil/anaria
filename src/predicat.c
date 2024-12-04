@@ -88,8 +88,6 @@ int
 charge_action(dbref thing)
 {
   ATTR *b;
-  char tbuf2[BUFFER_LEN];
-  int num;
 
   /* check if object has # of charges */
   b = atr_get_noparent(thing, "CHARGES");
@@ -97,8 +95,9 @@ charge_action(dbref thing)
   if (!b) {
     return 1; /* no CHARGES */
   } else {
+    char tbuf2[BUFFER_LEN];
     strcpy(tbuf2, atr_value(b));
-    num = atoi(tbuf2);
+    int num = atoi(tbuf2);
     if (num > 0) {
       char tmp[100];
       /* charges left, decrement and execute */
@@ -763,14 +762,13 @@ ok_player_name(const char *name, dbref player, dbref thing)
  * \retval OPAE_TOOMANY too many aliases for player
  */
 enum opa_error
-ok_object_name(char *name, dbref player, dbref thing, int type, char **newname,
+ok_object_name(char *name, const dbref player, dbref thing, int type, char **newname,
                char **newalias)
 {
   char *bon, *eon;
   char nbuff[BUFFER_LEN], abuff[BUFFER_LEN] = {'\0'};
   char *ap = abuff;
   int aliases = 0;
-  int empty = 0;
 
   strncpy(nbuff, name, BUFFER_LEN - 1);
   nbuff[BUFFER_LEN - 1] = '\0';
@@ -819,6 +817,7 @@ ok_object_name(char *name, dbref player, dbref thing, int type, char **newname,
   *newname = mush_strdup(bon, "name.newname");
 
   if (aliases) {
+    int empty = 0;
     /* We had aliases, so parse them */
     while (eon) {
       if (empty)
@@ -827,7 +826,7 @@ ok_object_name(char *name, dbref player, dbref thing, int type, char **newname,
       if ((eon = strchr(bon, ALIAS_DELIMITER))) {
         *eon++ = '\0';
       }
-      while (*bon && *bon == ' ')
+      while (*bon == ' ')
         bon++;
       if (!*bon) {
         empty =
@@ -890,7 +889,7 @@ ok_player_alias(const char *alias, dbref player, dbref thing)
   s = trim_space_sep(tbuf1, ALIAS_DELIMITER);
   while (s) {
     sp = split_token(&s, ALIAS_DELIMITER);
-    while (sp && *sp && *sp == ' ')
+    while (sp && *sp == ' ')
       sp++;
     if (!sp || !*sp)
       return OPAE_NULL; /* No null aliases */
@@ -1078,7 +1077,7 @@ ok_tag_attribute(dbref player, const char *params)
  * \param queue_entry the queue entry \@switch is being run in
  */
 void
-do_switch(dbref executor, char *expression, char **argv, dbref enactor,
+do_switch(dbref executor, const char *expression, char **argv, dbref enactor,
           int first, int notifyme, int regexp, int queue_type,
           MQUE *queue_entry)
 {
@@ -1197,12 +1196,11 @@ page_return(dbref player, dbref target, const char *type, const char *message,
             const char *def, NEW_PE_INFO *pe_info)
 {
   char buff[BUFFER_LEN];
-  struct tm *ptr;
 
   if (message && *message) {
     if (call_attrib(target, message, buff, player, pe_info, NULL)) {
       if (*buff) {
-        ptr = (struct tm *) localtime(&mudtime);
+        struct tm *ptr = (struct tm *) localtime(&mudtime);
         notify_format(player, T("%s message from %s: %s"), type,
                       AName(target, AN_SYS, NULL), buff);
         if (!Haven(target))
@@ -1454,7 +1452,7 @@ regrep_helper(dbref player, dbref thing __attribute__((__unused__)),
               void *args)
 {
   struct regrep_data *rgd = args;
-  char *s;
+  const char *s;
   int subpatterns;
   PCRE2_SIZE search = 0;
   ansi_string *orig, *repl;
@@ -1470,7 +1468,7 @@ regrep_helper(dbref player, dbref thing __attribute__((__unused__)),
     return 0;
   }
   while (subpatterns >= 0 && !cpu_time_limit_hit) {
-    PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(rgd->md);
+    const PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(rgd->md);
     safe_str(ANSI_HILITE, rbuff, &rbp);
     ansi_pcre_copy_substring(orig, rgd->md, subpatterns, 0, 0, rbuff, &rbp);
     safe_str(ANSI_END, rbuff, &rbp);
@@ -1508,7 +1506,7 @@ regrep_helper(dbref player, dbref thing __attribute__((__unused__)),
 }
 
 int
-grep_util(dbref player, dbref thing, char *attrs, char *findstr, char *buff,
+grep_util(dbref player, dbref thing, const char *attrs, const char *findstr, char *buff,
           char **bp, int flags)
 {
   char cleanfind[BUFFER_LEN];

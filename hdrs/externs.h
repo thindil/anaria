@@ -370,7 +370,7 @@ dbref first_visible(dbref player, dbref thing);
 #define GREP_WILD 2   /**< Grep pattern is a glob pattern */
 #define GREP_REGEXP 4 /**< Grep pattern is a regexp */
 #define GREP_PARENT 8 /**< Check parent objects when grepping */
-int grep_util(dbref player, dbref thing, char *attrs, char *findstr, char *buff,
+int grep_util(dbref player, dbref thing, const char *attrs, const char *findstr, char *buff,
               char **bp, int flags);
 
 /* From rob.c */

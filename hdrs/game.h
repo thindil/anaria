@@ -114,7 +114,7 @@ extern void do_password(dbref executor, dbref enactor, const char *old,
                         const char *newobj, const MQUE *queue_entry);
 
 /* From predicat.c */
-extern void do_switch(dbref executor, char *expression, char **argv,
+extern void do_switch(dbref executor, const char *expression, char **argv,
                       dbref enactor, int first, int notifyme, int regexp,
                       int queue_type, MQUE *queue_entry);
 void do_verb(dbref executor, dbref enactor, const char *arg1, char **argv,
