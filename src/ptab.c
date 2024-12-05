@@ -19,7 +19,7 @@
 #include "notify.h"
 #include "strutil.h"
 
-static int ptab_find_exact_nun(PTAB *tab, const char *key);
+static int ptab_find_exact_nun(const PTAB *tab, const char *key);
 static int WIN32_CDECL ptab_cmp(const void *, const void *);
 
 /** A ptab entry. */
@@ -102,10 +102,9 @@ ptab_find(PTAB *tab, const char *key)
       if (cmp == 0) {
         return tab->tab[n]->data;
       } else if (cmp < 0) {
-        int m;
-        size_t i;
         /* We need to catch the first unique prefix */
         if (string_prefix(tab->tab[n]->key, key)) {
+          int m;
           for (m = (int) n - 1; m >= 0; m--) {
             if (string_prefix(tab->tab[m]->key, key)) {
               if (strcasecmp(tab->tab[m]->key, key) == 0)
@@ -113,6 +112,7 @@ ptab_find(PTAB *tab, const char *key)
             } else
               break;
           }
+          size_t i;
           /* Non-unique prefix */
           if (m != (int) n - 1)
             return NULL;
@@ -160,7 +160,7 @@ ptab_find_exact(PTAB *tab, const char *key)
 }
 
 static int
-ptab_find_exact_nun(PTAB *tab, const char *key)
+ptab_find_exact_nun(const PTAB *tab, const char *key)
 {
   size_t n;
 
