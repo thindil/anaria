@@ -721,7 +721,7 @@ CmdStatusService(void)
 {
   SERVICE_STATUS svcstatus;
   DWORD status;
-  char *p;
+  const char *p;
 
   /*
      Open the service manager and find its status
@@ -788,12 +788,12 @@ convert_error(DWORD error)
 {
 
   char *formattedmsg;
-  static char buff[100];
 
   if (!FormatMessage(
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER |
           FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, error, LANG_NEUTRAL, (LPTSTR) &formattedmsg, 0, NULL)) {
+    static char buff[100];
     snprintf(buff, sizeof buff, "<Error code: %ld>", error);
     return buff;
   } else
