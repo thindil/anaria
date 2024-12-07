@@ -608,7 +608,7 @@ do_attrib_flags(dbref player, const char *obj, const char *atrname,
  * \retval 0 failure to set.
  */
 int
-do_set(dbref player, const char *xname, char *flag)
+do_set(dbref player, const char *xname, const char *flag)
 {
   dbref thing;
   int her, listener, negate;
@@ -688,7 +688,7 @@ do_set(dbref player, const char *xname, char *flag)
  * \param noflagcopy if 1, don't copy associated flags.
  */
 void
-do_cpattr(dbref player, char *oldpair, char **newpair, int move, int noflagcopy)
+do_cpattr(dbref player, const char *oldpair, char **newpair, int move, int noflagcopy)
 {
   dbref oldobj, newobj;
   char tbuf1[BUFFER_LEN], tbuf2[BUFFER_LEN];
@@ -794,7 +794,8 @@ edit_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
 {
   int ansi_long_flag = 0;
   const char *r;
-  char *s, *val;
+  char *s;
+  const char *val;
   char tbuf1[BUFFER_LEN], tbuf_ansi[BUFFER_LEN];
   char *tbufp, *tbufap;
   size_t rlen, vlen;
@@ -877,7 +878,7 @@ edit_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
     /* find and replace */
     ansi_string *haystack;
     size_t last = 0;
-    char *p;
+    const char *p;
     int too_long = 0;
 
     haystack = parse_ansi_string(s);
@@ -960,7 +961,7 @@ edit_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
  * \param flags type of \@edit to do
  */
 void
-do_edit(dbref player, char *it, char **argv, int flags)
+do_edit(dbref player, const char *it, char **argv, int flags)
 {
   dbref thing;
   char tbuf1[BUFFER_LEN];
@@ -1022,7 +1023,7 @@ regedit_helper(dbref player, dbref thing,
                char const *pattern __attribute__((__unused__)), ATTR *a,
                void *args)
 {
-  char *s;
+  const char *s;
   char tbuf1[BUFFER_LEN], tbuf_ansi[BUFFER_LEN];
   char *tbufp, *tbufap;
   struct regedit_args *gargs;
@@ -1081,7 +1082,7 @@ regedit_helper(dbref player, dbref thing,
       }
       *tbp = '\0';
       if (pcre2_get_startchar(gargs->md) >= search) {
-        PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(gargs->md);
+        const PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(gargs->md);
         repl = parse_ansi_string(tbuf);
 
         /* Do the replacement */
@@ -1191,7 +1192,7 @@ regedit_helper(dbref player, dbref thing,
  */
 
 void
-do_edit_regexp(dbref player, char *it, char **argv, int flags,
+do_edit_regexp(dbref player, const char *it, char **argv, int flags,
                NEW_PE_INFO *pe_info)
 {
   dbref thing;
@@ -1275,7 +1276,6 @@ do_trigger(dbref executor, dbref enactor, char *object, char **argv,
   dbref thing;
   char *attrib;
   PE_REGS *pe_regs;
-  int i;
   dbref triggerer = executor; /* triggerer is totally a word. Shut up. */
   bool control;
   char *input = NULL;
@@ -1328,6 +1328,7 @@ do_trigger(dbref executor, dbref enactor, char *object, char **argv,
   if (flags & TRIGGER_MATCH) {
     input = argv[1];
   } else {
+    int i;
     for (i = 0; i < (MAX_ARG - 1); i++) {
       if (argv[i + 1]) {
         pe_regs_setenv_nocopy(pe_regs, i, argv[i + 1]);
@@ -1429,12 +1430,10 @@ do_use(dbref player, const char *what, NEW_PE_INFO *pe_info)
  * \param pe_info the pe_info to use for lock checks
  */
 void
-do_parent(dbref player, char *name, char *parent_name, NEW_PE_INFO *pe_info)
+do_parent(dbref player, const char *name, const char *parent_name, NEW_PE_INFO *pe_info)
 {
   dbref thing;
   dbref parent;
-  dbref check;
-  int i;
 
   if ((thing = noisy_match_result(player, name, NOTYPE, MAT_EVERYTHING)) ==
       NOTHING)
@@ -1471,6 +1470,8 @@ do_parent(dbref player, char *name, char *parent_name, NEW_PE_INFO *pe_info)
     return;
   }
   if (parent != NOTHING) {
+    dbref check;
+    int i;
     for (i = 0, check = Parent(parent); (i < MAX_PARENTS) && (check != NOTHING);
          i++, check = Parent(check)) {
       if (check == thing) {
@@ -1532,7 +1533,7 @@ bool in_wipe = false;
  * \param name the object/attribute-pattern to wipe.
  */
 void
-do_wipe(dbref player, char *name)
+do_wipe(dbref player, const char *name)
 {
   dbref thing;
   char *pattern;

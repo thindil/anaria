@@ -134,8 +134,8 @@ extern int do_chown(dbref player, const char *name, const char *newobj,
                     int preserve, NEW_PE_INFO *pe_info);
 extern int do_chzone(dbref player, const char *name, const char *newobj,
                      bool noisy, bool preserve, NEW_PE_INFO *pe_info);
-extern int do_set(dbref player, const char *name, char *flag);
-extern void do_cpattr(dbref player, char *oldpair, char **newpair, int move,
+extern int do_set(dbref player, const char *name, const char *flag);
+extern void do_cpattr(dbref player, const char *oldpair, char **newpair, int move,
                       int noflagcopy);
 #define EDIT_DEFAULT 0 /**< Edit all occurrences. Default. */
 #define EDIT_FIRST 1   /**< Only edit the first occurrence in each attribute. */
@@ -145,8 +145,8 @@ extern void do_cpattr(dbref player, char *oldpair, char **newpair, int move,
 #define EDIT_QUIET 4 /**< Don't show new values, just report total changes */
 #define EDIT_CASE 8  /**< Perform regexp matching case-sensitively */
 
-extern void do_edit(dbref player, char *it, char **argv, int flags);
-extern void do_edit_regexp(dbref player, char *it, char **argv, int flags,
+extern void do_edit(dbref player, const char *it, char **argv, int flags);
+extern void do_edit_regexp(dbref player, const char *it, char **argv, int flags,
                            NEW_PE_INFO *pe_info);
 #define TRIGGER_DEFAULT 0x00
 #define TRIGGER_SPOOF 0x01
@@ -158,9 +158,9 @@ extern void do_edit_regexp(dbref player, char *it, char **argv, int flags,
 extern void do_trigger(dbref executor, dbref enactor, char *object, char **argv,
                        MQUE *queue_entry, int flags);
 extern void do_use(dbref player, const char *what, NEW_PE_INFO *pe_info);
-extern void do_parent(dbref player, char *name, char *parent_name,
+extern void do_parent(dbref player, const char *name, const char *parent_name,
                       NEW_PE_INFO *pe_info);
-extern void do_wipe(dbref player, char *name);
+extern void do_wipe(dbref player, const char *name);
 
 /* From speech.c */
 extern void do_say(dbref player, const char *message, NEW_PE_INFO *pe_info);
