@@ -60,8 +60,6 @@ sigrecv_setup(void)
   signotifier_fd = fds[1];
 
 #else
-  int flags;
-
   if (pipe(fds) < 0) {
     penn_perror("sigrecv_setup: pipe");
     return;
