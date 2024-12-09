@@ -338,7 +338,7 @@ GENRECORD(gen_magic)
 
 GENRECORD(gen_dbref)
 {
-  char *val = remove_markup(rec->val, NULL);
+  const char *val = remove_markup(rec->val, NULL);
   rec->memo.num =
     (globals.database_loaded ? parse_objid(val) : qparse_dbref(val));
 }
@@ -647,7 +647,7 @@ ListTypeInfo ltypelist[] = {
 ListTypeInfo *
 get_list_type_info(SortType sort_type)
 {
-  int i, len;
+  int i;
   char *ptr = NULL;
   ListTypeInfo *lti;
 
@@ -665,7 +665,7 @@ get_list_type_info(SortType sort_type)
     for (i = 0; ltypelist[i].name; i++)
       ;
   } else if ((ptr = strchr(sort_type, ':'))) {
-    len = ptr - sort_type;
+    int len = ptr - sort_type;
     ptr += 1;
     if (!*ptr)
       ptr = NULL;
@@ -717,8 +717,8 @@ free_list_type_info(ListTypeInfo *lti)
 SortType
 get_list_type(char *args[], int nargs, int type_pos, char *ptrs[], int nptrs)
 {
-  int i, len;
-  char *str, *ptr;
+  char *str;
+  const char *ptr;
   sort_order = ASCENDING;
   if (nargs >= type_pos) {
     str = args[type_pos - 1];
@@ -728,11 +728,13 @@ get_list_type(char *args[], int nargs, int type_pos, char *ptrs[], int nptrs)
         sort_order = DESCENDING;
       }
       ptr = strchr(str, ':');
+      int len;
       if (ptr) {
         len = ptr - str;
       } else {
         len = strlen(str);
       }
+      int i;
       for (i = 0; ltypelist[i].name && strncasecmp(ltypelist[i].name, str, len);
            i++)
         ;
@@ -753,8 +755,8 @@ get_list_type(char *args[], int nargs, int type_pos, char *ptrs[], int nptrs)
 SortType
 get_list_type_noauto(char *args[], int nargs, int type_pos)
 {
-  int i, len;
-  char *str, *ptr;
+  char *str;
+  const char *ptr;
   sort_order = ASCENDING;
   if (nargs >= type_pos) {
     str = args[type_pos - 1];
@@ -764,11 +766,13 @@ get_list_type_noauto(char *args[], int nargs, int type_pos)
         sort_order = DESCENDING;
       }
       ptr = strchr(str, ':');
+      int len;
       if (ptr) {
         len = ptr - str;
       } else {
         len = strlen(str);
       }
+      int i;
       for (i = 0; ltypelist[i].name && strncasecmp(ltypelist[i].name, str, len);
            i++)
         ;
@@ -802,7 +806,7 @@ int
 gencomp(dbref player, char *a, char *b, SortType sort_type)
 {
   char *ptr;
-  int i, len;
+  int i;
   int result;
   s_rec s1, s2;
   ListTypeInfo *lti;
@@ -812,7 +816,7 @@ gencomp(dbref player, char *a, char *b, SortType sort_type)
     for (i = 0; ltypelist[i].name; i++)
       ;
   } else if ((ptr = strchr(sort_type, ':'))) {
-    len = ptr - sort_type;
+    int len = ptr - sort_type;
     ptr += 1;
     if (!*ptr)
       ptr = NULL;
@@ -953,7 +957,7 @@ slist_uniq(s_rec *sp, int n, ListTypeInfo *lti)
  * \param lti List Type Info describing how it's sorted and built.
  */
 void
-slist_free(s_rec *sp, int n, ListTypeInfo *lti)
+slist_free(s_rec *sp, int n, const ListTypeInfo *lti)
 {
   int i;
   for (i = 0; i < n; i++) {

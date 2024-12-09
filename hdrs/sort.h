@@ -68,7 +68,7 @@ s_rec *slist_build(dbref player, char *keys[], char *strs[], int n,
                    ListTypeInfo *lti);
 void slist_qsort(s_rec *sp, int n, ListTypeInfo *lti);
 int slist_uniq(s_rec *sp, int n, ListTypeInfo *lti);
-void slist_free(s_rec *sp, int n, ListTypeInfo *lti);
+void slist_free(s_rec *sp, int n, const ListTypeInfo *lti);
 int slist_comp(s_rec *s1, s_rec *s2, ListTypeInfo *lti);
 
 /** General-use sorting routines, good for most purposes. */
