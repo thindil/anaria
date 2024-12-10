@@ -223,7 +223,8 @@ void
 do_oemit_list(dbref executor, dbref speaker, char *list, const char *message,
               int flags, struct format_msg *format, NEW_PE_INFO *pe_info)
 {
-  char *temp, *p;
+  char *temp;
+  const char *p;
   const char *s;
   dbref who;
   dbref room;
@@ -355,7 +356,6 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
   const char **start;
   char sname[BUFFER_LEN];
   char pbuff[BUFFER_LEN];
-  int ignoreme __attribute__((__unused__));
 
   if (!arg1 || !*arg1) {
     notify(player, T("Whisper to whom?"));
@@ -462,6 +462,7 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
       mush_free(tbuf, "string");
       return;
     }
+    int ignoreme __attribute__((__unused__));
     ignoreme = snprintf(pbuff, BUFFER_LEN, T("%.4096s whispers%s."), sname, tbuf);
     p = pbuff;
     DOLIST (first, first) {
@@ -494,11 +495,10 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
  */
 void
 do_message(dbref executor, dbref speaker, char *list, char *attrname,
-           char *message, enum emit_type type, int flags, int numargs,
+           const char *message, enum emit_type type, int flags, int numargs,
            char *argv[], NEW_PE_INFO *pe_info)
 {
   struct format_msg format;
-  dbref thing;
   char *p;
   int i;
 
@@ -511,7 +511,7 @@ do_message(dbref executor, dbref speaker, char *list, char *attrname,
   if ((p = strchr(attrname, '/')) != NULL) {
     *p++ = '\0';
     if (*attrname && strcmp(attrname, "#-2")) {
-      thing = noisy_match_result(executor, attrname, NOTYPE, MAT_EVERYTHING);
+      dbref thing = noisy_match_result(executor, attrname, NOTYPE, MAT_EVERYTHING);
       if (thing == NOTHING)
         return;
       format.thing = thing;
@@ -821,10 +821,8 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   int repage = 0;
   int fails_lock;
   int is_haven;
-  ATTR *a;
   char alias[BUFFER_LEN], *ap;
   char msg[BUFFER_LEN];
-  int ignoreme __attribute__((__unused__));
 
   if (*arg1 && has_eq) {
     /* page to=[msg] */
@@ -852,7 +850,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   nbp = namebuf = (char *) mush_malloc(BUFFER_LEN, "page_buff");
 
   if (repage) {
-    a = atr_get_noparent(executor, "LASTPAGED");
+    ATTR *a = atr_get_noparent(executor, "LASTPAGED");
     if (!a || !*((hp = head = safe_atr_value(a, "atrval.page")))) {
       notify(executor, T("You haven't paged anyone since connecting."));
       if (hp)
@@ -1040,6 +1038,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   if ((ap = shortalias(executor)) && *ap) {
     mush_strncpy(alias, ap, sizeof alias);
     if (PAGE_ALIASES && strcasecmp(ap, Name(executor))) {
+      int ignoreme __attribute__((__unused__));
       ignoreme = snprintf(msg, BUFFER_LEN, "%s (%.4096s)",
                           AName(executor, AN_SAY, NULL), alias);
       current = msg;
@@ -1301,7 +1300,7 @@ do_remit(dbref executor, dbref speaker, char *rooms, const char *message,
 {
   if (flags & PEMIT_LIST) {
     /* @remit/list */
-    char *current;
+    const char *current;
     rooms = trim_space_sep(rooms, ' ');
     while ((current = split_token(&rooms, ' ')) != NULL)
       do_one_remit(executor, speaker, current, message, flags, format, pe_info);
@@ -1393,7 +1392,6 @@ na_zemit(dbref current, void *data)
 void
 do_zemit(dbref player, const char *target, const char *message, int flags)
 {
-  const char *where;
   dbref zone;
   dbref pass[4];
   int na_flags = NA_INTER_HEAR;
@@ -1418,7 +1416,7 @@ do_zemit(dbref player, const char *target, const char *message, int flags)
                   NULL, NOTHING, NULL);
 
   if (!(flags & PEMIT_SILENT) && pass[3] != NOTHING) {
-    where = unparse_object(player, zone, AN_SYS);
+    const char *where = unparse_object(player, zone, AN_SYS);
     notify_format(player, T("You zemit, \"%s\" in zone %s"), message, where);
   }
 }

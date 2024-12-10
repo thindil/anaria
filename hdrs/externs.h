@@ -410,7 +410,7 @@ enum msgformat_response messageformat(dbref player, const char *attribute,
                                       dbref executor, int flags, int nargs,
                                       char *argv[]);
 void do_message(dbref executor, dbref speaker, char *list, char *attrname,
-                char *message, enum emit_type type, int flags, int numargs,
+                const char *message, enum emit_type type, int flags, int numargs,
                 char *argv[], NEW_PE_INFO *pe_info);
 
 const char *spname_int(dbref thing, bool ansi);
