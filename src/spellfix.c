@@ -672,7 +672,7 @@ static void editDist3ConfigDelete(void *pIn){
 ** Return negative, zero, or positive if the A is less than, equal to,
 ** or greater than B.
 */
-static int editDist3CostCompare(EditDist3Cost *pA, EditDist3Cost *pB){
+static int editDist3CostCompare(const EditDist3Cost *pA, const EditDist3Cost *pB){
   int n = pA->nFrom;
   int rc;
   if( n>pB->nFrom ) n = pB->nFrom;
@@ -844,7 +844,7 @@ static int utf8Len(unsigned char c, int N){
 ** Return TRUE (non-zero) if the To side of the given cost matches
 ** the given string.
 */
-static int matchTo(EditDist3Cost *p, const char *z, int n){
+static int matchTo(const EditDist3Cost *p, const char *z, int n){
   assert( n>0 );
   if( p->a[p->nFrom]!=z[0] ) return 0;
   if( p->nTo>n ) return 0;
@@ -856,7 +856,7 @@ static int matchTo(EditDist3Cost *p, const char *z, int n){
 ** Return TRUE (non-zero) if the From side of the given cost matches
 ** the given string.
 */
-static int matchFrom(EditDist3Cost *p, const char *z, int n){
+static int matchFrom(const EditDist3Cost *p, const char *z, int n){
   assert( p->nFrom<=n );
   if( p->nFrom ){
     if( p->a[0]!=z[0] ) return 0;
@@ -887,8 +887,8 @@ static int matchFromTo(
 ** Delete an EditDist3FromString objecct
 */
 static void editDist3FromStringDelete(EditDist3FromString *p){
-  int i;
   if( p ){
+    int i;
     for(i=0; i<p->n; i++){
       sqlite3_free(p->a[i].apDel);
       sqlite3_free(p->a[i].apSubst);
@@ -998,7 +998,7 @@ static void updateCost(
 ** match pFrom.
 */
 static int editDist3Core(
-  EditDist3FromString *pFrom,  /* The FROM string */
+  const EditDist3FromString *pFrom,  /* The FROM string */
   const char *z2,              /* The TO string */
   int n2,                      /* Length of the TO string */
   const EditDist3Lang *pLang,  /* Edit weights for a particular language ID */
@@ -1184,10 +1184,9 @@ static void editDist3SqlFunc(
 ){
   EditDist3Config *pConfig = (EditDist3Config*)sqlite3_user_data(context);
   sqlite3 *db = sqlite3_context_db_handle(context);
-  int rc;
   if( argc==1 ){
     const char *zTable = (const char*)sqlite3_value_text(argv[0]);
-    rc = editDist3ConfigLoad(pConfig, db, zTable);
+    int rc = editDist3ConfigLoad(pConfig, db, zTable);
     if( rc ) sqlite3_result_error_code(context, rc);
   }else{
     const char *zA = (const char*)sqlite3_value_text(argv[0]);
@@ -2108,7 +2107,6 @@ static int spellfix1Init(
   const char *zTableName = argv[2];
   int nDbName;
   int rc = SQLITE_OK;
-  int i;
 
   nDbName = (int)strlen(zDbName);
   pNew = sqlite3_malloc64( sizeof(*pNew) + nDbName + 1);
@@ -2161,6 +2159,7 @@ static int spellfix1Init(
          zDbName, zTableName, zTableName
       );
     }
+    int i;
     for(i=3; rc==SQLITE_OK && i<argc; i++){
       if( strncmp(argv[i],"edit_cost_table=",16)==0 && pNew->zCostTable==0 ){
         pNew->zCostTable = spellfix1Dequote(&argv[i][16]);
@@ -2374,7 +2373,7 @@ static int spellfix1BestIndex(sqlite3_vtab *tab, sqlite3_index_info *pIdxInfo){
     pIdxInfo->estimatedCost = 5;
   }else{
     pIdxInfo->idxNum = 0;
-    pIdxInfo->estimatedCost = 1e50;
+    pIdxInfo->estimatedCost = 1e10;
   }
   return SQLITE_OK;
 }
@@ -2771,7 +2770,7 @@ static int spellfix1Next(sqlite3_vtab_cursor *cur){
 ** Return TRUE if we are at the end-of-file
 */
 static int spellfix1Eof(sqlite3_vtab_cursor *cur){
-  spellfix1_cursor *pCur = (spellfix1_cursor *)cur;
+  const spellfix1_cursor *pCur = (spellfix1_cursor *)cur;
   return pCur->iRow>=pCur->nRow;
 }
 
