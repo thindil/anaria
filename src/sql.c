@@ -287,7 +287,7 @@ sql_shutdown(void)
 }
 
 static void
-free_sql_query(void *queryp __attribute__((__unused__)))
+free_sql_query(const void *queryp __attribute__((__unused__)))
 {
   switch (sql_platform()) {
 #ifdef HAVE_MYSQL
@@ -371,7 +371,7 @@ FUNCTION(fun_sql_escape)
 #endif
   case SQL_PLATFORM_SQLITE3: {
     sqlite3_stmt *escaper;
-    char *utf8;
+    const char *utf8;
     int status, ulen;
 
     escaper =
@@ -733,7 +733,7 @@ COMMAND(cmd_sql)
           break;
         }
         if (cell && *cell) {
-          char *newcell = sql_sanitize(cell);
+          const char *newcell = sql_sanitize(cell);
           if (strchr(newcell, TAG_START) || strchr(newcell, ESC_CHAR)) {
             /* Either old or new style ANSI string. */
             tbp = tbuf;
@@ -971,7 +971,7 @@ FUNCTION(fun_sql)
   int i;
   int numfields, numrows;
   ansi_string *as;
-  char *qreg_save = NULL;
+  const char *qreg_save = NULL;
   bool free_cell = 0;
 
   if (sql_platform() == SQL_PLATFORM_DISABLED) {
