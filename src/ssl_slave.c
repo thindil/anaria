@@ -258,7 +258,7 @@ address_resolved(int result, char type, int count,
 {
   struct conn *c = data;
   struct sockaddr_un addr;
-  struct hostname_info *ipaddr;
+  const struct hostname_info *ipaddr;
 
   c->resolver_req = NULL;
 
@@ -647,7 +647,7 @@ time_string(void)
 {
   static char buffer[100];
   time_t now;
-  struct tm *ltm;
+  const struct tm *ltm;
 
   now = time(NULL);
   ltm = localtime(&now);
