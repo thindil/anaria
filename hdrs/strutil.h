@@ -111,7 +111,7 @@ int safe_str_space(const char *s, char *buff, char **bp);
 int safe_strl(const char *s, size_t len, char *buff, char **bp);
 int safe_hexchar(char c, char *buff, char **bp);
 /* Append a base16 encoded block of bytes to a buffer */
-int safe_hexstr(uint8_t *data, int len, char *buff, char **bp);
+int safe_hexstr(const uint8_t *data, int len, char *buff, char **bp);
 /** Append a boolean to the end of a string */
 #define safe_boolean(x, buf, bufp) safe_chr((x) ? '1' : '0', (buf), (bufp))
 int safe_time_t(time_t t, char *buff, char **bp);
@@ -134,13 +134,13 @@ char *replace_string2(const char *const old[2], const char *const newbits[2],
 char *copy_up_to(char *RESTRICT dest, const char *RESTRICT src, char c);
 char *trim_space_sep(char *str, char sep);
 int do_wordcount(char *str, char sep);
-char *remove_word(char *list, char *word, char sep);
+char *remove_word(char *list, const char *word, char sep);
 char *next_in_list(const char **head);
 void safe_itemizer(int cur_num, int done, const char *delim,
                    const char *conjoin, const char *space, char *buff,
                    char **bp);
 char *show_time(time_t t, bool utc);
-char *show_tm(struct tm *t);
+char *show_tm(const struct tm *t);
 
 /* Functions to work on strings holding key:value pairs or a single
  * default value  */

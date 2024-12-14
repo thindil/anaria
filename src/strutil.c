@@ -1091,7 +1091,7 @@ safe_hexchar(char c, char *buff, char **bp)
 }
 
 int
-safe_hexstr(uint8_t *bytes, int len, char *buff, char **bp)
+safe_hexstr(const uint8_t *bytes, int len, char *buff, char **bp)
 {
   int n;
 
@@ -1364,7 +1364,7 @@ next_token(char *str, char sep)
 }
 
 TEST_GROUP(next_token) {
-  char *c;
+  const char *c;
   c = next_token("  a b", ' ');
   TEST("next_token.1", c && *c == 'a');
   c = next_token("a|b", '|');
@@ -1425,7 +1425,8 @@ split_token(char **sp, char sep)
 }
 
 TEST_GROUP(split_token) {
-  char *c, *t;
+  const char *c;
+  char *t;
   char buff[BUFFER_LEN];
   t = NULL;
   c = split_token(&t, ' ');
@@ -1492,9 +1493,9 @@ TEST_GROUP(do_wordcount)
  * of word.
  */
 char *
-remove_word(char *list, char *word, char sep)
+remove_word(char *list, const char *word, char sep)
 {
-  char *sp;
+  const char *sp;
   char *bp;
   static char buff[BUFFER_LEN];
 
@@ -1522,7 +1523,7 @@ remove_word(char *list, char *word, char sep)
 TEST_GROUP(remove_word) {
   // TEST remove_word REQUIRES split_token
   char buff[BUFFER_LEN];
-  char *c;
+  const char *c;
   strcpy(buff, "adam boy charles");
   c = remove_word(buff, "boy", ' ');
   TEST("remove_word.1", strcmp(c, "adam charles") == 0);
@@ -1569,7 +1570,7 @@ next_in_list(const char **head)
 
 TEST_GROUP(next_in_list) {
   char buff[BUFFER_LEN];
-  char *c;
+  const char *c;
   const char *t;
   strcpy(buff, "adam boy charles");
   t = buff;
@@ -1957,7 +1958,7 @@ show_time(time_t t, bool utc)
  * \return a pointer to a static buffer with the stringified time.
  */
 char *
-show_tm(struct tm *when)
+show_tm(const struct tm *when)
 {
   static char buffer[BUFFER_LEN];
   int p;
@@ -2076,7 +2077,6 @@ keystr_find_full(const char *restrict map, const char *restrict key,
   int errcode;
   pcre2_match_data *md;
   int matches;
-  static char tbuf[BUFFER_LEN];
   char pattern[BUFFER_LEN], *pp;
 
   if (!strchr(map, ' ') && !strchr(map, delim))
@@ -2098,6 +2098,7 @@ keystr_find_full(const char *restrict map, const char *restrict key,
 
   if (matches == 2) {
     PCRE2_SIZE blen = BUFFER_LEN;
+    static char tbuf[BUFFER_LEN];
     pcre2_substring_copy_bynumber(md, 1, (PCRE2_UCHAR *) tbuf, &blen);
     pcre2_match_data_free(md);
     return tbuf;
