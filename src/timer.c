@@ -519,14 +519,13 @@ sq_run_one(void)
 {
   uint64_t now = now_msecs();
   struct squeue *torun;
-  bool r;
 
   if (sq_head) {
     if (sq_head->when <= now) {
       torun = sq_head;
       sq_head = torun->next;
 
-      r = torun->fun(torun->data);
+      bool r = torun->fun(torun->data);
       if (torun->event) {
         if (r)
           queue_event(SYSEVENT, torun->event, "%s", "");
