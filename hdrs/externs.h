@@ -435,7 +435,7 @@ extern const char *unparse_object(dbref player, dbref loc, int an_flag);
 #define object_header(p, l) unparse_object(p, l, AN_UNPARSE)
 const char *unparse_object_myopic(dbref player, dbref loc, int an_flag);
 const char *unparse_room(dbref player, dbref loc, NEW_PE_INFO *pe_info);
-int nameformat(dbref player, dbref loc, char *tbuf1, char *defname,
+int nameformat(dbref player, dbref loc, char *tbuf1, const char *defname,
                bool localize, NEW_PE_INFO *pe_info);
 const char *accented_name(dbref thing);
 
