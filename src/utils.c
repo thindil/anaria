@@ -143,7 +143,7 @@ fetch_ufun_attrib(const char *attrstring, dbref executor, ufun_attrib *ufun,
   char *thingname, *attrname;
   char astring[BUFFER_LEN];
   ATTR *attrib;
-  char *stripped;
+  const char *stripped;
 
   if (!ufun) {
     return 0;
@@ -349,7 +349,7 @@ call_ufun_int(ufun_attrib *ufun, char *ret, dbref caller, dbref enactor,
   }
 
   if (ufun->ufun_flags & UFUN_NAME) {
-    char *name = (char *) data;
+    const char *name = (char *) data;
     if (!name || !*name)
       name = (char *) Name(enactor);
     safe_str(name, ret, &rp);
@@ -452,12 +452,12 @@ find_entrance(dbref door)
 dbref
 remove_first(dbref first, dbref what)
 {
-  dbref prev;
   /* special case if it's the first one */
   if (first == what) {
     return Next(first);
   } else {
     /* have to find it */
+    dbref prev;
     DOLIST (prev, first) {
       if (Next(prev) == what) {
         Next(prev) = Next(what);
@@ -683,7 +683,7 @@ char *
 shortalias(dbref it)
 {
   static char n[BUFFER_LEN]; /* STATIC */
-  char *s;
+  const char *s;
 
   s = fullalias(it);
   if (!(s && *s)) {
@@ -705,11 +705,11 @@ char *
 shortname(dbref it)
 {
   static char n[BUFFER_LEN]; /* STATIC */
-  char *s;
 
   mush_strncpy(n, Name(it), BUFFER_LEN);
 
   if (IsExit(it)) {
+    char *s;
     if ((s = strchr(n, ';')))
       *s = '\0';
   }
