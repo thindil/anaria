@@ -82,7 +82,6 @@ ct_exit(dbref player, dbref i, warn_type flags)
 {
   dbref j, src, dst;
   int count = 0;
-  int lt;
   bool global_return = 0;
 
   /* i must be an exit, must be in a valid room, and must lead to a
@@ -117,7 +116,7 @@ ct_exit(dbref player, dbref i, warn_type flags)
 
   if (!Dark(i)) {
     if (flags & W_EXIT_MSGS) {
-      lt = warning_lock_type(getlock(i, Basic_Lock));
+      int lt = warning_lock_type(getlock(i, Basic_Lock));
       if ((lt & W_UNLOCKED) && (!atr_get(i, "OSUCCESS") ||
                                 !atr_get(i, "ODROP") || !atr_get(i, "SUCCESS")))
         complain(player, i, "exit-msgs",
@@ -178,8 +177,6 @@ ct_player(dbref player, dbref i, warn_type flags)
 static void
 ct_thing(dbref player, dbref i, warn_type flags)
 {
-  int lt;
-
   /* Ignore carried objects */
   if (Location(i) == player)
     return;
@@ -187,7 +184,7 @@ ct_thing(dbref player, dbref i, warn_type flags)
     complain(player, i, "thing-desc", T("thing is missing description"));
 
   if (flags & W_THING_MSGS) {
-    lt = warning_lock_type(getlock(i, Basic_Lock));
+    int lt = warning_lock_type(getlock(i, Basic_Lock));
     if ((lt & W_UNLOCKED) && (!atr_get(i, "OSUCCESS") || !atr_get(i, "ODROP") ||
                               !atr_get(i, "SUCCESS") || !atr_get(i, "DROP")))
       complain(player, i, "thing-msgs",
@@ -263,11 +260,9 @@ do_warnings(dbref player, const char *name, const char *warns)
 warn_type
 parse_warnings(dbref player, const char *warnings)
 {
-  int found = 0;
   warn_type flags, negate_flags;
   char tbuf1[BUFFER_LEN];
-  char *w, *s;
-  tcheck *c;
+  char *s;
 
   flags = W_NONE;
   negate_flags = W_NONE;
@@ -275,7 +270,9 @@ parse_warnings(dbref player, const char *warnings)
     strcpy(tbuf1, warnings);
     /* Loop through whatever's listed and add on those warnings */
     s = trim_space_sep(tbuf1, ' ');
-    w = split_token(&s, ' ');
+    char *w = split_token(&s, ' ');
+    tcheck *c;
+    int found = 0;
     while (w && *w) {
       found = 0;
       if (*w == '!') {
