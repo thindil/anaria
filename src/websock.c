@@ -216,7 +216,7 @@ process_websocket_request(DESC *d, const char *command)
 
   if (strncasecmp(command, KEY_HEADER, KEY_HEADER_LEN) == 0) {
     /* Re-using Pueblo checksum field for storing WebSockets key. */
-    char *value = skip_space(command + KEY_HEADER_LEN);
+    const char *value = skip_space(command + KEY_HEADER_LEN);
     if (value && strlen(value) == WEBSOCKET_KEY_LEN) {
       memcpy(d->checksum, value, WEBSOCKET_KEY_LEN + 1);
     }
@@ -391,7 +391,7 @@ process_websocket_frame(DESC *d, char *tbuf1, int got)
 }
 
 static char *
-write_message(char *dst, char *const dstend, const char *src,
+write_message(char *dst, const char *const dstend, const char *src,
               const char *const srcend, char channel)
 {
   size_t dstlen = dstend - dst;
@@ -543,7 +543,7 @@ to_websocket_frame(const char **bp, int *np, char channel)
 }
 
 int
-markup_websocket(char *buff, char **bp, char *data, int datalen, char *alt,
+markup_websocket(char *buff, char **bp, const char *data, int datalen, const char *alt,
                  int altlen, char channel)
 {
   char *saved = *bp;
@@ -647,7 +647,7 @@ send_websocket_object(DESC *d, const char *header, cJSON *data)
 
 static void
 do_fun_markup_websocket(char *buff, char **bp, int nargs, char *args[],
-                        int arglens[], dbref executor, char channel)
+                        const int arglens[], dbref executor, char channel)
 {
   char *arg1;
   int arglen1;
