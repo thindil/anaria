@@ -348,12 +348,9 @@ wild_match_case_r(const char *restrict s, const char *restrict d, bool cs,
 {
   int results[BUFFER_LEN * 2];
   int n;
-  int count = 0;
 
-  ansi_string *as;
-  char *buff, *maxbuff;
+  char *maxbuff;
   char *bp;
-  int curlen, spaceleft;
 
   if (wild_match_test(s, d, cs, results, BUFFER_LEN)) {
     /* Populate everything. Oi.
@@ -370,11 +367,13 @@ wild_match_case_r(const char *restrict s, const char *restrict d, bool cs,
     if (nmatches > 0 && data && len > 0) {
       /* For speed purposes, make sure we have an ansi'd string before
        * we actually use parse_ansi_string */
+      int count = 0;
       if (has_markup(d)) {
-        as = parse_ansi_string(d);
+        ansi_string *as = parse_ansi_string(d);
         bp = data;
         maxbuff = data + len - BUFFER_LEN;
-
+        
+        char *buff;
         for (n = 0; (n < BUFFER_LEN) && (results[n * 2] >= 0) && n < nmatches &&
                     bp < (data + len);
              n++) {
@@ -390,6 +389,7 @@ wild_match_case_r(const char *restrict s, const char *restrict d, bool cs,
         }
         free_ansi_string(as);
       } else {
+        int curlen, spaceleft;
         for (n = 0, curlen = 0;
              (results[n * 2] >= 0) && n < nmatches && curlen < len; n++) {
           spaceleft = len - curlen;
@@ -651,8 +651,8 @@ bool
 local_wild_match_case(const char *restrict s, const char *restrict d, bool cs,
                       PE_REGS *pe_regs)
 {
-  int mod = 0;
   if (s && *s) {
+    int mod = 0;
     switch (*s) {
     case '>':
       s++;
