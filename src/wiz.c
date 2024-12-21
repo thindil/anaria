@@ -361,7 +361,6 @@ do_teleport(dbref player, const char *what, const char *where, int flags,
 {
   dbref destination;
   const char *list;
-  char *onename;
 
   if (!strcasecmp(where, "home")) {
     destination = HOME;
@@ -379,6 +378,7 @@ do_teleport(dbref player, const char *what, const char *where, int flags,
 
   if ((flags & TEL_LIST) && what && *what) {
     list = what;
+    const char *onename;
     while (list && *list) {
       onename = next_in_list(&list);
       do_teleport_one(player, onename, destination, flags, pe_info);
@@ -1610,7 +1610,7 @@ add_link(dbref from, dbref to)
 }
 
 static sqlite3_stmt *
-find_linked(struct search_spec *spec)
+find_linked(const struct search_spec *spec)
 {
   sqlite3 *sqldb;
   sqlite3_stmt *finder;
@@ -1646,11 +1646,10 @@ find_linked(struct search_spec *spec)
 void
 do_entrances(dbref player, const char *where, char *argv[], int types)
 {
-  dbref place, obj;
+  dbref place;
   struct search_spec spec;
   int rooms, things, exits, players;
   int nresults = 0;
-  char exit_source[BUFFER_LEN];
   sqlite3_stmt *linked;
   bool prived;
 
@@ -1689,6 +1688,8 @@ do_entrances(dbref player, const char *where, char *argv[], int types)
 
   if (linked) {
     int status;
+    dbref obj;
+    char exit_source[BUFFER_LEN];
     do {
       status = sqlite3_step(linked);
       if (status == SQLITE_ROW) {
@@ -1746,7 +1747,6 @@ FUNCTION(fun_entrances)
   struct search_spec spec;
   bool n;
   int status;
-  char *p;
   sqlite3_stmt *finder;
   bool prived;
 
@@ -1772,7 +1772,7 @@ FUNCTION(fun_entrances)
   spec.entrances = where;
   spec.type = 0;
   if (nargs > 1 && args[1] && *args[1]) {
-    p = args[1];
+    char *p = args[1];
     while (*p) {
       switch (*p) {
       case 'a':
@@ -2234,9 +2234,9 @@ FUNCTION(fun_playermem)
 
   if (!strcasecmp(args[0], "me") && IsPlayer(executor))
     thing = executor;
-  else if (*args[0] && *args[0] == '*')
+  else if (*args[0] == '*')
     thing = lookup_player(args[0] + 1);
-  else if (*args[0] && *args[0] == '#')
+  else if (*args[0] == '#')
     thing = atoi(args[0] + 1);
   else
     thing = lookup_player(args[0]);
