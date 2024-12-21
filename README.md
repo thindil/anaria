@@ -10,7 +10,6 @@ identical like PennMUSH, with some changes:
 * Removed some old documentation.
 
 The list above will be updated over time. At the moment the work is focused on
-fixing various issues with PennMUSH. In the next stage, I will start to
 removing unnecessary for me options, like Pueblo, multilanguage support or web
 server support (not WebSocket support). And the next stage? We will see. :)
 
