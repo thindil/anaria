@@ -482,41 +482,41 @@ format_access(struct access *ap, int rulenum,
               dbref who __attribute__((__unused__)), char *buff, char **bp)
 {
   if (ap) {
-    safe_format(buff, bp, T("Matched line %d: %s %s"), rulenum, ap->host,
+    safe_format(buff, bp, "Matched line %d: %s %s", rulenum, ap->host,
                 (ap->can & ACS_REGEXP) ? "(regexp)" : "");
     safe_chr('\n', buff, bp);
-    safe_format(buff, bp, T("Comment: %s"), ap->comment);
+    safe_format(buff, bp, "Comment: %s", ap->comment);
     safe_chr('\n', buff, bp);
-    safe_str(T("Connections allowed by: "), buff, bp);
+    safe_str("Connections allowed by: ", buff, bp);
     if (ap->cant & ACS_CONNECT)
-      safe_str(T("No one"), buff, bp);
+      safe_str("No one", buff, bp);
     else if (ap->cant & ACS_ADMIN)
-      safe_str(T("All but admin"), buff, bp);
+      safe_str("All but admin", buff, bp);
     else if (ap->cant & ACS_WIZARD)
-      safe_str(T("All but wizards"), buff, bp);
+      safe_str("All but wizards", buff, bp);
     else if (ap->cant & ACS_GOD)
-      safe_str(T("All but God"), buff, bp);
+      safe_str("All but God", buff, bp);
     else
-      safe_str(T("All"), buff, bp);
+      safe_str("All", buff, bp);
     safe_chr('\n', buff, bp);
     if (ap->cant & ACS_GUEST)
-      safe_str(T("Guest connections are NOT allowed"), buff, bp);
+      safe_str("Guest connections are NOT allowed", buff, bp);
     else
-      safe_str(T("Guest connections are allowed"), buff, bp);
+      safe_str("Guest connections are allowed", buff, bp);
     safe_chr('\n', buff, bp);
     if (ap->cant & ACS_CREATE)
-      safe_str(T("Creation is NOT allowed"), buff, bp);
+      safe_str("Creation is NOT allowed", buff, bp);
     else
-      safe_str(T("Creation is allowed"), buff, bp);
+      safe_str("Creation is allowed", buff, bp);
     safe_chr('\n', buff, bp);
     if (ap->can & ACS_REGISTER)
-      safe_str(T("Email registration is allowed"), buff, bp);
+      safe_str("Email registration is allowed", buff, bp);
     if (ap->can & ACS_SUSPECT)
-      safe_str(T("Players connecting are set SUSPECT"), buff, bp);
+      safe_str("Players connecting are set SUSPECT", buff, bp);
     if (ap->can & ACS_DENY_SILENT)
-      safe_str(T("Denied connections are not logged"), buff, bp);
+      safe_str("Denied connections are not logged", buff, bp);
   } else {
-    safe_str(T("No matching access rule"), buff, bp);
+    safe_str("No matching access rule", buff, bp);
   }
 }
 
@@ -546,7 +546,7 @@ add_access_sitelock(dbref player, const char *host, dbref who, uint32_t can,
   tmp = sitelock_alloc(host, who, can, cant, "", &errptr);
 
   if (!tmp) {
-    notify_format(player, T("Unable to add sitelock entry: %s"), errptr);
+    notify_format(player, "Unable to add sitelock entry: %s", errptr);
     return false;
   }
 
@@ -554,7 +554,7 @@ add_access_sitelock(dbref player, const char *host, dbref who, uint32_t can,
     /* Add to the beginning, but first add a sitelock marker */
     if (!add_access_node("@sitelock", AMBIGUOUS, ACS_SITELOCK, 0, "",
                          &errptr)) {
-      notify_format(player, T("Unable to add @sitelock separator: %s"), errptr);
+      notify_format(player, "Unable to add @sitelock separator: %s", errptr);
       return 0;
     }
     access_top->next = tmp;
@@ -567,7 +567,7 @@ add_access_sitelock(dbref player, const char *host, dbref who, uint32_t can,
       /* We're at the end and there's no sitelock marker. Add one */
       if (!add_access_node("@sitelock", AMBIGUOUS, ACS_SITELOCK, 0, "",
                            &errptr)) {
-        notify_format(player, T("Unable to add @sitelock separator: %s"),
+        notify_format(player, "Unable to add @sitelock separator: %s",
                       errptr);
         return 0;
       }
@@ -675,17 +675,17 @@ do_list_access(dbref player)
         }
       }
       *bp = '\0';
-      notify_format(player, T("%3d SITE: %-20s  DBREF: %-6s FLAGS:%s"), rulenum,
+      notify_format(player, "%3d SITE: %-20s  DBREF: %-6s FLAGS:%s", rulenum,
                     ap->host, unparse_dbref(ap->who), flaglist);
-      notify_format(player, T(" COMMENT: %s"), ap->comment ? ap->comment : "");
+      notify_format(player, " COMMENT: %s", ap->comment ? ap->comment : "");
     } else {
       notify(
         player,
-        T("---- @sitelock will add sites immediately below this line ----"));
+        "---- @sitelock will add sites immediately below this line ----");
     }
   }
   if (rulenum == 0) {
-    notify(player, T("There are no access rules."));
+    notify(player, "There are no access rules.");
   }
 }
 
@@ -758,7 +758,7 @@ parse_access_options(const char *opts, dbref *who, uint32_t *can,
     /* At this point, we haven't matched any warnings. */
     if (!found) {
       if (GoodObject(player))
-        notify_format(player, T("Unknown access option: %s"), w);
+        notify_format(player, "Unknown access option: %s", w);
       else
         do_log(LT_ERR, GOD, GOD, "Unknown access flag: %s", w);
     } else {
