@@ -285,13 +285,13 @@ static void
 dummy_msgs()
 {
   char *temp;
-  temp = T("There is already a player with that name.");
-  temp = T("That name is not allowed.");
-  temp = T("The password is invalid (or missing).");
-  temp = T("Unable to register that player with that email address.");
-  temp = T("Registration successful! You will receive your password by email.");
-  temp = T("Going down - Bye");
-  temp = T("GAME: SSL connections must be dropped, sorry.");
+  temp = "There is already a player with that name.";
+  temp = "That name is not allowed.";
+  temp = "The password is invalid (or missing).";
+  temp = "Unable to register that player with that email address.";
+  temp = "Registration successful! You will receive your password by email.";
+  temp = "Going down - Bye";
+  temp = "GAME: SSL connections must be dropped, sorry.";
 }
 
 #endif
@@ -1229,10 +1229,10 @@ check_status(void)
       do_rawlog(LT_ERR, "ERROR! forking dump exited with signal %d",
                 WTERMSIG(dump_status));
       queue_event(SYSEVENT, "DUMP`ERROR", "%s,%d,SIGNAL %d",
-                  T("GAME: ERROR! Forking database save failed!"), 1,
+                  "GAME: ERROR! Forking database save failed!", 1,
                   dump_status);
       flag_broadcast("ROYALTY WIZARD", 0,
-                     T("GAME: ERROR! Forking database save failed!"));
+                     "GAME: ERROR! Forking database save failed!");
     } else if (WIFEXITED(dump_status)) {
       if (WEXITSTATUS(dump_status) == 0) {
         time(&globals.last_dump_time);
@@ -1244,10 +1244,10 @@ check_status(void)
         do_rawlog(LT_ERR, "ERROR! forking dump exited with exit code %d",
                   WEXITSTATUS(dump_status));
         queue_event(SYSEVENT, "DUMP`ERROR", "%s,%d,EXIT %d",
-                    T("GAME: ERROR! Forking database save failed!"), 1,
+                    "GAME: ERROR! Forking database save failed!", 1,
                     dump_status);
         flag_broadcast("ROYALTY WIZARD", 0,
-                       T("GAME: ERROR! Forking database save failed!"));
+                       "GAME: ERROR! Forking database save failed!");
       }
     }
     dump_error = 0;
@@ -1271,7 +1271,7 @@ check_status(void)
 #endif /* !WIN32 */
 
   if (signal_shutdown_flag) {
-    flag_broadcast(0, 0, T("GAME: Shutdown by external signal"));
+    flag_broadcast(0, 0, "GAME: Shutdown by external signal");
     do_rawlog(LT_ERR, "SHUTDOWN by external signal");
     return 0;
   }
@@ -2168,9 +2168,9 @@ fcache_load(dbref player)
 
     if (player != NOTHING) {
       notify_format(player,
-                    T("%s sizes:  Index...%d  NewUser...%d  Connect...%d  "
+                    "%s sizes:  Index...%d  NewUser...%d  Connect...%d  "
                       "Guest...%d  Motd...%d  Wizmotd...%d  Quit...%d  "
-                      "Register...%d  Down...%d  Full...%d  Who...%d"),
+                      "Register...%d  Down...%d  Full...%d  Who...%d",
                     i ? "HTMLFile" : "File", index, new, conn, guest, motd, wiz,
                     quit, reg, down, full, who);
     }
@@ -3168,7 +3168,7 @@ FUNCTION(fun_oob)
   if (nargs > 2 && arglens[2]) {
     json = cJSON_Parse(args[2]);
     if (!json) {
-      safe_str(T("#-1 INVALID JSON"), buff, bp);
+      safe_str("#-1 INVALID JSON", buff, bp);
       return;
     }
   }
@@ -4069,7 +4069,7 @@ do_http_command(DESC *d)
 
   content_len = req->rp - req->response;
 
-  queue_event(SYSEVENT, "HTTP`COMMAND", "%s,%s,%s,%s,%s,%ld,%d", d->ip,
+  queue_event(SYSEVENT, "HTTP`COMMAND", "%s,%s,%s,%s,%s,%u,%d", d->ip,
               req->method, req->path, req->code, req->ctype,
               strlen(req->inbody), content_len);
 
@@ -4360,7 +4360,7 @@ dump_messages(DESC *d, dbref player, int isnew)
     fcache_dump(d, fcache.guest_fcache, NULL, NULL);
 
   if (ModTime(player))
-    notify_format(player, T("%ld failed connections since last login."),
+    notify_format(player, "%ld failed connections since last login.",
                   (long) ModTime(player));
   ModTime(player) = (time_t) 0;
   announce_connect(d, isnew, num);    /* broadcast connect message */
@@ -4373,10 +4373,10 @@ dump_messages(DESC *d, dbref player, int isnew)
   set_player_folder(player, 0);
   do_look_around(player);
   if (Haven(player))
-    notify(player, T("Your HAVEN flag is set. You cannot receive pages."));
+    notify(player, "Your HAVEN flag is set. You cannot receive pages.");
   if (Vacation(player)) {
-    notify(player, T("Welcome back from vacation! Don't forget to unset your "
-                     "ON-VACATION flag"));
+    notify(player, "Welcome back from vacation! Don't forget to unset your "
+                     "ON-VACATION flag");
   }
   local_connect(player, isnew, num);
   return 1;
@@ -4748,7 +4748,7 @@ boot_player(dbref player, int idleonly, int silent, dbref booter)
     if (d->player == player &&
         (!ignore || (d != ignore && difftime(now, d->last_time) > 60.0))) {
       if (!idleonly && !silent && !count)
-        notify(player, T("You are politely shown to the door."));
+        notify(player, "You are politely shown to the door.");
       count++;
       boot = d;
     }
@@ -4759,9 +4759,9 @@ boot_player(dbref player, int idleonly, int silent, dbref booter)
 
   if (count && idleonly) {
     if (count == 1)
-      notify(player, T("You boot an idle self."));
+      notify(player, "You boot an idle self.");
     else
-      notify_format(player, T("You boot %d idle selves."), count);
+      notify_format(player, "You boot %d idle selves.", count);
   }
 
   return count;
@@ -4828,7 +4828,7 @@ sockset_wrapper(DESC *d, char *cmd)
     queue_eol(d);
     return;
   } else {
-    res = T("You must give an option and a value.");
+    res = "You must give an option and a value.";
     queue_newwrite(d, res, strlen(res));
     queue_eol(d);
   }
@@ -4909,15 +4909,15 @@ sockset(DESC *d, const char *name, char *val)
   int ival;
 
   if (!name || !name[0]) {
-    return T("Set what option?");
+    return "Set what option?";
   }
 
   if (!strcasecmp(name, PREFIX_COMMAND)) {
     set_userstring(&d->output_prefix, val);
     if (val && *val) {
-      return T("OUTPUTPREFIX set.");
+      return "OUTPUTPREFIX set.";
     } else {
-      return T("OUTPUTPREFIX cleared.");
+      return "OUTPUTPREFIX cleared.";
     }
     return retval;
   }
@@ -4925,9 +4925,9 @@ sockset(DESC *d, const char *name, char *val)
   if (!strcasecmp(name, SUFFIX_COMMAND)) {
     set_userstring(&d->output_suffix, val);
     if (val && *val) {
-      return T("OUTPUTSUFFIX set.");
+      return "OUTPUTSUFFIX set.";
     } else {
-      return T("OUTPUTSUFFIX cleared.");
+      return "OUTPUTSUFFIX cleared.";
     }
     return retval;
   }
@@ -4943,10 +4943,10 @@ sockset(DESC *d, const char *name, char *val)
                       d->descriptor, d->addr, d->ip);
         d->conn_flags |= CONN_HTML;
       }
-      return T("Pueblo flag set.");
+      return "Pueblo flag set.";
     } else {
       d->conn_flags &= ~CONN_HTML;
-      return T("Pueblo flag cleared.");
+      return "Pueblo flag cleared.";
     }
   }
 
@@ -4954,72 +4954,72 @@ sockset(DESC *d, const char *name, char *val)
     ival = isyes(val);
     if (ival) {
       d->conn_flags |= CONN_TELNET;
-      return T("Telnet flag set.");
+      return "Telnet flag set.";
     } else {
       d->conn_flags &= ~CONN_TELNET;
-      return T("Telnet flag cleared.");
+      return "Telnet flag cleared.";
     }
   }
 
   if (!strcasecmp(name, "WIDTH")) {
     if (!is_strict_integer(val)) {
-      return T("Width expects a positive integer.");
+      return "Width expects a positive integer.";
     }
     ival = parse_integer(val);
     if (ival < 1) {
-      return T("Width expects a positive integer.");
+      return "Width expects a positive integer.";
     }
     d->width = ival;
-    return T("Width set.");
+    return "Width set.";
   }
 
   if (!strcasecmp(name, "HEIGHT")) {
     if (!is_strict_integer(val)) {
-      return T("Height expects a positive integer.");
+      return "Height expects a positive integer.";
     }
     ival = parse_integer(val);
     if (ival < 1) {
-      return T("Height expects a positive integer.");
+      return "Height expects a positive integer.";
     }
     d->height = ival;
-    return T("Height set.");
+    return "Height set.";
   }
 
   if (!strcasecmp(name, "TERMINALTYPE")) {
     set_ttype(d, val);
-    return T("Terminal Type set.");
+    return "Terminal Type set.";
   }
 
   if (strcasecmp(name, "COLORSTYLE") == 0 ||
       strcasecmp(name, "COLOURSTYLE") == 0) {
     if (strcasecmp(val, "auto") == 0) {
       d->conn_flags &= ~CONN_COLORSTYLE;
-      snprintf(retval, sizeof retval, T("Colorstyle set to '%s'"), "auto");
+      snprintf(retval, sizeof retval, "Colorstyle set to '%s'", "auto");
       return retval;
     } else if (strcasecmp("plain", val) == 0 || strcasecmp("none", val) == 0) {
       d->conn_flags &= ~CONN_COLORSTYLE;
       d->conn_flags |= CONN_PLAIN;
-      snprintf(retval, sizeof retval, T("Colorstyle set to '%s'"), "plain");
+      snprintf(retval, sizeof retval, "Colorstyle set to '%s'", "plain");
       return retval;
     } else if (strcasecmp("hilite", val) == 0 ||
                strcasecmp("highlight", val) == 0) {
       d->conn_flags &= ~CONN_COLORSTYLE;
       d->conn_flags |= CONN_ANSI;
-      snprintf(retval, sizeof retval, T("Colorstyle set to '%s'"), "hilite");
+      snprintf(retval, sizeof retval, "Colorstyle set to '%s'", "hilite");
       return retval;
     } else if (strcasecmp("16color", val) == 0) {
       d->conn_flags &= ~CONN_COLORSTYLE;
       d->conn_flags |= CONN_ANSICOLOR;
-      snprintf(retval, sizeof retval, T("Colorstyle set to '%s'"), "16color");
+      snprintf(retval, sizeof retval, "Colorstyle set to '%s'", "16color");
       return retval;
     } else if (strcasecmp("xterm256", val) == 0 || strcmp(val, "256") == 0) {
       d->conn_flags &= ~CONN_COLORSTYLE;
       d->conn_flags |= CONN_XTERM256;
-      snprintf(retval, sizeof retval, T("Colorstyle set to '%s'"), "xterm256");
+      snprintf(retval, sizeof retval, "Colorstyle set to '%s'", "xterm256");
       return retval;
     }
     snprintf(retval, sizeof retval,
-             T("Unknown color style. Valid color styles: %s"),
+             "Unknown color style. Valid color styles: %s",
              "'auto', 'plain', 'hilite', '16color', 'xterm256'.");
     return retval;
   }
@@ -5028,10 +5028,10 @@ sockset(DESC *d, const char *name, char *val)
     ival = isyes(val);
     if (ival) {
       d->conn_flags |= CONN_PROMPT_NEWLINES;
-      return T("A newline will be sent after a prompt.");
+      return "A newline will be sent after a prompt.";
     } else {
       d->conn_flags &= ~CONN_PROMPT_NEWLINES;
-      return T("No newline will be sent after a prompt.");
+      return "No newline will be sent after a prompt.";
     }
   }
 
@@ -5039,26 +5039,26 @@ sockset(DESC *d, const char *name, char *val)
     ival = isyes(val);
     if (ival) {
       d->conn_flags |= CONN_STRIPACCENTS;
-      return T("Accents will be stripped.");
+      return "Accents will be stripped.";
     } else {
       d->conn_flags &= ~CONN_STRIPACCENTS;
-      return T("Accents will not be stripped.");
+      return "Accents will not be stripped.";
     }
   }
   if (!strcasecmp(name, "NOQUOTA")) {
     ival = isyes(val);
     if (!GoodObject(d->player) || !Wizard(d->player)) {
-      return T("Only Wizards can set this option.");
+      return "Only Wizards can set this option.";
     }
     if (ival) {
       d->conn_flags |= CONN_NOQUOTA;
-      return T("NOQUOTA turned on. Command quota is now ignored.");
+      return "NOQUOTA turned on. Command quota is now ignored.";
     } else {
       d->conn_flags &= ~CONN_NOQUOTA;
-      return T("NOQUOTA turned off. Command quota will be respected.");
+      return "NOQUOTA turned off. Command quota will be respected.";
     }
   }
-  snprintf(retval, BUFFER_LEN, T("@sockset option '%s' is not a valid option."),
+  snprintf(retval, BUFFER_LEN, "@sockset option '%s' is not a valid option.",
            name);
   return retval;
 }
@@ -5095,7 +5095,7 @@ do_pemit_port(dbref player, const char *pc, const char *message, int flags)
   char *next;
 
   if (!Hasprivs(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -5109,11 +5109,11 @@ do_pemit_port(dbref player, const char *pc, const char *message, int flags)
     port = atoi(next);
 
     if (port <= 0) {
-      notify_format(player, T("'%s' is not a port number."), next);
+      notify_format(player, "'%s' is not a port number.", next);
     } else {
       d = port_desc(port);
       if (!d) {
-        notify(player, T("That port is not active."));
+        notify(player, "That port is not active.");
       } else {
         queue_string_eol(d, "%s", message);
         total++;
@@ -5128,11 +5128,11 @@ do_pemit_port(dbref player, const char *pc, const char *message, int flags)
 
   if (!(flags & PEMIT_SILENT)) {
     if (total == 1) {
-      notify_format(player, T("You pemit \"%s\" to %s."), message,
+      notify_format(player, "You pemit \"%s\" to %s.", message,
                     (last && last->connected ? AName(last->player, AN_SYS, NULL)
-                                             : T("a connecting player")));
+                                             : "a connecting player"));
     } else {
-      notify_format(player, T("You pemit \"%s\" to %d connections."), message,
+      notify_format(player, "You pemit \"%s\" to %d connections.", message,
                     total);
     }
   }
@@ -5153,19 +5153,19 @@ do_page_port(dbref executor, const char *pc, const char *message)
   dbref target = NOTHING;
 
   if (!Hasprivs(executor)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
   p = atoi(pc);
 
   if (p <= 0) {
-    notify(executor, T("That's not a port number."));
+    notify(executor, "That's not a port number.");
     return;
   }
 
   if (!message || !*message) {
-    notify(executor, T("What do you want to page with?"));
+    notify(executor, "What do you want to page with?");
     return;
   }
 
@@ -5184,25 +5184,25 @@ do_page_port(dbref executor, const char *pc, const char *message)
 
   d = port_desc(p);
   if (!d) {
-    notify(executor, T("That port's not active."));
+    notify(executor, "That port's not active.");
     return;
   }
   if (d->connected)
     target = d->player;
   switch (key) {
   case 1:
-    safe_format(tbuf, &tbp, T("From afar, %s%s%s"), Name(executor), gap,
+    safe_format(tbuf, &tbp, "From afar, %s%s%s", Name(executor), gap,
                 message + 1);
-    notify_format(executor, T("Long distance to %s: %s%s%s"),
+    notify_format(executor, "Long distance to %s: %s%s%s",
                   target != NOTHING ? AName(target, AN_SAY, NULL)
-                                    : T("a connecting player"),
+                                    : "a connecting player",
                   AName(executor, AN_SAY, NULL), gap, message + 1);
     break;
   case 3:
-    safe_format(tbuf, &tbp, T("%s pages: %s"), Name(executor), message);
-    notify_format(executor, T("You paged %s with '%s'"),
+    safe_format(tbuf, &tbp, "%s pages: %s", Name(executor), message);
+    notify_format(executor, "You paged %s with '%s'",
                   target != NOTHING ? AName(target, AN_SAY, NULL)
-                                    : T("a connecting player"),
+                                    : "a connecting player",
                   message);
     break;
   }
@@ -5540,8 +5540,8 @@ dump_users(DESC *call_by, char *match)
     queue_newwrite(call_by, "<PRE>", 5);
   }
 
-  snprintf(tbuf, BUFFER_LEN, "%-16s %10s %6s  %s", T("Player Name"),
-           T("On For"), T("Idle"), get_poll());
+  snprintf(tbuf, BUFFER_LEN, "%-16s %10s %6s  %s", "Player Name",
+           "On For", "Idle", get_poll());
   queue_string_eol(call_by, "%s", tbuf);
 
   for (d = descriptor_list; d; d = d->next) {
@@ -5566,13 +5566,13 @@ dump_users(DESC *call_by, char *match)
   }
   switch (count) {
   case 0:
-    mush_strncpy(tbuf, T("There are no players connected."), BUFFER_LEN);
+    mush_strncpy(tbuf, "There are no players connected.", BUFFER_LEN);
     break;
   case 1:
-    mush_strncpy(tbuf, T("There is 1 player connected."), BUFFER_LEN);
+    mush_strncpy(tbuf, "There is 1 player connected.", BUFFER_LEN);
     break;
   default:
-    snprintf(tbuf, BUFFER_LEN, T("There are %d players connected."), count);
+    snprintf(tbuf, BUFFER_LEN, "There are %d players connected.", count);
     break;
   }
   queue_string_eol(call_by, "%s", tbuf);
@@ -5654,8 +5654,8 @@ do_who_mortal(dbref player, char *name)
   if (name && *name && wildcard_count(name, 0) == -1)
     wild = 1;
 
-  notify_format(player, "%-16s %10s %6s  %s", T("Player Name"), T("On For"),
-                T("Idle"), get_poll());
+  notify_format(player, "%-16s %10s %6s  %s", "Player Name", "On For",
+                "Idle", get_poll());
   for (d = descriptor_list; d; d = d->next) {
     if (!d->connected)
       continue;
@@ -5679,13 +5679,13 @@ do_who_mortal(dbref player, char *name)
   }
   switch (count) {
   case 0:
-    notify(player, T("There are no players connected."));
+    notify(player, "There are no players connected.");
     break;
   case 1:
-    notify(player, T("There is one player connected."));
+    notify(player, "There is one player connected.");
     break;
   default:
-    notify_format(player, T("There are %d players connected."), count);
+    notify_format(player, "There are %d players connected.", count);
     break;
   }
 
@@ -5720,9 +5720,9 @@ do_who_admin(dbref player, char *name)
   if (name && *name && wildcard_count(name, 0) == -1)
     wild = 1;
 
-  notify_format(player, "%-16s %6s %9s %5s %5s %-4s %-s", T("Player Name"),
-                T("Loc #"), T("On For"), T("Idle"), T("Cmds"), T("Des"),
-                T("Host"));
+  notify_format(player, "%-16s %6s %9s %5s %5s %-4s %-s", "Player Name",
+                "Loc #", "On For", "Idle", "Cmds", "Des",
+                "Host");
   for (d = descriptor_list; d; d = d->next) {
     if (d->connected)
       count++;
@@ -5761,13 +5761,13 @@ do_who_admin(dbref player, char *name)
       *tp = '\0';
     } else if (d->conn_flags & CONN_HTTP_REQUEST) {
       snprintf(tbuf, sizeof tbuf, "%-16s %6s %9s %5s %4d %3d%c %s",
-               T("HTTP Request"), "#-1", onfor_time_fmt(d->connected_at, 9),
+               "HTTP Request", "#-1", onfor_time_fmt(d->connected_at, 9),
                idle_time_fmt(d->last_time, 5), d->cmds, d->descriptor,
                is_ssl_desc(d) ? 'S' : ' ', d->addr);
       tbuf[78] = '\0';
     } else {
       snprintf(tbuf, sizeof tbuf, "%-16s %6s %9s %5s %4d %3d%c %s",
-               T("Connecting..."), "#-1", onfor_time_fmt(d->connected_at, 9),
+               "Connecting...", "#-1", onfor_time_fmt(d->connected_at, 9),
                idle_time_fmt(d->last_time, 5), d->cmds, d->descriptor,
                is_ssl_desc(d) ? 'S' : ' ', d->addr);
       tbuf[78] = '\0';
@@ -5777,13 +5777,13 @@ do_who_admin(dbref player, char *name)
 
   switch (count) {
   case 0:
-    notify(player, T("There are no players connected."));
+    notify(player, "There are no players connected.");
     break;
   case 1:
-    notify(player, T("There is one player connected."));
+    notify(player, "There is one player connected.");
     break;
   default:
-    notify_format(player, T("There are %d players connected."), count);
+    notify_format(player, "There are %d players connected.", count);
     break;
   }
 
@@ -5818,8 +5818,8 @@ do_who_session(dbref player, char *name)
     wild = 1;
 
   notify_format(player, "%-16s %6s %9s %5s %5s %4s %7s %7s %7s",
-                T("Player Name"), T("Loc #"), T("On For"), T("Idle"), T("Cmds"),
-                T("Des"), T("Sent"), T("Recv"), T("Pend"));
+                "Player Name", "Loc #", "On For", "Idle", "Cmds",
+                "Des", "Sent", "Recv", "Pend");
 
   for (d = descriptor_list; d; d = d->next) {
     if (d->connected)
@@ -5842,7 +5842,7 @@ do_who_session(dbref player, char *name)
                     d->output_size);
     } else {
       notify_format(player, "%-16s %6s %9s %5s %5d %3d%c %7lu %7lu %7d",
-                    T("Connecting..."), "#-1",
+                    "Connecting...", "#-1",
                     onfor_time_fmt(d->connected_at, 9),
                     idle_time_fmt(d->last_time, 5), d->cmds, d->descriptor,
                     is_ssl_desc(d) ? 'S' : ' ', d->input_chars, d->output_chars,
@@ -5852,13 +5852,13 @@ do_who_session(dbref player, char *name)
 
   switch (count) {
   case 0:
-    notify(player, T("There are no players connected."));
+    notify(player, "There are no players connected.");
     break;
   case 1:
-    notify(player, T("There is one player connected."));
+    notify(player, "There is one player connected.");
     break;
   default:
-    notify_format(player, T("There are %d players connected."), count);
+    notify_format(player, "There are %d players connected.", count);
     break;
   }
 
@@ -5918,40 +5918,40 @@ announce_connect(DESC *d, int isnew, int num)
 
   if (isnew) {
     /* A brand new player created. */
-    snprintf(tbuf1, BUFFER_LEN, T("%s created."),
+    snprintf(tbuf1, BUFFER_LEN, "%s created.",
              AName(player, AN_ANNOUNCE, NULL));
-    flag_broadcast(0, "HEAR_CONNECT", "%s %s", T("GAME:"), tbuf1);
+    flag_broadcast(0, "HEAR_CONNECT", "%s %s", "GAME:", tbuf1);
     if (Suspect(player))
-      flag_broadcast("WIZARD", 0, T("GAME: Suspect %s created."),
+      flag_broadcast("WIZARD", 0, "GAME: Suspect %s created.",
                      AName(player, AN_ANNOUNCE, NULL));
   }
 
   /* Redundant, but better for translators */
   if (Hidden(d)) {
     message =
-      (num > 1) ? T("has HIDDEN-reconnected.") : T("has HIDDEN-connected.");
+      (num > 1) ? "has HIDDEN-reconnected." : "has HIDDEN-connected.";
   } else {
-    message = (num > 1) ? T("has reconnected.") : T("has connected.");
+    message = (num > 1) ? "has reconnected." : "has connected.";
   }
   snprintf(tbuf1, BUFFER_LEN, "%s %s", AName(player, AN_ANNOUNCE, NULL),
            message);
 
   /* send out messages */
   if (Suspect(player))
-    flag_broadcast("WIZARD", 0, T("GAME: Suspect %s"), tbuf1);
+    flag_broadcast("WIZARD", 0, "GAME: Suspect %s", tbuf1);
 
   if (Dark(player)) {
-    flag_broadcast("ROYALTY WIZARD", "HEAR_CONNECT", "%s %s", T("GAME:"),
+    flag_broadcast("ROYALTY WIZARD", "HEAR_CONNECT", "%s %s", "GAME:",
                    tbuf1);
   } else
-    flag_broadcast(0, "HEAR_CONNECT", "%s %s", T("GAME:"), tbuf1);
+    flag_broadcast(0, "HEAR_CONNECT", "%s %s", "GAME:", tbuf1);
 
   if (ANNOUNCE_CONNECTS)
     chat_player_announce(d, message, 0);
 
   loc = Location(player);
   if (!GoodObject(loc)) {
-    notify(player, T("You are nowhere!"));
+    notify(player, "You are nowhere!");
     return;
   }
 
@@ -6129,11 +6129,11 @@ announce_disconnect(DESC *saved, const char *reason, dbref executor)
 
   /* Redundant, but better for translators */
   if (Hidden(saved)) {
-    message = (numleft) ? T("has partially HIDDEN-disconnected.")
-                        : T("has HIDDEN-disconnected.");
+    message = (numleft) ? "has partially HIDDEN-disconnected."
+                        : "has HIDDEN-disconnected.";
   } else {
     message =
-      (numleft) ? T("has partially disconnected.") : T("has disconnected.");
+      (numleft) ? "has partially disconnected." : "has disconnected.";
   }
   snprintf(tbuf1, BUFFER_LEN, "%s %s", AName(player, AN_ANNOUNCE, NULL),
            message);
@@ -6149,12 +6149,12 @@ announce_disconnect(DESC *saved, const char *reason, dbref executor)
 
   /* Monitor broadcasts */
   if (Suspect(player))
-    flag_broadcast("WIZARD", 0, T("GAME: Suspect %s"), tbuf1);
+    flag_broadcast("WIZARD", 0, "GAME: Suspect %s", tbuf1);
   if (Dark(player)) {
-    flag_broadcast("ROYALTY WIZARD", "HEAR_CONNECT", "%s %s", T("GAME:"),
+    flag_broadcast("ROYALTY WIZARD", "HEAR_CONNECT", "%s %s", "GAME:",
                    tbuf1);
   } else
-    flag_broadcast(0, "HEAR_CONNECT", "%s %s", T("GAME:"), tbuf1);
+    flag_broadcast(0, "HEAR_CONNECT", "%s %s", "GAME:", tbuf1);
 
   if (!numleft) {
     clear_flag_internal(player, "CONNECTED");
@@ -6181,47 +6181,47 @@ do_motd(dbref player, int key, const char *message)
 
   if ((key & MOTD_ACTION) == MOTD_LIST ||
       ((key & MOTD_ACTION) == MOTD_SET && (!message || !*message))) {
-    notify_format(player, T("MOTD: %s"), cf_motd_msg);
+    notify_format(player, "MOTD: %s", cf_motd_msg);
     if (Hasprivs(player) && (key & MOTD_ACTION) == MOTD_LIST) {
-      notify_format(player, T("Wiz MOTD: %s"), cf_wizmotd_msg);
-      notify_format(player, T("Down MOTD: %s"), cf_downmotd_msg);
-      notify_format(player, T("Full MOTD: %s"), cf_fullmotd_msg);
+      notify_format(player, "Wiz MOTD: %s", cf_wizmotd_msg);
+      notify_format(player, "Down MOTD: %s", cf_downmotd_msg);
+      notify_format(player, "Full MOTD: %s", cf_fullmotd_msg);
     }
     return;
   }
 
   if (!(((key & MOTD_TYPE) == MOTD_MOTD) ? Can_Announce(player)
                                          : Hasprivs(player))) {
-    notify(player, T("You may get 15 minutes of fame and glory in life, but "
-                     "not right now."));
+    notify(player, "You may get 15 minutes of fame and glory in life, but "
+                     "not right now.");
     return;
   }
 
   if (key & MOTD_CLEAR) {
-    what = T("cleared");
+    what = "cleared";
     message = "";
   } else
-    what = T("set");
+    what = "set";
 
   switch (key & MOTD_TYPE) {
   case MOTD_MOTD:
     mush_strncpy(cf_motd_msg, message, BUFFER_LEN);
-    notify_format(player, T("Motd %s."), what);
+    notify_format(player, "Motd %s.", what);
     break;
   case MOTD_WIZ:
     mush_strncpy(cf_wizmotd_msg, message, BUFFER_LEN);
-    notify_format(player, T("Wizard motd %s."), what);
+    notify_format(player, "Wizard motd %s.", what);
     break;
   case MOTD_DOWN:
     mush_strncpy(cf_downmotd_msg, message, BUFFER_LEN);
-    notify_format(player, T("Down motd %s."), what);
+    notify_format(player, "Down motd %s.", what);
     break;
   case MOTD_FULL:
     mush_strncpy(cf_fullmotd_msg, message, BUFFER_LEN);
-    notify_format(player, T("Full motd %s."), what);
+    notify_format(player, "Full motd %s.", what);
     break;
   default:
-    notify(player, T("Set what?"));
+    notify(player, "Set what?");
   }
 }
 
@@ -6309,7 +6309,7 @@ set_poll(const char *message)
     mush_strncpy(poll_msg, remove_markup(message, &len), sizeof poll_msg);
     len--; /* Length includes trailing null */
   } else {
-    mush_strncpy(poll_msg, T("Doing"), sizeof poll_msg);
+    mush_strncpy(poll_msg, "Doing", sizeof poll_msg);
   }
   for (i = 0; i < DOING_LEN; i++) {
     if (poll_msg[i] == '\0') {
@@ -6341,28 +6341,28 @@ do_poll(dbref player, const char *message, int clear)
 
   if ((!message || !*message) && !clear) {
     /* Just display the poll. */
-    notify_format(player, T("The current poll is: %s"), get_poll());
+    notify_format(player, "The current poll is: %s", get_poll());
     return;
   }
 
   if (!Change_Poll(player)) {
-    notify(player, T("Who do you think you are, Gallup?"));
+    notify(player, "Who do you think you are, Gallup?");
     return;
   }
 
   if (clear) {
     set_poll(NULL);
-    notify(player, T("Poll reset."));
+    notify(player, "Poll reset.");
     return;
   }
 
   i = set_poll(message);
 
   if (i) {
-    notify_format(player, T("Poll set to '%s'. %d characters lost."), poll_msg,
+    notify_format(player, "Poll set to '%s'. %d characters lost.", poll_msg,
                   i);
   } else
-    notify_format(player, T("Poll set to: %s"), poll_msg);
+    notify_format(player, "Poll set to: %s", poll_msg);
   do_log(LT_WIZ, player, NOTHING, "Poll Set to '%s'.", poll_msg);
 }
 
@@ -6554,7 +6554,7 @@ FUNCTION(fun_lwho)
       online = 0;
       offline = 1;
     } else {
-      safe_str(T("#-1 INVALID SECOND ARGUMENT"), buff, bp);
+      safe_str("#-1 INVALID SECOND ARGUMENT", buff, bp);
       return;
     }
     if (offline && !powered) {
@@ -6592,14 +6592,14 @@ FUNCTION(fun_lwho)
 FUNCTION(fun_hidden)
 {
   if (!See_All(executor)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     safe_str("#-1", buff, bp);
     return;
   }
   if (is_strict_integer(args[0])) {
     const DESC *d = lookup_desc(executor, args[0]);
     if (!d) {
-      notify(executor, T("Couldn't find that descriptor."));
+      notify(executor, "Couldn't find that descriptor.");
       safe_str("#-1", buff, bp);
       return;
     }
@@ -6607,7 +6607,7 @@ FUNCTION(fun_hidden)
   } else {
     dbref it = match_thing(executor, args[0]);
     if ((it == NOTHING) || (!IsPlayer(it))) {
-      notify(executor, T("Couldn't find that player."));
+      notify(executor, "Couldn't find that player.");
       safe_str("#-1", buff, bp);
       return;
     }
@@ -6840,7 +6840,7 @@ FUNCTION(fun_zwho)
   }
   if ((getlock(zone, Zone_Lock) == TRUE_BOOLEXP) ||
       (IsPlayer(zone) && !(has_flag_by_name(zone, "SHARED", TYPE_PLAYER)))) {
-    safe_str(T("#-1 INVALID ZONE"), buff, bp);
+    safe_str("#-1 INVALID ZONE", buff, bp);
     return;
   }
 
@@ -6948,7 +6948,7 @@ FUNCTION(fun_pueblo)
   if (match)
     safe_boolean(match->conn_flags & CONN_HTML, buff, bp);
   else
-    safe_str(T("#-1 NOT CONNECTED"), buff, bp);
+    safe_str("#-1 NOT CONNECTED", buff, bp);
 }
 
 FUNCTION(fun_ssl)
@@ -6964,14 +6964,14 @@ FUNCTION(fun_ssl)
     else
       safe_str(T(e_perm), buff, bp);
   } else
-    safe_str(T("#-1 NOT CONNECTED"), buff, bp);
+    safe_str("#-1 NOT CONNECTED", buff, bp);
 }
 
 FUNCTION(fun_width)
 {
   const DESC *match;
   if (!*args[0])
-    safe_str(T("#-1 FUNCTION REQUIRES ONE ARGUMENT"), buff, bp);
+    safe_str("#-1 FUNCTION REQUIRES ONE ARGUMENT", buff, bp);
   else if ((match = lookup_desc(executor, args[0])) && match->width > 0)
     safe_integer(match->width, buff, bp);
   else if (args[1])
@@ -6984,7 +6984,7 @@ FUNCTION(fun_height)
 {
   const DESC *match;
   if (!*args[0])
-    safe_str(T("#-1 FUNCTION REQUIRES ONE ARGUMENT"), buff, bp);
+    safe_str("#-1 FUNCTION REQUIRES ONE ARGUMENT", buff, bp);
   else if ((match = lookup_desc(executor, args[0])) && match->height > 0)
     safe_integer(match->height, buff, bp);
   else if (args[1])
@@ -6997,9 +6997,9 @@ FUNCTION(fun_terminfo)
 {
   DESC *match;
   if (!*args[0])
-    safe_str(T("#-1 FUNCTION REQUIRES ONE ARGUMENT"), buff, bp);
+    safe_str("#-1 FUNCTION REQUIRES ONE ARGUMENT", buff, bp);
   else if (!(match = lookup_desc(executor, args[0])))
-    safe_str(T("#-1 NOT CONNECTED"), buff, bp);
+    safe_str("#-1 NOT CONNECTED", buff, bp);
   else {
     bool has_privs = (match->player == executor) || See_All(executor);
     int type;
@@ -7100,7 +7100,7 @@ FUNCTION(fun_lports)
       online = 0;
       offline = 1;
     } else {
-      safe_str(T("#-1 INVALID SECOND ARGUMENT"), buff, bp);
+      safe_str("#-1 INVALID SECOND ARGUMENT", buff, bp);
       return;
     }
     if (offline && !powered) {
@@ -7140,7 +7140,7 @@ FUNCTION(fun_ports)
   }
   if (target != executor && !Priv_Who(executor)) {
     /* This should probably be a safe_str */
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
   if (!GoodObject(target) || !Connected(target)) {
@@ -7175,7 +7175,7 @@ hide_player(dbref player, int hide, char *victim)
   dbref thing;
 
   if (!Can_Hide(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   if (!victim || !*victim) {
@@ -7185,27 +7185,27 @@ hide_player(dbref player, int hide, char *victim)
       d = lookup_desc(player, victim);
       if (!d) {
         if (See_All(player))
-          notify(player, T("Couldn't find that descriptor."));
+          notify(player, "Couldn't find that descriptor.");
         else
-          notify(player, T("Permission denied."));
+          notify(player, "Permission denied.");
         return;
       }
       thing = d->player;
       if (!Wizard(player) && thing != player) {
-        notify(player, T("Permission denied."));
+        notify(player, "Permission denied.");
         return;
       }
       if (!d->connected) {
-        notify(player, T("Noone is connected to that descriptor."));
+        notify(player, "Noone is connected to that descriptor.");
         return;
       }
       if (hide == 2)
         hide = !(d->hide);
       d->hide = hide;
       if (hide) {
-        notify(player, T("Connection hidden."));
+        notify(player, "Connection hidden.");
       } else {
-        notify(player, T("Connection unhidden."));
+        notify(player, "Connection unhidden.");
       }
       return;
     } else {
@@ -7218,7 +7218,7 @@ hide_player(dbref player, int hide, char *victim)
   }
 
   if (!Connected(thing)) {
-    notify(player, T("That player is not online."));
+    notify(player, "That player is not online.");
     return;
   }
 
@@ -7238,15 +7238,15 @@ hide_player(dbref player, int hide, char *victim)
   }
   if (hide) {
     if (player == thing)
-      notify(player, T("You no longer appear on the WHO list."));
+      notify(player, "You no longer appear on the WHO list.");
     else
-      notify_format(player, T("%s no longer appears on the WHO list."),
+      notify_format(player, "%s no longer appears on the WHO list.",
                     AName(thing, AN_SYS, NULL));
   } else {
     if (player == thing)
-      notify(player, T("You now appear on the WHO list."));
+      notify(player, "You now appear on the WHO list.");
     else
-      notify_format(player, T("%s now appears on the WHO list."),
+      notify_format(player, "%s now appears on the WHO list.",
                     AName(thing, AN_SYS, NULL));
   }
 }
@@ -7292,7 +7292,7 @@ inactivity_check(void)
         booted = true;
       } else if (!Can_Idle(d->player)) {
 
-        queue_string(d, T("\n*** Inactivity timeout ***\n"));
+        queue_string(d, "\n*** Inactivity timeout ***\n");
         do_rawlog_lvl(LT_CONN, MLOG_NOTICE,
                       "[%d/%s/%s] Logout by %s(#%d) <Inactivity Timeout>",
                       d->descriptor, d->addr, d->ip, Name(d->player),
@@ -7303,7 +7303,7 @@ inactivity_check(void)
 
         if ((Can_Hide(d->player)) && (!Hidden(d))) {
           queue_string(
-            d, T("\n*** Inactivity limit reached. You are now HIDDEN. ***\n"));
+            d, "\n*** Inactivity limit reached. You are now HIDDEN. ***\n");
           d->hide = 1;
           booted = true;
         }
@@ -7387,14 +7387,14 @@ dump_reboot_db(void)
   flags |= RDBF_WEBSOCKET_FRAME;
 
   if (setjmp(db_err)) {
-    flag_broadcast(0, 0, T("GAME: Error writing reboot database!"));
+    flag_broadcast(0, 0, "GAME: Error writing reboot database!");
     exit(0);
   } else {
     release_fd();
     f = penn_fopen(REBOOTFILE, "w");
     /* This shouldn't happen */
     if (!f) {
-      flag_broadcast(0, 0, T("GAME: Error writing reboot database!"));
+      flag_broadcast(0, 0, "GAME: Error writing reboot database!");
       exit(0);
     }
     /* Write out the reboot db flags here */
@@ -7643,7 +7643,7 @@ load_reboot_db(void)
     remove(REBOOTFILE);
   }
 
-  flag_broadcast(0, 0, T("GAME: Reboot finished."));
+  flag_broadcast(0, 0, "GAME: Reboot finished.");
 }
 
 /** Reboot the game without disconnecting players.
@@ -7665,7 +7665,7 @@ do_reboot(dbref player, int flag)
      for various reasons, but if it does, it gets logged and you get an
      inadvertent full @shutdown. */
   if (access(saved_argv[0], R_OK | X_OK) < 0) {
-    notify_format(player, T("Unable to reboot using executable '%s': %s"),
+    notify_format(player, "Unable to reboot using executable '%s': %s",
                   saved_argv[0], strerror(errno));
     return;
   }
@@ -7673,10 +7673,10 @@ do_reboot(dbref player, int flag)
 
   if (player == NOTHING) {
     flag_broadcast(
-      0, 0, T("GAME: Reboot w/o disconnect from game account, please wait."));
+      0, 0, "GAME: Reboot w/o disconnect from game account, please wait.");
     do_rawlog(LT_WIZ, "Reboot w/o disconnect triggered by signal.");
   } else {
-    flag_broadcast(0, 0, T("GAME: Reboot w/o disconnect by %s, please wait."),
+    flag_broadcast(0, 0, "GAME: Reboot w/o disconnect by %s, please wait.",
                    AName(Owner(player), AN_ANNOUNCE, NULL));
     do_rawlog(LT_WIZ, "Reboot w/o disconnect triggered by %s(#%d).",
               Name(player), player);
@@ -7692,7 +7692,7 @@ do_reboot(dbref player, int flag)
 #endif
   if (!fork_and_dump(0)) {
     /* Database save failed. Cancel the reboot */
-    flag_broadcast(0, 0, T("GAME: Reboot failed."));
+    flag_broadcast(0, 0, "GAME: Reboot failed.");
     return;
   }
   sql_shutdown();
