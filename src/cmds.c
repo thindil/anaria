@@ -92,29 +92,29 @@ COMMAND(cmd_attribute)
       do_attribute_access(executor, arg_left, arg_right,
                           SW_ISSET(sw, SWITCH_RETROACTIVE));
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
   } else if (SW_ISSET(sw, SWITCH_DECOMPILE)) {
     do_decompile_attribs(executor, arg_left, SW_ISSET(sw, SWITCH_RETROACTIVE));
   } else if (SW_ISSET(sw, SWITCH_DELETE)) {
     if (Wizard(executor))
       do_attribute_delete(executor, arg_left);
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
   } else if (SW_ISSET(sw, SWITCH_RENAME)) {
     if (Wizard(executor))
       do_attribute_rename(executor, arg_left, arg_right);
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
   } else if (SW_ISSET(sw, SWITCH_LIMIT)) {
     if (Wizard(executor))
       do_attribute_limit(executor, arg_left, AF_RLIMIT, arg_right);
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
   } else if (SW_ISSET(sw, SWITCH_ENUM)) {
     if (Wizard(executor))
       do_attribute_limit(executor, arg_left, AF_ENUM, arg_right);
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
   } else
     do_attribute_info(executor, arg_left);
 }
@@ -127,13 +127,13 @@ COMMAND(cmd_sockset)
   if (!arg_left || !*arg_left) {
     d = least_idle_desc(executor, 1);
     if (!d) {
-      notify(executor, T("You are not connected?"));
+      notify(executor, "You are not connected?");
       return;
     }
   } else {
     d = lookup_desc(executor, arg_left);
     if (!d) {
-      notify(executor, T("Invalid descriptor."));
+      notify(executor, "Invalid descriptor.");
       return;
     }
   }
@@ -142,12 +142,12 @@ COMMAND(cmd_sockset)
     if (d->player == executor || See_All(executor))
       notify(executor, sockset_show(d, "\n"));
     else
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
     return;
   }
 
   if (d->player != executor && !Wizard(executor)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
@@ -155,7 +155,7 @@ COMMAND(cmd_sockset)
     notify(executor, sockset(d, args_right[i], args_right[i + 1]));
 
   if (i == 1)
-    notify(executor, T("Set what option?"));
+    notify(executor, "Set what option?");
 }
 
 COMMAND(cmd_atrchown) { (void) do_atrchown(executor, arg_left, arg_right); }
@@ -315,11 +315,11 @@ COMMAND(cmd_config)
 {
   if (SW_ISSET(sw, SWITCH_SET) || SW_ISSET(sw, SWITCH_SAVE)) {
     if (!Wizard(executor)) {
-      notify(executor, T("You can't remake the world in your image."));
+      notify(executor, "You can't remake the world in your image.");
       return;
     }
     if (!arg_left || !*arg_left) {
-      notify(executor, T("What did you want to set?"));
+      notify(executor, "What did you want to set?");
       return;
     }
     {
@@ -327,23 +327,23 @@ COMMAND(cmd_config)
       if (source == 2) {
         if (!God(executor)) {
           /* Only god can alter the original config file. */
-          notify(executor, T("You can't remake the world in your image."));
+          notify(executor, "You can't remake the world in your image.");
           return;
         }
       }
       if (!config_set(arg_left, arg_right, source, 0) &&
           !config_set(arg_left, arg_right, source, 1))
-        notify(executor, T("Couldn't set that option."));
+        notify(executor, "Couldn't set that option.");
       else {
         if (source == 2) {
 #ifdef HAVE_ED
-          notify(executor, T("Option set and saved."));
+          notify(executor, "Option set and saved.");
 #else
-          notify(executor, T("Option set but not saved (Saves disabled.)"));
+          notify(executor, "Option set but not saved (Saves disabled.)");
           source = 1;
 #endif
         } else
-          notify(executor, T("Option set."));
+          notify(executor, "Option set.");
         if (source == 1)
           do_log(LT_WIZ, executor, NOTHING, "Config option '%s' set to '%s'.",
                  arg_left, arg_right);
@@ -543,10 +543,10 @@ COMMAND(cmd_firstexit) { do_firstexit(executor, (const char **) args_left); }
 COMMAND(cmd_flag)
 {
   if (SW_ISSET(sw, SWITCH_LIST))
-    do_list_flags("FLAG", executor, arg_left, FLAG_LIST_NAMECHAR, T("Flags"));
+    do_list_flags("FLAG", executor, arg_left, FLAG_LIST_NAMECHAR, "Flags");
   else if (SW_ISSET(sw, SWITCH_DECOMPILE))
     do_list_flags("FLAG", executor, arg_left, FLAG_LIST_DECOMPILE,
-                  T("@@ Flags"));
+                  "@@ Flags");
   else if (SW_ISSET(sw, SWITCH_ADD))
     do_flag_add("FLAG", executor, arg_left, args_right);
   else if (SW_ISSET(sw, SWITCH_DELETE))
@@ -615,7 +615,7 @@ COMMAND(cmd_function)
       split = 1;
       saved = args_right[2];
       if ((args_right[2] = strchr(args_right[1], '/')) == NULL) {
-        notify(executor, T("#-1 INVALID SECOND ARGUMENT"));
+        notify(executor, "#-1 INVALID SECOND ARGUMENT");
         return;
       }
       *args_right[2]++ = '\0';
@@ -709,14 +709,14 @@ COMMAND(cmd_hook)
     do_hook_list(executor, arg_left, 1);
     return;
   } else {
-    notify(executor, T("You must give a switch for @hook."));
+    notify(executor, "You must give a switch for @hook.");
     return;
   }
   if (queue_type != QUEUE_DEFAULT) {
     if (flags != HOOK_OVERRIDE && flags != HOOK_EXTEND) {
       notify(
         executor,
-        T("You can only use /inplace and /inline with /override or /extend."));
+        "You can only use /inplace and /inline with /override or /extend.");
       return;
     }
   }
@@ -725,7 +725,7 @@ COMMAND(cmd_hook)
 
 COMMAND(cmd_huh_command)
 {
-  notify(executor, T("Huh?  (Type \"help\" for help.)"));
+  notify(executor, "Huh?  (Type \"help\" for help.)");
 }
 
 COMMAND(cmd_home)
@@ -794,7 +794,7 @@ do_list_allocations(dbref player)
   size_t i;
 
   if (!Hasprivs(player)) {
-    notify(player, T("Sorry."));
+    notify(player, "Sorry.");
     return;
   }
 
@@ -853,7 +853,7 @@ static void
 do_list(dbref player, const char *arg, int lc, int which)
 {
   if (!arg || !*arg)
-    notify(player, T("I don't understand what you want to @list."));
+    notify(player, "I don't understand what you want to @list.");
   else if (string_prefixe("commands", arg))
     do_list_commands(player, lc, which);
   else if (string_prefixe("functions", arg)) {
@@ -876,17 +876,17 @@ do_list(dbref player, const char *arg, int lc, int which)
   else if (strcasecmp("flags", arg) == 0)
     do_list_flags("FLAG", player, "",
                   FLAG_LIST_NAMECHAR | (lc ? FLAG_LIST_LOWERCASE : 0),
-                  T("Flags"));
+                  "Flags");
   else if (string_prefixe("powers", arg))
     do_list_flags("POWER", player, "",
                   FLAG_LIST_NAMECHAR | (lc ? FLAG_LIST_LOWERCASE : 0),
-                  T("Powers"));
+                  "Powers");
   else if (string_prefixe("locks", arg))
-    do_list_locks(player, NULL, lc, T("Locks"));
+    do_list_locks(player, NULL, lc, "Locks");
   else if (string_prefixe("allocations", arg))
     do_list_allocations(player);
   else
-    notify(player, T("I don't understand what you want to @list."));
+    notify(player, "I don't understand what you want to @list.");
 }
 
 COMMAND(cmd_list)
@@ -911,15 +911,15 @@ COMMAND(cmd_list)
   else if (SW_ISSET(sw, SWITCH_ATTRIBS))
     do_list_attribs(executor, lc);
   else if (SW_ISSET(sw, SWITCH_LOCKS))
-    do_list_locks(executor, arg_left, lc, T("Locks"));
+    do_list_locks(executor, arg_left, lc, "Locks");
   else if (SW_ISSET(sw, SWITCH_FLAGS))
     do_list_flags("FLAG", executor, arg_left,
                   FLAG_LIST_NAMECHAR | (lc ? FLAG_LIST_LOWERCASE : 0),
-                  T("Flags"));
+                  "Flags");
   else if (SW_ISSET(sw, SWITCH_POWERS))
     do_list_flags("POWER", executor, arg_left,
                   FLAG_LIST_NAMECHAR | (lc ? FLAG_LIST_LOWERCASE : 0),
-                  T("Powers"));
+                  "Powers");
   else if (SW_ISSET(sw, SWITCH_ALLOCATIONS))
     do_list_allocations(executor);
   else
@@ -1035,7 +1035,7 @@ COMMAND(cmd_mail)
            SW_ISSET(sw, SWITCH_SEND) || silent || urgent || nosig) {
     /* These commands are not allowed to gagged players */
     if (Gagged(executor)) {
-      notify(executor, T("You cannot do that while gagged."));
+      notify(executor, "You cannot do that while gagged.");
       return;
     }
     if (SW_ISSET(sw, SWITCH_FWD))
@@ -1101,15 +1101,15 @@ COMMAND(cmd_message)
 
   switch (numargs) {
   case 1:
-    notify(executor, T("@message them with what?"));
+    notify(executor, "@message them with what?");
     return;
   case 2:
-    notify(executor, T("Use what attribute for the @message?"));
+    notify(executor, "Use what attribute for the @message?");
     return;
   }
 
   if (!*arg_left) {
-    notify(executor, T("@message who?"));
+    notify(executor, "@message who?");
     return;
   }
 
@@ -1285,10 +1285,10 @@ COMMAND(cmd_poor) { do_poor(executor, arg_left); }
 COMMAND(cmd_power)
 {
   if (SW_ISSET(sw, SWITCH_LIST))
-    do_list_flags("POWER", executor, arg_left, FLAG_LIST_NAMECHAR, T("Powers"));
+    do_list_flags("POWER", executor, arg_left, FLAG_LIST_NAMECHAR, "Powers");
   else if (SW_ISSET(sw, SWITCH_DECOMPILE))
     do_list_flags("POWER", executor, arg_left, FLAG_LIST_NAMECHAR,
-                  T("@@ Powers"));
+                  "@@ Powers");
   else if (SW_ISSET(sw, SWITCH_ADD))
     do_flag_add("POWER", executor, arg_left, args_right);
   else if (SW_ISSET(sw, SWITCH_DELETE))
@@ -1447,7 +1447,7 @@ COMMAND(cmd_slave)
 #ifdef INFO_SLAVE
     if (strcasecmp(arg_left, "info") == 0) {
       kill_info_slave();
-      notify(executor, T("Restarting info_slave daemon."));
+      notify(executor, "Restarting info_slave daemon.");
       do_rawlog(LT_WIZ, "%s(#%d) restarted info_slave.", Name(executor),
                 executor);
       return;
@@ -1457,15 +1457,15 @@ COMMAND(cmd_slave)
     if (strcasecmp(arg_left, "ssl") == 0) {
       kill_ssl_slave();
       make_ssl_slave();
-      notify(executor, T("Restarting ssl_slave daemon."));
+      notify(executor, "Restarting ssl_slave daemon.");
       do_rawlog(LT_WIZ, "%s(#%d) restarted ssl_slave.", Name(executor),
                 executor);
       return;
     }
 #endif
-    notify(executor, T("No such service."));
+    notify(executor, "No such service.");
   } else {
-    notify(executor, T("I'm sorry, Dave, I'm afraid I can't do that."));
+    notify(executor, "I'm sorry, Dave, I'm afraid I can't do that.");
   }
 }
 
@@ -1540,7 +1540,7 @@ COMMAND(cmd_teleport)
 
   if (rhs_present) {
     if (!*arg_right)
-      notify(executor, T("You can't teleport to nothing!"));
+      notify(executor, "You can't teleport to nothing!");
     else
       do_teleport(executor, arg_left, arg_right, flags, queue_entry->pe_info);
   } else {
@@ -1707,12 +1707,12 @@ COMMAND(cmd_buy)
     forwhat += 5;
   }
   if (forwhat && !is_strict_integer(forwhat)) {
-    notify(executor, T("Buy for WHAT price?"));
+    notify(executor, "Buy for WHAT price?");
     return;
   } else if (forwhat) {
     price = parse_integer(forwhat);
     if (price < 0) {
-      notify(executor, T("You can't buy things by taking money."));
+      notify(executor, "You can't buy things by taking money.");
       return;
     }
   }
@@ -1800,7 +1800,7 @@ COMMAND(cmd_warn_on_missing)
 {
   notify_format(
     Owner(executor),
-    T("No command found in code by %s - don't start code with functions."),
+    "No command found in code by %s - don't start code with functions.",
     unparse_dbref(executor));
   return;
 }
@@ -1868,12 +1868,12 @@ COMMAND(cmd_fetch)
   bool put = false;
 
   if (!Wizard(executor) && !has_power_by_name(executor, "Can_HTTP", NOTYPE)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
   if (!args_right[1] || !*args_right[1]) {
-    notify(executor, T("What do you want to query?"));
+    notify(executor, "What do you want to query?");
     return;
   }
 
@@ -1897,7 +1897,7 @@ COMMAND(cmd_fetch)
   mush_strncpy(tbuf, arg_left, sizeof tbuf);
   s = strchr(tbuf, '/');
   if (!s) {
-    notify(executor, T("I need to know what attribute to trigger."));
+    notify(executor, "I need to know what attribute to trigger.");
     return;
   }
   *(s++) = '\0';
@@ -1910,7 +1910,7 @@ COMMAND(cmd_fetch)
   }
 
   if (!controls(executor, thing)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
@@ -1991,7 +1991,7 @@ COMMAND(cmd_fetch)
 
   curl_multi_add_handle(curl_handle, handle);
 #else
-  notify(executor, T("Command disabled."));
+  notify(executor, "Command disabled.");
 #endif
 }
 
@@ -2003,32 +2003,32 @@ COMMAND(cmd_respond)
   req = active_http_request;
 
   if (!USABLE(HTTP_HANDLER) || !IsPlayer(HTTP_HANDLER)) {
-    notify(executor, T("Invalid http_handler, it should be a player."));
+    notify(executor, "Invalid http_handler, it should be a player.");
   }
 
   if (!arg_left || !*arg_left) {
-    notify(executor, T("Invalid use of @respond, please check help @respond."));
+    notify(executor, "Invalid use of @respond, please check help @respond.");
     return;
   }
 
   /* Ensure only isprint()-able characters. */
   for (p = arg_left; p && *p; p++) {
     if (!isprint(*p)) {
-      notify(executor, T("No nonprintable characters allowed in @respond"));
+      notify(executor, "No nonprintable characters allowed in @respond");
       return;
     }
   }
 
   for (p = arg_right; p && *p; p++) {
     if (!isprint(*p)) {
-      notify(executor, T("No nonprintable characters allowed in @respond"));
+      notify(executor, "No nonprintable characters allowed in @respond");
       return;
     }
   }
 
   if (SW_ISSET(sw, SWITCH_TYPE) && SW_ISSET(sw, SWITCH_HEADER)) {
     notify(executor,
-           T("Invalid @respond - You can't use more than one switch!"));
+           "Invalid @respond - You can't use more than one switch!");
     return;
   }
 
@@ -2036,7 +2036,7 @@ COMMAND(cmd_respond)
   if (SW_ISSET(sw, SWITCH_TYPE)) {
     if (*arg_right) {
       notify(executor,
-             T("Invalid @respond/type - cannot have arg_right, use {}s"));
+             "Invalid @respond/type - cannot have arg_right, use {}s");
       return;
     }
     if (req) {
@@ -2052,17 +2052,17 @@ COMMAND(cmd_respond)
     /* Sanity checking on header name. */
     if (!arg_left || !*arg_left || !arg_right || !*arg_right) {
       notify(executor,
-             T("Invalid format, use @respond/header HeaderName=Value."));
+             "Invalid format, use @respond/header HeaderName=Value.");
       return;
     }
     if (!strcasecmp(arg_left, "content-length")) {
-      notify(executor, T("You cannot set Content-Length header."));
+      notify(executor, "You cannot set Content-Length header.");
       return;
     }
     /* Only printable ascii allowed in header names. */
     for (p = arg_left; *p; p++) {
       if (!isascii(*p)) {
-        notify(executor, T("Invalid HTTP Header name."));
+        notify(executor, "Invalid HTTP Header name.");
         return;
       }
     }
@@ -2084,25 +2084,25 @@ COMMAND(cmd_respond)
    */
   if (!isdigit(arg_left[0]) || !isdigit(arg_left[1]) || !isdigit(arg_left[2]) ||
       arg_left[3] != ' ' || !isalnum(arg_left[4])) {
-    notify(executor, T("@respond must be 3 digits, space, then text ."));
+    notify(executor, "@respond must be 3 digits, space, then text .");
     return;
   }
 
   if (*arg_right) {
     notify(executor,
-           T("Invalid @respond/type - cannot have arg_right, use {}s"));
+           "Invalid @respond/type - cannot have arg_right, use {}s");
     return;
   }
 
   for (p = arg_left; *p; p++) {
     if (!isascii(*p)) {
-      notify(executor, T("@respond must be 3 digits, space, then text ."));
+      notify(executor, "@respond must be 3 digits, space, then text .");
       return;
     }
   }
 
   if (strlen(arg_left) >= 40) {
-    notify(executor, T("@respond status code too long."));
+    notify(executor, "@respond status code too long.");
     return;
   }
 
