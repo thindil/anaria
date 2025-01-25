@@ -1386,7 +1386,7 @@ command_parse(dbref player, char *string, MQUE *queue_entry)
           strcat(swp, swtch);
         } else {
           if (se == switch_err) {
-            safe_format(switch_err, &se, T("%s doesn't know switch %s."),
+            safe_format(switch_err, &se, "%s doesn't know switch %s.",
                         cmd->name, swtch);
           }
         }
@@ -1557,7 +1557,7 @@ run_command(const COMMAND_INFO *cmd, dbref executor, dbref enactor,
 
   if (cmd->type & CMD_T_DEPRECATED) {
     notify_format(Owner(executor),
-                  T("Deprecated command %s being used on object #%d."),
+                  "Deprecated command %s being used on object #%d.",
                   cmd->name, executor);
   }
 
@@ -1906,7 +1906,7 @@ COMMAND(cmd_unimplemented)
   } else {
     /* Either we were already in UNIMPLEMENTED_COMMAND, or we couldn't find it
      */
-    notify(executor, T("This command has not been implemented."));
+    notify(executor, "This command has not been implemented.");
   }
 }
 
@@ -1925,7 +1925,7 @@ do_command_add(dbref player, char *name, int flags)
   COMMAND_INFO *command;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   name = trim_space_sep(name, ' ');
@@ -1933,7 +1933,7 @@ do_command_add(dbref player, char *name, int flags)
   command = command_find(name);
   if (!command) {
     if (!ok_command_name(name)) {
-      notify(player, T("Bad command name."));
+      notify(player, "Bad command name.");
     } else {
       char *switches = NULL;
       if ((flags & (CMD_T_NOPARSE | CMD_T_RS_NOPARSE)) !=
@@ -1941,10 +1941,10 @@ do_command_add(dbref player, char *name, int flags)
         switches = "NOEVAL";
       command_add(mush_strdup(name, "command_add"), flags, NULL, 0, switches,
                   cmd_unimplemented);
-      notify_format(player, T("Command %s added."), name);
+      notify_format(player, "Command %s added.", name);
     }
   } else {
-    notify_format(player, T("Command %s already exists."), command->name);
+    notify_format(player, "Command %s already exists.", command->name);
   }
 }
 
@@ -1960,7 +1960,7 @@ void
 do_command_clone(dbref player, char *original, char *clone)
 {
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -1969,15 +1969,15 @@ do_command_clone(dbref player, char *original, char *clone)
 
   const COMMAND_INFO *cmd = command_find(original);
   if (!cmd) {
-    notify(player, T("No such command."));
+    notify(player, "No such command.");
     return;
   } else if (!ok_command_name(clone) || command_find(clone)) {
-    notify(player, T("Bad command name."));
+    notify(player, "Bad command name.");
     return;
   }
 
   clone_command(original, clone);
-  notify(player, T("Command cloned."));
+  notify(player, "Command cloned.");
 }
 
 /** Create a new \@hook.
@@ -2068,13 +2068,13 @@ do_command_delete(dbref player, char *name)
   COMMAND_INFO *command;
 
   if (!God(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   upcasestr(name);
   command = command_find_exact(name);
   if (!command) {
-    notify(player, T("No such command."));
+    notify(player, "No such command.");
     return;
   }
   if (strcasecmp(command->name, name) == 0) {
@@ -2083,7 +2083,7 @@ do_command_delete(dbref player, char *name)
         !strcmp(command->name, "UNIMPLEMENTED_COMMAND")) {
       notify(
         player,
-        T("You can't delete built-in commands. @command/disable instead."));
+        "You can't delete built-in commands. @command/disable instead.");
       return;
     } else {
       int acount = 0;
@@ -2100,15 +2100,15 @@ do_command_delete(dbref player, char *name)
       mush_free((char *) command->name, "command.name");
       mush_free(command, "command");
       if (acount > 1)
-        notify_format(player, T("Removed %s and aliases from command table."),
+        notify_format(player, "Removed %s and aliases from command table.",
                       name);
       else
-        notify_format(player, T("Removed %s from command table."), name);
+        notify_format(player, "Removed %s from command table.", name);
     }
   } else {
     /* This is an alias. Just remove it */
     ptab_delete(&ptab_command, name);
-    notify_format(player, T("Removed %s from command table."), name);
+    notify_format(player, "Removed %s from command table.", name);
   }
 }
 
@@ -2123,7 +2123,7 @@ COMMAND(cmd_command)
   char *bp = buff;
 
   if (!arg_left[0]) {
-    notify(executor, T("You must specify a command."));
+    notify(executor, "You must specify a command.");
     return;
   }
   if (SW_ISSET(sw, SWITCH_ADD)) {
@@ -2136,23 +2136,23 @@ COMMAND(cmd_command)
     flags |= SW_ISSET(sw, SWITCH_RSNOPARSE) ? CMD_T_RS_NOPARSE : 0;
     if (SW_ISSET(sw, SWITCH_NOEVAL))
       notify(executor,
-             T("WARNING: /NOEVAL no longer creates a Noparse command.\n        "
-               " Use /NOPARSE if that's what you meant."));
+             "WARNING: /NOEVAL no longer creates a Noparse command.\n        "
+               " Use /NOPARSE if that's what you meant.");
     do_command_add(executor, arg_left, flags);
     return;
   }
   if (SW_ISSET(sw, SWITCH_ALIAS)) {
     if (Wizard(executor)) {
       if (!ok_command_name(upcasestr(arg_right))) {
-        notify(executor, T("I can't alias a command to that!"));
+        notify(executor, "I can't alias a command to that!");
       } else if (!alias_command(arg_left, arg_right)) {
-        notify(executor, T("Unable to set alias."));
+        notify(executor, "Unable to set alias.");
       } else {
         if (!SW_ISSET(sw, SWITCH_QUIET))
-          notify(executor, T("Alias set."));
+          notify(executor, "Alias set.");
       }
     } else {
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
     }
     return;
   }
@@ -2167,7 +2167,7 @@ COMMAND(cmd_command)
   }
   command = command_find(arg_left);
   if (!command) {
-    notify(executor, T("No such command."));
+    notify(executor, "No such command.");
     return;
   }
   if (Wizard(executor)) {
@@ -2178,21 +2178,21 @@ COMMAND(cmd_command)
 
     if (SW_ISSET(sw, SWITCH_RESTRICT)) {
       if (!arg_right || !arg_right[0]) {
-        notify(executor, T("How do you want to restrict the command?"));
+        notify(executor, "How do you want to restrict the command?");
         return;
       }
 
       if (!restrict_command(executor, command, arg_right))
-        notify(executor, T("Restrict attempt failed."));
+        notify(executor, "Restrict attempt failed.");
     }
 
     if ((command->func == cmd_command) && (command->type & CMD_T_DISABLED)) {
-      notify(executor, T("@command is ALWAYS enabled."));
+      notify(executor, "@command is ALWAYS enabled.");
       command->type &= ~CMD_T_DISABLED;
     }
   }
   if (!SW_ISSET(sw, SWITCH_QUIET)) {
-    notify_format(executor, T("Name       : %s (%s)"), command->name,
+    notify_format(executor, "Name       : %s (%s)", command->name,
                   (command->type & CMD_T_DISABLED) ? "Disabled" : "Enabled");
     buff[0] = '\0';
     bp = buff;
@@ -2207,12 +2207,12 @@ COMMAND(cmd_command)
     if (command->type & CMD_T_DEPRECATED)
       strccat(buff, &bp, "Deprecated");
     *bp = '\0';
-    notify_format(executor, T("Flags      : %s"), buff);
+    notify_format(executor, "Flags      : %s", buff);
     buff[0] = '\0';
-    notify_format(executor, T("Lock       : %s"),
+    notify_format(executor, "Lock       : %s",
                   unparse_boolexp(executor, command->cmdlock, UB_DBREF));
     if (command->restrict_message)
-      notify_format(executor, T("Failure Msg: %s"), command->restrict_message);
+      notify_format(executor, "Failure Msg: %s", command->restrict_message);
     if (command->sw.mask) {
       bp = buff;
       SWITCH_VALUE *sw_val;
@@ -2220,9 +2220,9 @@ COMMAND(cmd_command)
         if (SW_ISSET(command->sw.mask, sw_val->value))
           strccat(buff, &bp, sw_val->name);
       *bp = '\0';
-      notify_format(executor, T("Switches   : %s"), buff);
+      notify_format(executor, "Switches   : %s", buff);
     } else
-      notify(executor, T("Switches   :"));
+      notify(executor, "Switches   :");
     buff[0] = '\0';
     bp = buff;
     if (command->type & CMD_T_LS_ARGS) {
@@ -2235,7 +2235,7 @@ COMMAND(cmd_command)
       strccat(buff, &bp, "Noparse");
     if (command->type & CMD_T_EQSPLIT) {
       *bp = '\0';
-      notify_format(executor, T("Leftside   : %s"), buff);
+      notify_format(executor, "Leftside   : %s", buff);
       buff[0] = '\0';
       bp = buff;
       if (command->type & CMD_T_RS_ARGS) {
@@ -2247,10 +2247,10 @@ COMMAND(cmd_command)
       if (command->type & CMD_T_RS_NOPARSE)
         strccat(buff, &bp, "Noparse");
       *bp = '\0';
-      notify_format(executor, T("Rightside  : %s"), buff);
+      notify_format(executor, "Rightside  : %s", buff);
     } else {
       *bp = '\0';
-      notify_format(executor, T("Arguments  : %s"), buff);
+      notify_format(executor, "Arguments  : %s", buff);
     }
     do_hook_list(executor, arg_left, 0);
   }
@@ -2267,7 +2267,7 @@ void
 do_list_commands(dbref player, int lc, int type)
 {
   char *b = list_commands(type);
-  notify_format(player, T("Commands: %s"), lc ? strlower(b) : b);
+  notify_format(player, "Commands: %s", lc ? strlower(b) : b);
 }
 
 /** Return a list of defined commands.
@@ -2334,7 +2334,7 @@ command_check_with(dbref player, const COMMAND_INFO *cmd, int noisy,
       if (cmd->restrict_message)
         notify(player, cmd->restrict_message);
       else
-        notify(player, T("Permission denied."));
+        notify(player, "Permission denied.");
     }
     return 0;
   }
@@ -2585,11 +2585,11 @@ do_hook(dbref player, const char *command, const char *obj, const char *attrname
 
   cmd = command_find(command);
   if (!cmd) {
-    notify(player, T("No such command."));
+    notify(player, "No such command.");
     return;
   }
   if ((cmd->func == cmd_password) || (cmd->func == cmd_newpassword)) {
-    notify(player, T("Hooks not allowed with that command."));
+    notify(player, "Hooks not allowed with that command.");
     return;
   }
 
@@ -2604,12 +2604,12 @@ do_hook(dbref player, const char *command, const char *obj, const char *attrname
   else if (flag == HOOK_EXTEND)
     h = &cmd->hooks.extend;
   else {
-    notify(player, T("Unknown hook type"));
+    notify(player, "Unknown hook type");
     return;
   }
 
   if (!obj && !attrname) {
-    notify_format(player, T("Hook removed from %s."), cmd->name);
+    notify_format(player, "Hook removed from %s.", cmd->name);
     if (*h) {
       if ((*h)->attrname) {
         mush_free((*h)->attrname, "hook.attr");
@@ -2622,14 +2622,14 @@ do_hook(dbref player, const char *command, const char *obj, const char *attrname
              ((flag != HOOK_OVERRIDE && flag != HOOK_EXTEND) &&
               (!attrname || !*attrname))) {
     if (flag == HOOK_OVERRIDE || flag == HOOK_EXTEND) {
-      notify(player, T("You must give an object."));
+      notify(player, "You must give an object.");
     } else {
-      notify(player, T("You must give both an object and attribute."));
+      notify(player, "You must give both an object and attribute.");
     }
   } else {
     dbref objdb = match_thing(player, obj);
     if (!GoodObject(objdb)) {
-      notify(player, T("Invalid hook object."));
+      notify(player, "Invalid hook object.");
       return;
     }
     if (!(*h))
@@ -2643,7 +2643,7 @@ do_hook(dbref player, const char *command, const char *obj, const char *attrname
       (*h)->attrname = strupper_a(attrname, "hook.attr");
     }
     (*h)->inplace = queue_type;
-    notify_format(player, T("Hook set for %s."), cmd->name);
+    notify_format(player, "Hook set for %s.", cmd->name);
   }
 }
 
@@ -2678,12 +2678,12 @@ do_hook_list(dbref player, const char *command, bool verbose)
       }
     }
     if (count == 0) {
-      notify(player, T("There are no hooks currently set."));
+      notify(player, "There are no hooks currently set.");
       return;
     }
     do_gensort(0, ptrs, NULL, count, ALPHANUM_LIST);
     bp = buff;
-    safe_str(T("The following commands have hooks: "), buff, &bp);
+    safe_str("The following commands have hooks: ", buff, &bp);
     for (i = 0; i < count; i++) {
       if (i > 0 && gencomp((dbref) 0, ptrs[i], ptrs[i - 1], ALPHANUM_LIST) <= 0)
         continue;
@@ -2698,7 +2698,7 @@ do_hook_list(dbref player, const char *command, bool verbose)
   } else {
     cmd = command_find(command);
     if (!cmd) {
-      notify(player, T("No such command."));
+      notify(player, "No such command.");
       return;
     }
     if (Wizard(player) || has_power_by_name(player, "HOOK", NOTYPE)) {
@@ -2766,9 +2766,9 @@ do_hook_list(dbref player, const char *command, bool verbose)
                       cmd->hooks.extend->obj, cmd->hooks.extend->attrname);
       }
       if (!count && verbose)
-        notify(player, T("That command has no hooks."));
+        notify(player, "That command has no hooks.");
     } else if (verbose) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
     }
   }
 }
