@@ -382,22 +382,22 @@ PENNCONFGROUP confgroups[] = {
 #if 0
 /* Just to mark these strings for translation */
 PENNCONFGROUP dummy[] = {
-  {"attribs", T("Options affecting attributes"), 0},
-  {"chat", T("Chat system options"), 0},
-  {"cmds", T("Options affecting command behavior"), 0},
-  {"compile", T("Compile-time options"), 0},
-  {"cosmetic", T("Cosmetic options"), 0},
-  {"costs", T("Costs"), 0},
-  {"db", T("Database options"), 0},
-  {"dump", T("Options affecting dumps and other periodic processes"), 0},
-  {"files", T("Files used by the MUSH"), CGP_GOD},
-  {"flags", T("Default flags for new objects"), 0},
-  {"funcs", T("Options affecting function behavior"), 0},
-  {"limits", T("Limits and other constants"), 0},
-  {"log", T("Logging options"), 0},
-  {"messages", T("Message files sent by the MUSH"), CGP_GOD},
-  {"net", T("Networking and connection-related options"), 0},
-  {"tiny", T("TinyMUSH compatibility options"), 0},
+  {"attribs", "Options affecting attributes", 0},
+  {"chat", "Chat system options", 0},
+  {"cmds", "Options affecting command behavior", 0},
+  {"compile", "Compile-time options", 0},
+  {"cosmetic", "Cosmetic options", 0},
+  {"costs", "Costs", 0},
+  {"db", "Database options", 0},
+  {"dump", "Options affecting dumps and other periodic processes", 0},
+  {"files", "Files used by the MUSH", CGP_GOD},
+  {"flags", "Default flags for new objects", 0},
+  {"funcs", "Options affecting function behavior", 0},
+  {"limits", "Limits and other constants", 0},
+  {"log", "Logging options", 0},
+  {"messages", "Message files sent by the MUSH", CGP_GOD},
+  {"net", "Networking and connection-related options", 0},
+  {"tiny", "TinyMUSH compatibility options", 0},
   {NULL, NULL, 0}
 };
 #endif
@@ -1194,8 +1194,8 @@ conf_default_set(void)
   options.dump_interval = 3601;
   set_string_option(
     options.dump_message,
-    T("GAME: Saving database. Game may freeze for a few moments."));
-  set_string_option(options.dump_complete, T("GAME: Save complete. "));
+    "GAME: Saving database. Game may freeze for a few moments.");
+  set_string_option(options.dump_complete, "GAME: Save complete. ");
   options.max_logins = 128;
   options.max_guests = 0;
   options.max_named_qregs = 50;
@@ -1213,8 +1213,8 @@ conf_default_set(void)
   options.use_quota = 1;
   options.function_side_effects = 1;
   options.empty_attrs = 1;
-  set_string_option(options.money_singular, T("Penny"));
-  set_string_option(options.money_plural, T("Pennies"));
+  set_string_option(options.money_singular, "Penny");
+  set_string_option(options.money_plural, "Pennies");
   set_string_option(options.log_wipe_passwd, "zap!");
 #ifdef WIN32
   strcpy(options.compressprog, "");
@@ -1256,9 +1256,9 @@ conf_default_set(void)
   options.use_dns = 1;
   options.safer_ufun = 1;
   set_string_option(options.dump_warning_1min,
-                    T("GAME: Database save in 1 minute."));
+                    "GAME: Database save in 1 minute.");
   set_string_option(options.dump_warning_5min,
-                    T("GAME: Database save in 5 minutes."));
+                    "GAME: Database save in 5 minutes.");
   options.noisy_whisper = 0;
   options.possessive_get = 1;
   options.possessive_get_d = 1;
@@ -1302,9 +1302,9 @@ conf_default_set(void)
   options.chat_token_alias[1] = '\0';
   options.use_muxcomm = 0;
   options.chat_strip_quote = 1;
-  set_string_option(options.wizwall_prefix, T("Broadcast:"));
-  set_string_option(options.rwall_prefix, T("Admin:"));
-  set_string_option(options.wall_prefix, T("Announcement:"));
+  set_string_option(options.wizwall_prefix, "Broadcast:");
+  set_string_option(options.rwall_prefix, "Admin:");
+  set_string_option(options.wall_prefix, "Announcement:");
   set_string_option(options.access_file, "access.cnf");
   set_string_option(options.names_file, "names.cnf");
   options.object_cost = 10;
@@ -1620,7 +1620,7 @@ do_config_list(dbref player, const char *type, int lc)
       }
       if (!found) {
         /* Wasn't found at all. Ok. */
-        notify(player, T("I only know the following types of options:"));
+        notify(player, "I only know the following types of options:");
         for (cgp = confgroups; cgp->name; cgp++) {
           if (Can_View_Config_Group(player, cgp))
             notify_format(player, " %-15s %s", T(cgp->name), cgp->desc);
@@ -1650,7 +1650,7 @@ do_config_list(dbref player, const char *type, int lc)
   } else {
     /* If we're here, we ran @config without a type. */
     notify(player,
-           T("Use: @config/list <type of options> where type is one of:"));
+           "Use: @config/list <type of options> where type is one of:");
     for (cgp = confgroups; cgp->name; cgp++) {
       if (Can_View_Config_Group(player, cgp))
         notify_format(player, " %-15s %s", T(cgp->name), cgp->desc);
@@ -1744,7 +1744,7 @@ FUNCTION(fun_config)
         return;
       }
     }
-    safe_str(T("#-1 NO SUCH CONFIG OPTION"), buff, bp);
+    safe_str("#-1 NO SUCH CONFIG OPTION", buff, bp);
     return;
   } else {
     int first = 1;
@@ -1783,109 +1783,109 @@ do_enable(dbref player, const char *param, int state)
   for (cp = conftable; cp->name; cp++) {
     if (!strcasecmp(cp->name, param) && can_view_config_option(player, cp)) {
       if (cp->flags & CP_GODONLY) {
-        notify(player, T("That option cannot be altered."));
+        notify(player, "That option cannot be altered.");
         return;
       } else if (cp->handler == cf_bool) {
         cf_bool(param, (state ? "yes" : "no"), cp->loc, cp->max, 1);
         if (state == 0)
-          notify(player, T("Disabled."));
+          notify(player, "Disabled.");
         else
-          notify(player, T("Enabled."));
+          notify(player, "Enabled.");
         do_log(LT_WIZ, player, NOTHING, "%s %s", cp->name,
                (state) ? "ENABLED" : "DISABLED");
       } else
-        notify(player, T("That isn't an on/off option."));
+        notify(player, "That isn't an on/off option.");
       return;
     }
   }
-  notify(player, T("No such option."));
+  notify(player, "No such option.");
 }
 
 static void
 show_compile_options(dbref player)
 {
   if (strcmp(options.attr_compression, "huffman") == 0) {
-    notify(player, T(" Attributes are Huffman compressed in memory."));
+    notify(player, " Attributes are Huffman compressed in memory.");
   } else if (strcmp(options.attr_compression, "word") == 0) {
-    notify(player, T(" Attributes are word compressed in memory."));
+    notify(player, " Attributes are word compressed in memory.");
   } else {
-    notify(player, T(" Attributes are not compressed in memory."));
+    notify(player, " Attributes are not compressed in memory.");
   }
 
 #ifdef HAVE_SSL
-  notify(player, T(" The MUSH was compiled with SSL support."));
+  notify(player, " The MUSH was compiled with SSL support.");
 #endif
 
 #ifdef SSL_SLAVE
-  notify(player, T(" SSL connections are handled by a slave process."));
+  notify(player, " SSL connections are handled by a slave process.");
 #endif
 
 #ifdef HAVE_MYSQL
-  notify(player, T(" The MUSH was compiled with MySQL support."));
+  notify(player, " The MUSH was compiled with MySQL support.");
 #endif
 #ifdef HAVE_POSTGRESQL
-  notify(player, T(" The MUSH was compiled with Postgresql support."));
+  notify(player, " The MUSH was compiled with Postgresql support.");
 #endif
 
-  notify_format(player, T(" The MUSH was compiled with Sqlite %s."),
+  notify_format(player, " The MUSH was compiled with Sqlite %s.",
                 SQLITE_VERSION);
 
 
 #ifdef INFO_SLAVE
-  notify(player, T(" DNS lookups are handled by a slave process."));
+  notify(player, " DNS lookups are handled by a slave process.");
 #else
-  notify(player, T(" DNS lookups are handled by the MUSH process."));
+  notify(player, " DNS lookups are handled by the MUSH process.");
 #endif
 
 #ifdef HAVE_GETDATE
-  notify(player, T(" Extended convtime() is supported."));
+  notify(player, " Extended convtime() is supported.");
 #else
-  notify(player, T(" convtime() is stricter."));
+  notify(player, " convtime() is stricter.");
 #endif
 
 #if defined(HAVE_SETITIMER) || defined(WIN32)
-  notify(player, T(" CPU usage limiting is supported."));
+  notify(player, " CPU usage limiting is supported.");
 #else
-  notify(player, T(" CPU usage limiting is NOT supported."));
+  notify(player, " CPU usage limiting is NOT supported.");
 #endif
 
 #ifdef HAVE_INOTIFY_INIT1
-  notify(player, T(" Changed help files will be automatically reindexed."));
+  notify(player, " Changed help files will be automatically reindexed.");
 #endif
 
 #ifdef HAVE_SSE2
-  notify(player, T(" SSE2 instructions are being used."));
+  notify(player, " SSE2 instructions are being used.");
 #endif
 
 #ifdef HAVE_SSE3
-  notify(player, T(" SSE3 instructions are being used."));
+  notify(player, " SSE3 instructions are being used.");
 #endif
 
 #ifdef HAVE_SSSE3
-  notify(player, T(" SSSE3 instructions are being used."));
+  notify(player, " SSSE3 instructions are being used.");
 #endif
 
 #ifdef HAVE_SSE42
-  notify(player, T(" SSE4.2 instructions are being used."));
+  notify(player, " SSE4.2 instructions are being used.");
 #endif
 
 #ifdef HAVE_ALTIVEC
-  notify(player, T(" Altivec instructions are being used."));
+  notify(player, " Altivec instructions are being used.");
 #endif
 
 #ifdef HAVE_ED
-  notify(player, T(" @config/save is enabled."));
+  notify(player, " @config/save is enabled.");
 #else
-  notify(player, T(" @config/save is disabled."));
+  notify(player, " @config/save is disabled.");
 #endif
 
   if (options.use_chunk)
-    notify(player, T(" Attribute contents are managed by the chunk system."));
+    notify(player, " Attribute contents are managed by the chunk system.");
   else
-    notify(player, T(" Attribute contents are managed by malloc."));
+    notify(player, " Attribute contents are managed by malloc.");
 
 #ifdef HAVE_ZONEINFO
-  notify(player, T(" IANA symbolic timezones can be used."));
+  notify(player, " IANA symbolic timezones can be used.");
 #endif
 
   {
@@ -1893,22 +1893,22 @@ show_compile_options(dbref player)
     uint32_t jit = 0;
 
     pcre2_config(PCRE2_CONFIG_VERSION, target);
-    notify_format(player, T(" Using PCRE %s"), (const char *) target);
+    notify_format(player, " Using PCRE %s", (const char *) target);
 
     pcre2_config(PCRE2_CONFIG_JIT, &jit);
     if (jit) {
       pcre2_config(PCRE2_CONFIG_JITTARGET, target);
       notify_format(player,
-                    T(" Internal regular expressions are JIT-compiled for %s."),
+                    " Internal regular expressions are JIT-compiled for %s.",
                     (const char *) target);
     }
   }
 
 #ifdef HAVE_ICU
-  notify(player, T(" (Very limited) Unicode support is enabled."));
+  notify(player, " (Very limited) Unicode support is enabled.");
 #endif
 
 #ifdef HAVE_LIBCURL
-  notify(player, T(" @HTTP is supported."));
+  notify(player, " @HTTP is supported.");
 #endif
 }
