@@ -513,7 +513,7 @@ FUNCTION(fun_connlog)
   bool count_only = 0;
 
   if (!options.use_connlog) {
-    safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+    safe_str("#-1 FUNCTION DISABLED", buff, bp);
     return;
   }
 
@@ -798,7 +798,7 @@ FUNCTION(fun_connrecord)
   int status;
 
   if (!options.use_connlog) {
-    safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+    safe_str("#-1 FUNCTION DISABLED", buff, bp);
     return;
   }
 
@@ -873,7 +873,7 @@ FUNCTION(fun_addrlog)
   char *sbp = *bp;
 
   if (!options.use_connlog) {
-    safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+    safe_str("#-1 FUNCTION DISABLED", buff, bp);
     return;
   }
 
@@ -888,7 +888,7 @@ FUNCTION(fun_addrlog)
   }
 
   if (nargs == n + 1) {
-    safe_str(T("#-1 MISSING ARGUMENTS"), buff, bp);
+    safe_str("#-1 MISSING ARGUMENTS", buff, bp);
     return;
   }
 
@@ -906,7 +906,7 @@ FUNCTION(fun_addrlog)
     sqlite3_str_appendall(query, " hostname");
   } else {
     char *s;
-    safe_str(T("#-1 INVALID ARGUMENT"), buff, bp);
+    safe_str("#-1 INVALID ARGUMENT", buff, bp);
     s = sqlite3_str_finish(query);
     sqlite3_free(s);
     return;
@@ -927,7 +927,7 @@ FUNCTION(fun_addrlog)
   sqlite3_free(utf8);
 
   if (!stmt) {
-    safe_str(T("#-1 SQLITE ERROR"), buff, bp);
+    safe_str("#-1 SQLITE ERROR", buff, bp);
     mush_free(pat, "string");
     if (free_sep) {
       mush_free(sep, "utf8.string");
@@ -960,7 +960,7 @@ FUNCTION(fun_addrlog)
 
   if (rc != SQLITE_DONE) {
     *bp = sbp;
-    safe_format(buff, bp, T("#-1 SQLITE ERROR: %s"),
+    safe_format(buff, bp, "#-1 SQLITE ERROR: %s",
                 sqlite3_errmsg(connlog_db));
   }
 
