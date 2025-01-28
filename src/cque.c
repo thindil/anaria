@@ -291,17 +291,17 @@ pay_queue(dbref player, const char *command)
     (QUEUE_LOSS ? ((get_random_u32(0, QUEUE_LOSS - 1) == 0) ? 1 : 0) : 0);
   if (!quiet_payfor(player, estcost)) {
     notify_format(Owner(player),
-                  T("Not enough money to queue command for %s(#%d)."),
+                  "Not enough money to queue command for %s(#%d).",
                   AName(player, AN_SYS, NULL), player);
     return 0;
   }
   if (!NoPay(player) && (estcost != QUEUE_COST) && Track_Money(Owner(player))) {
     notify_format(Owner(player),
-                  T("GAME: Object %s(%s) lost a %s to queue loss."),
+                  "GAME: Object %s(%s) lost a %s to queue loss.",
                   AName(player, AN_SYS, NULL), unparse_dbref(player), MONEY);
   }
   if (queue_limit(QUEUE_PER_OWNER ? Owner(player) : player)) {
-    notify_format(Owner(player), T("Runaway object: %s(%s). Commands halted."),
+    notify_format(Owner(player), "Runaway object: %s(%s). Commands halted.",
                   AName(player, AN_SYS, NULL), unparse_dbref(player));
     do_log(LT_TRACE, player, player, "Runaway object %s executing: %s",
            unparse_dbref(player), command);
@@ -429,7 +429,7 @@ queue_event(dbref enactor, const char *event, const char *fmt, ...)
   pid = next_pid();
   if (pid == 0) {
     /* Too many queue entries */
-    notify(Owner(EVENT_HANDLER), T("Queue entry table full. Try again later."));
+    notify(Owner(EVENT_HANDLER), "Queue entry table full. Try again later.");
     return 0;
   }
 
@@ -551,7 +551,7 @@ insert_que(MQUE *queue_entry, MQUE *parent_queue)
       /* Too many queue entries */
       /* Should this be notifying the enactor instead? */
       notify(queue_entry->executor,
-             T("Queue entry table full. Try again later."));
+             "Queue entry table full. Try again later.");
       free_qentry(queue_entry);
       return;
     }
@@ -905,7 +905,7 @@ wait_que(dbref executor, int waittill, char *command, dbref enactor, dbref sem,
     return;
   pid = next_pid();
   if (pid == 0) {
-    notify(executor, T("Queue entry table full. Try again later."));
+    notify(executor, "Queue entry table full. Try again later.");
     return;
   }
   if (parent_queue)
@@ -1453,7 +1453,7 @@ COMMAND(cmd_notify_drain)
 
   /* Make sure they gave an object ref */
   if (!arg_left || !*arg_left) {
-    notify(executor, T("You must specify an object to use for the semaphore."));
+    notify(executor, "You must specify an object to use for the semaphore.");
     return;
   }
 
@@ -1463,7 +1463,7 @@ COMMAND(cmd_notify_drain)
     if (SW_ISSET(sw, SWITCH_ANY)) {
       notify(
         executor,
-        T("You may not specify a semaphore attribute with the ANY switch."));
+        "You may not specify a semaphore attribute with the ANY switch.");
       return;
     }
     *pos++ = '\0';
@@ -1486,7 +1486,7 @@ COMMAND(cmd_notify_drain)
    */
   if ((!controls(executor, thing) && !LinkOk(thing)) ||
       (aname && !waitable_attr(thing, aname))) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
@@ -1503,9 +1503,9 @@ COMMAND(cmd_notify_drain)
       }
     }
     if (execute_one_semaphore(thing, aname, pe_regs)) {
-      quiet_notify(executor, T("Notified."));
+      quiet_notify(executor, "Notified.");
     } else {
-      notify_format(executor, T("No such semaphore entry to notify."));
+      notify_format(executor, "No such semaphore entry to notify.");
     }
     pe_regs_free(pe_regs);
   } else {
@@ -1514,11 +1514,11 @@ COMMAND(cmd_notify_drain)
     if (args_right[1] && *args_right[1]) {
       if (all) {
         notify(executor,
-               T("You may not specify a semaphore count with the ALL switch."));
+               "You may not specify a semaphore count with the ALL switch.");
         return;
       }
       if (!is_strict_uinteger(args_right[1])) {
-        notify(executor, T("The semaphore count must be an integer."));
+        notify(executor, "The semaphore count must be an integer.");
         return;
       }
       count = parse_integer(args_right[1]);
@@ -1534,9 +1534,9 @@ COMMAND(cmd_notify_drain)
     dequeue_semaphores(thing, aname, count, all, drain);
 
     if (drain) {
-      quiet_notify(executor, T("Drained."));
+      quiet_notify(executor, "Drained.");
     } else {
-      quiet_notify(executor, T("Notified."));
+      quiet_notify(executor, "Notified.");
     }
   }
 }
@@ -1602,7 +1602,7 @@ do_wait(dbref executor, dbref enactor, char *arg1, const char *cmd, bool until,
 
   if ((!controls(executor, thing) && !LinkOk(thing)) ||
       (aname && !waitable_attr(thing, aname))) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
   /* get timeout, default of -1 */
@@ -1639,7 +1639,7 @@ do_waitpid(dbref player, const char *pidstr, const char *timestr, bool until)
   bool found;
 
   if (!is_strict_uinteger(pidstr)) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
@@ -1647,23 +1647,23 @@ do_waitpid(dbref player, const char *pidstr, const char *timestr, bool until)
   q = im_find(queue_map, pid);
 
   if (!q) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
   if (!controls(player, q->executor) && !HaltAny(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   if (q->semaphore_obj != NOTHING && q->wait_until == 0) {
     notify(player,
-           T("You cannot adjust the timeout of an indefinite semaphore."));
+           "You cannot adjust the timeout of an indefinite semaphore.");
     return;
   }
 
   if (!is_strict_integer(timestr)) {
-    notify(player, T("That is not a valid timestamp."));
+    notify(player, "That is not a valid timestamp.");
     return;
   }
 
@@ -1729,7 +1729,7 @@ do_waitpid(dbref player, const char *pidstr, const char *timestr, bool until)
     }
   }
 
-  notify_format(player, T("Queue entry with pid %u updated."),
+  notify_format(player, "Queue entry with pid %u updated.",
                 (unsigned int) pid);
 }
 
@@ -1750,7 +1750,7 @@ FUNCTION(fun_pidinfo)
   const MQUE *q = im_find(queue_map, pid);
 
   if (!q) {
-    safe_str(T("#-1 INVALID PID"), buff, bp);
+    safe_str("#-1 INVALID PID", buff, bp);
     return;
   }
 
@@ -1864,7 +1864,7 @@ FUNCTION(fun_lpids)
         else if (strcasecmp("independent", elem) == 0)
           qmask |= LPIDS_INDEPENDENT;
         else {
-          safe_str(T("#-1 INVALID ARGUMENT"), buff, bp);
+          safe_str("#-1 INVALID ARGUMENT", buff, bp);
           return;
         }
       }
@@ -2074,36 +2074,36 @@ do_queue(dbref player, const char *what, enum queue_type flag)
 
   switch (victim) {
   case NOTHING:
-    notify(player, T("I couldn't find that player."));
+    notify(player, "I couldn't find that player.");
     break;
   case AMBIGUOUS:
-    notify(player, T("I don't know who you mean!"));
+    notify(player, "I don't know who you mean!");
     break;
   default:
 
     if (!quick) {
       if (all)
-        notify(player, T("Queue for : all"));
+        notify(player, "Queue for : all");
       else
-        notify_format(player, T("Queue for : %s"), AName(victim, AN_SYS, NULL));
+        notify_format(player, "Queue for : %s", AName(victim, AN_SYS, NULL));
     }
     victim = Owner(victim);
     if (!quick)
-      notify(player, T("Command Queue:"));
+      notify(player, "Command Queue:");
     show_queue(player, victim, 0, quick, all, qfirst, &tpq, &pq, &dpq);
     if (!quick)
-      notify(player, T("Wait Queue:"));
+      notify(player, "Wait Queue:");
     show_queue(player, victim, 1, quick, all, qwait, &twq, &wq, &dwq);
     if (!quick)
-      notify(player, T("Semaphore Queue:"));
+      notify(player, "Semaphore Queue:");
     show_queue(player, victim, 2, quick, all, qsemfirst, &tsq, &sq, &dsq);
     if (!quick)
-      notify(player, T("------------  Queue Done  ------------"));
+      notify(player, "------------  Queue Done  ------------");
     notify_format(player,
-                  T("Totals: Player...%d/%d[%ddel]  "
-                    "Wait...%d/%d[%ddel]  Semaphore...%d/%d"),
+                  "Totals: Player...%d/%d[%ddel]  "
+                    "Wait...%d/%d[%ddel]  Semaphore...%d/%d",
                   pq, tpq, dpq, wq, twq, dwq, sq, tsq);
-    notify_format(player, T("Load average (1/5/15 minutes): %.2f %.2f %.2f"),
+    notify_format(player, "Load average (1/5/15 minutes): %.2f %.2f %.2f",
                   average32(queue_load_record, 60),
                   average32(queue_load_record, 300),
                   average32(queue_load_record, 900));
@@ -2125,19 +2125,19 @@ do_queue_single(dbref player, const char *pidstr, bool debug)
   MQUE *q;
 
   if (!is_strict_uinteger(pidstr)) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
   pid = parse_uint32(pidstr, NULL, 10);
   q = im_find(queue_map, pid);
   if (!q) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
   if (!LookQueue(player) && Owner(player) != Owner(q->executor)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -2170,7 +2170,7 @@ do_halt(dbref owner, const char *ncom, dbref victim)
   else
     player = victim;
   if (!Quiet(Owner(player)))
-    notify_format(Owner(player), "%s: %s(#%d)", T("Halted"),
+    notify_format(Owner(player), "%s: %s(#%d)", "Halted",
                   AName(player, AN_SYS, NULL), player);
   for (tmp = qfirst; tmp; tmp = tmp->next) {
     if (GoodObject(tmp->executor) &&
@@ -2239,11 +2239,11 @@ do_halt1(dbref player, const char *arg1, const char *arg2)
                                      MAT_OBJECTS | MAT_HERE)) == NOTHING)
       return;
     if (!Owns(player, victim) && !HaltAny(player)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     if (arg2 && *arg2 && !controls(player, victim)) {
-      notify(player, T("You may not use @halt obj=command on this object."));
+      notify(player, "You may not use @halt obj=command on this object.");
       return;
     }
     /* If victim's a player, we halt all of their objects */
@@ -2252,11 +2252,11 @@ do_halt1(dbref player, const char *arg1, const char *arg2)
     do_halt(player, arg2, victim);
     if (IsPlayer(victim)) {
       if (victim == player) {
-        notify(player, T("All of your objects have been halted."));
+        notify(player, "All of your objects have been halted.");
       } else {
-        notify_format(player, T("All objects for %s have been halted."),
+        notify_format(player, "All objects for %s have been halted.",
                       AName(victim, AN_SYS, NULL));
-        notify_format(victim, T("All of your objects have been halted by %s."),
+        notify_format(victim, "All of your objects have been halted by %s.",
                       AName(player, AN_SYS, NULL));
       }
     } else {
@@ -2265,9 +2265,9 @@ do_halt1(dbref player, const char *arg1, const char *arg2)
         char obj[BUFFER_LEN];
         strcpy(owner, AName(Owner(victim), AN_SYS, NULL));
         strcpy(obj, AName(victim, AN_SYS, NULL));
-        notify_format(player, "%s: %s's %s(%s)", T("Halted"), owner, obj,
+        notify_format(player, "%s: %s's %s(%s)", "Halted", owner, obj,
                       unparse_dbref(victim));
-        notify_format(Owner(victim), "%s: %s(%s), by %s", T("Halted"), obj,
+        notify_format(Owner(victim), "%s: %s(%s), by %s", "Halted", obj,
                       unparse_dbref(victim), AName(player, AN_SYS, NULL));
       }
       if (arg2 && *arg2 == '\0')
@@ -2287,20 +2287,20 @@ do_haltpid(dbref player, const char *arg1)
   MQUE *q;
   dbref victim;
   if (!is_strict_uinteger(arg1)) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
   pid = parse_uint32(arg1, NULL, 10);
   q = im_find(queue_map, pid);
   if (!q) {
-    notify(player, T("That is not a valid pid!"));
+    notify(player, "That is not a valid pid!");
     return;
   }
 
   victim = q->executor;
   if (!controls(player, victim) && !HaltAny(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -2328,7 +2328,7 @@ do_haltpid(dbref player, const char *arg1)
     free_qentry(q);
   }
 
-  notify_format(player, T("Queue entry with pid %u halted."),
+  notify_format(player, "Queue entry with pid %u halted.",
                 (unsigned int) pid);
 }
 
@@ -2341,12 +2341,12 @@ do_allhalt(dbref player)
   dbref victim;
   if (!HaltAny(player)) {
     notify(player,
-           T("You do not have the power to bring the world to a halt."));
+           "You do not have the power to bring the world to a halt.");
     return;
   }
   for (victim = 0; victim < db_top; victim++) {
     if (IsPlayer(victim)) {
-      notify_format(victim, T("Your objects have been globally halted by %s"),
+      notify_format(victim, "Your objects have been globally halted by %s",
                     AName(player, AN_SYS, NULL));
       do_halt(victim, "", victim);
     }
@@ -2364,7 +2364,7 @@ do_allrestart(dbref player)
 {
   dbref thing;
   if (!HaltAny(player)) {
-    notify(player, T("You do not have the power to restart the world."));
+    notify(player, "You do not have the power to restart the world.");
     return;
   }
   do_allhalt(player);
@@ -2375,7 +2375,7 @@ do_allrestart(dbref player)
       do_top(5);
     }
     if (IsPlayer(thing)) {
-      notify_format(thing, T("Your objects are being globally restarted by %s"),
+      notify_format(thing, "Your objects are being globally restarted by %s",
                     AName(player, AN_SYS, NULL));
     }
   }
@@ -2413,31 +2413,31 @@ do_restart_com(dbref player, const char *arg1)
         NOTHING)
       return;
     if (!Owns(player, victim) && !HaltAny(player)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     if (Owner(victim) != player) {
       if (IsPlayer(victim)) {
-        notify_format(player, T("All objects for %s are being restarted."),
+        notify_format(player, "All objects for %s are being restarted.",
                       AName(victim, AN_SYS, NULL));
         notify_format(victim,
-                      T("All of your objects are being restarted by %s."),
+                      "All of your objects are being restarted by %s.",
                       AName(player, AN_SYS, NULL));
       } else {
         char owner[BUFFER_LEN];
         char obj[BUFFER_LEN];
         strcpy(owner, AName(Owner(victim), AN_SYS, NULL));
         strcpy(obj, AName(victim, AN_SYS, NULL));
-        notify_format(player, T("Restarting: %s's %s(%s)"), owner, obj,
+        notify_format(player, "Restarting: %s's %s(%s)", owner, obj,
                       unparse_dbref(victim));
-        notify_format(Owner(victim), T("Restarting: %s(%s), by %s"), obj,
+        notify_format(Owner(victim), "Restarting: %s(%s), by %s", obj,
                       unparse_dbref(victim), AName(player, AN_SYS, NULL));
       }
     } else {
       if (victim == player)
-        notify(player, T("All of your objects are being restarted."));
+        notify(player, "All of your objects are being restarted.");
       else
-        notify_format(player, T("Restarting: %s(%s)"),
+        notify_format(player, "Restarting: %s(%s)",
                       AName(victim, AN_SYS, NULL), unparse_dbref(victim));
     }
     do_halt(player, "", victim);
