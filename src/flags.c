@@ -345,7 +345,7 @@ realloc_object_flag_bitmasks(FLAGSPACE *n)
   int i, numbytes;
 
 #ifdef DEBUG
-  do_rawlog(LT_TRACE, T("Resizing object flag arrays."));
+  do_rawlog(LT_TRACE, "Resizing object flag arrays.");
 #endif
 
   numbytes = FlagBytes(n);
@@ -1554,7 +1554,7 @@ can_set_power(dbref player, dbref thing, const FLAG *flagp, int negate)
   if (!can_set_flag_generic(player, thing, flagp, negate))
     return 0;
   if (Hasprivs(thing) && (is_flag(flagp, "GUEST"))) {
-    notify(player, T("You can't make admin into guests."));
+    notify(player, "You can't make admin into guests.");
     return 0;
   }
   return 1;
@@ -1597,7 +1597,7 @@ can_set_flag(dbref player, dbref thing, const FLAG *flagp, int negate)
   if (!negate && is_flag(flagp, "SHARED") &&
       (getlock(thing, Zone_Lock) == TRUE_BOOLEXP)) {
     notify(player,
-           T("You must @lock/zone before you can set a player SHARED."));
+           "You must @lock/zone before you can set a player SHARED.");
     return 0;
   }
 
@@ -1686,9 +1686,9 @@ flag_description(dbref player, dbref thing)
   static char buf[BUFFER_LEN];
   char *bp;
   bp = buf;
-  safe_str(T("Type: "), buf, &bp);
+  safe_str("Type: ", buf, &bp);
   safe_str(privs_to_string(type_privs, Typeof(thing)), buf, &bp);
-  safe_str(T(" Flags: "), buf, &bp);
+  safe_str(" Flags: ", buf, &bp);
   safe_str(bits_to_string("FLAG", Flags(thing), player, thing), buf, &bp);
   *bp = '\0';
   return buf;
@@ -1774,7 +1774,7 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
 
   n = hashfind("FLAG", &htab_flagspaces);
   if (!n) {
-    notify_format(player, T("Internal error: Unable to find flagspace '%s'!"),
+    notify_format(player, "Internal error: Unable to find flagspace '%s'!",
                   "FLAG");
     return;
   }
@@ -1786,19 +1786,19 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
                     flag, suggestion);
       mush_free(suggestion, "string");
     } else {
-      notify_format(player, T("%s - I don't recognize that flag."), flag);
+      notify_format(player, "%s - I don't recognize that flag.", flag);
     }
     return;
   }
 
   if (!can_set_flag(player, thing, f, negate)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   /* The only players who can be Dark are wizards. */
   if (is_flag(f, "DARK") && !negate && Alive(thing) && !Wizard(thing) &&
       !has_power_by_name(thing, "Can_dark", NOTYPE)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -1821,7 +1821,7 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
     if (!IsPlayer(thing) && (hear || listener) && !Hearer(thing) &&
         !Listener(thing)) {
       tp = tbuf1;
-      safe_format(tbuf1, &tp, T("%s is no longer listening."),
+      safe_format(tbuf1, &tp, "%s is no longer listening.",
                   AName(thing, AN_SAY, NULL));
       *tp = '\0';
       if (GoodObject(Location(thing)))
@@ -1834,7 +1834,7 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
       case TYPE_EXIT:
         if (Audible(Source(thing))) {
           tp = tbuf1;
-          safe_format(tbuf1, &tp, T("Exit %s is no longer broadcasting."),
+          safe_format(tbuf1, &tp, "Exit %s is no longer broadcasting.",
                       AName(thing, AN_SAY, NULL));
           *tp = '\0';
           notify_except(thing, Source(thing), NOTHING, tbuf1, 0);
@@ -1842,14 +1842,14 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
         break;
       case TYPE_ROOM:
         notify_except(thing, thing, NOTHING,
-                      T("Audible exits in this room have been deactivated."),
+                      "Audible exits in this room have been deactivated.",
                       0);
         break;
       case TYPE_THING:
       case TYPE_PLAYER:
         notify_except(thing, thing, thing,
-                      T("This room is no longer broadcasting."), 0);
-        notify(thing, T("Your contents can no longer be heard from outside."));
+                      "This room is no longer broadcasting.", 0);
+        notify(thing, "Your contents can no longer be heard from outside.");
         break;
       }
     }
@@ -1859,8 +1859,8 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
       safe_str(" - ", tbuf1, &tp);
       safe_str(f->name, tbuf1, &tp);
       if (!current)
-        safe_str(T(" (already)"), tbuf1, &tp);
-      safe_str(T(" reset."), tbuf1, &tp);
+        safe_str(" (already)", tbuf1, &tp);
+      safe_str(" reset.", tbuf1, &tp);
       *tp = '\0';
       notify(player, tbuf1);
     }
@@ -1873,14 +1873,14 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
       queue_event(player, "OBJECT`FLAG", "%s,%s,%s,%d,%s", unparse_objid(thing),
                   f->name, "FLAG", 1, "SET");
     if (is_flag(f, "TRUST") && GoodObject(Zone(thing)))
-      notify(player, T("Warning: Setting trust flag on zoned object"));
+      notify(player, "Warning: Setting trust flag on zoned object");
     if (is_flag(f, "SHARED"))
       check_zone_lock(player, thing, 1);
     /* notify area if something starts listening */
     if (!IsPlayer(thing) && (is_flag(f, "PUPPET") || is_flag(f, "MONITOR")) &&
         !hear && !listener) {
       tp = tbuf1;
-      safe_format(tbuf1, &tp, T("%s is now listening."),
+      safe_format(tbuf1, &tp, "%s is now listening.",
                   AName(thing, AN_SAY, NULL));
       *tp = '\0';
       if (GoodObject(Location(thing)))
@@ -1894,7 +1894,7 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
       case TYPE_EXIT:
         if (Audible(Source(thing))) {
           tp = tbuf1;
-          safe_format(tbuf1, &tp, T("Exit %s is now broadcasting."),
+          safe_format(tbuf1, &tp, "Exit %s is now broadcasting.",
                       AName(thing, AN_SAY, NULL));
           *tp = '\0';
           notify_except(thing, Source(thing), NOTHING, tbuf1, 0);
@@ -1902,13 +1902,13 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
         break;
       case TYPE_ROOM:
         notify_except(thing, thing, NOTHING,
-                      T("Audible exits in this room have been activated."), 0);
+                      "Audible exits in this room have been activated.", 0);
         break;
       case TYPE_PLAYER:
       case TYPE_THING:
-        notify_except(thing, thing, thing, T("This room is now broadcasting."),
+        notify_except(thing, thing, thing, "This room is now broadcasting.",
                       0);
-        notify(thing, T("Your contents can now be heard from outside."));
+        notify(thing, "Your contents can now be heard from outside.");
         break;
       }
     }
@@ -1918,8 +1918,8 @@ set_flag(dbref player, dbref thing, const char *flag, int negate, int hear,
       safe_str(" - ", tbuf1, &tp);
       safe_str(f->name, tbuf1, &tp);
       if (current)
-        safe_str(T(" (already)"), tbuf1, &tp);
-      safe_str(T(" set."), tbuf1, &tp);
+        safe_str(" (already)", tbuf1, &tp);
+      safe_str(" set.", tbuf1, &tp);
       *tp = '\0';
       notify(player, tbuf1);
     }
@@ -1946,7 +1946,7 @@ set_power(dbref player, dbref thing, const char *flag, int negate)
 
   n = hashfind("POWER", &htab_flagspaces);
   if (!n) {
-    notify_format(player, T("Internal error: Unable to find flagspace '%s'!"),
+    notify_format(player, "Internal error: Unable to find flagspace '%s'!",
                   "POWER");
     return;
   }
@@ -1959,13 +1959,13 @@ set_power(dbref player, dbref thing, const char *flag, int negate)
                     flag, suggestion);
       mush_free(suggestion, "string");
     } else {
-      notify_format(player, T("%s - I don't recognize that power."), flag);
+      notify_format(player, "%s - I don't recognize that power.", flag);
     }
     return;
   }
 
   if (!can_set_power(player, thing, f, negate)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -1980,18 +1980,18 @@ set_power(dbref player, dbref thing, const char *flag, int negate)
     tp = tbuf1;
     if (negate) {
       if (current) {
-        safe_format(tbuf1, &tp, T("%s - %s removed."),
+        safe_format(tbuf1, &tp, "%s - %s removed.",
                     AName(thing, AN_SYS, NULL), f->name);
       } else {
-        safe_format(tbuf1, &tp, T("%s - %s (already) removed."),
+        safe_format(tbuf1, &tp, "%s - %s (already) removed.",
                     AName(thing, AN_SYS, NULL), f->name);
       }
     } else {
       if (current) {
-        safe_format(tbuf1, &tp, T("%s - %s (already) granted."),
+        safe_format(tbuf1, &tp, "%s - %s (already) granted.",
                     AName(thing, AN_SYS, NULL), f->name);
       } else {
-        safe_format(tbuf1, &tp, T("%s - %s granted."),
+        safe_format(tbuf1, &tp, "%s - %s granted.",
                     AName(thing, AN_SYS, NULL), f->name);
       }
     }
@@ -2001,7 +2001,7 @@ set_power(dbref player, dbref thing, const char *flag, int negate)
 
   if (f->perms & F_LOG)
     do_log(LT_WIZ, player, thing, "%s POWER %s", f->name,
-           negate ? T("CLEARED") : T("SET"));
+           negate ? "CLEARED" : "SET");
   if (f->perms & F_EVENT) {
     queue_event(player, "OBJECT`FLAG", "%s,%s,%s,%d,%s", unparse_objid(thing),
                 f->name, "POWER", !negate, (negate ? "CLEARED" : "SET"));
@@ -2332,17 +2332,17 @@ do_flag_info(const char *ns, dbref player, const char *name)
     f = match_flag_ns(n, name);
   if (!f) {
     char tmp[BUFFER_LEN];
-    notify_format(player, T("No such %s."), strlower_r(ns, tmp, sizeof tmp));
+    notify_format(player, "No such %s.", strlower_r(ns, tmp, sizeof tmp));
     return;
   }
-  notify_format(player, "%9s: %s", T("Name"), f->name);
-  notify_format(player, "%9s: %c", T("Character"), f->letter);
-  notify_format(player, "%9s: %s", T("Aliases"), list_aliases(n, f));
-  notify_format(player, "%9s: %s", T("Type(s)"),
+  notify_format(player, "%9s: %s", "Name", f->name);
+  notify_format(player, "%9s: %c", "Character", f->letter);
+  notify_format(player, "%9s: %s", "Aliases", list_aliases(n, f));
+  notify_format(player, "%9s: %s", "Type(s)",
                 privs_to_string(type_privs, f->type));
-  notify_format(player, "%9s: %s", T("Perms"),
+  notify_format(player, "%9s: %s", "Perms",
                 privs_to_string(flag_privs, f->perms));
-  notify_format(player, "%9s: %s", T("ResetPrms"),
+  notify_format(player, "%9s: %s", "ResetPrms",
                 privs_to_string(flag_privs, f->negate_perms));
 }
 
@@ -2369,16 +2369,16 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't have enough magic for that."));
+    notify(player, "You don't have enough magic for that.");
     return;
   }
   n = hashfind(ns, &htab_flagspaces);
   if (!(f = flag_hash_lookup(n, name, NOTYPE))) {
-    notify_format(player, T("No such %s."), strlower_r(ns, tmp, sizeof tmp));
+    notify_format(player, "No such %s.", strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (!args_right[1] || !*args_right[1]) {
-    notify_format(player, T("How do you want to restrict that %s?"),
+    notify_format(player, "How do you want to restrict that %s?",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
@@ -2387,7 +2387,7 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
   } else {
     perms = string_to_privs(flag_privs, args_right[1], 0);
     if ((!perms) || (perms & (F_INTERNAL | F_DISABLED))) {
-      notify(player, T("I don't understand those permissions."));
+      notify(player, "I don't understand those permissions.");
       return;
     }
   }
@@ -2397,7 +2397,7 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
     } else {
       negate_perms = string_to_privs(flag_privs, args_right[2], 0);
       if ((!negate_perms) || (negate_perms & (F_INTERNAL | F_DISABLED))) {
-        notify(player, T("I don't understand those permissions."));
+        notify(player, "I don't understand those permissions.");
         return;
       }
     }
@@ -2406,7 +2406,7 @@ do_flag_restrict(const char *ns, dbref player, const char *name,
   }
   f->perms = perms;
   f->negate_perms = negate_perms;
-  notify_format(player, T("Permissions on %s %s set."), f->name,
+  notify_format(player, "Permissions on %s %s set.", f->name,
                 strlower_r(ns, tmp, sizeof tmp));
 }
 
@@ -2433,16 +2433,16 @@ do_flag_type(const char *ns, dbref player, const char *name, const char *type_st
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't have enough magic for that."));
+    notify(player, "You don't have enough magic for that.");
     return;
   }
   n = hashfind(ns, &htab_flagspaces);
   if (!(f = flag_hash_lookup(n, name, NOTYPE))) {
-    notify_format(player, T("No such %s."), strlower_r(ns, tmp, sizeof tmp));
+    notify_format(player, "No such %s.", strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (!type_string || !*type_string) {
-    notify_format(player, T("What type do you want to make that %s?"),
+    notify_format(player, "What type do you want to make that %s?",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
@@ -2451,7 +2451,7 @@ do_flag_type(const char *ns, dbref player, const char *name, const char *type_st
   } else {
     type = string_to_privs(type_privs, type_string, 0);
     if (!type) {
-      notify(player, T("I don't understand the list of types."));
+      notify(player, "I don't understand the list of types.");
       return;
     }
     /* Are there any objects with the flag that don't match these
@@ -2461,15 +2461,15 @@ do_flag_type(const char *ns, dbref player, const char *name, const char *type_st
     for (it = 0; it < db_top; it++) {
       if (!(type & Typeof(it)) && has_flag_ns(n, it, f)) {
         notify_format(player,
-                      T("Objects of other types already have this %s "
-                        "set. Search for them and remove it first."),
+                      "Objects of other types already have this %s "
+                        "set. Search for them and remove it first.",
                       strlower_r(ns, tmp, sizeof tmp));
         return;
       }
     }
   }
   set_flag_type_by_name(ns, name, type);
-  notify_format(player, T("Type of %s %s set."), f->name,
+  notify_format(player, "Type of %s %s set.", f->name,
                 strlower_r(ns, tmp, sizeof tmp));
 }
 
@@ -2515,41 +2515,41 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't have enough magic for that."));
+    notify(player, "You don't have enough magic for that.");
     return;
   }
 
   /* Some of these checks are done in add_flag_generic(), but are dupliated
    * here to allow more specific error messages */
   if (!name || !*name) {
-    notify_format(player, T("You must provide a name for the %s."),
+    notify_format(player, "You must provide a name for the %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (strlen(name) == 1) {
-    notify_format(player, T("%s names must be longer than one character."),
+    notify_format(player, "%s names must be longer than one character.",
                   strinitial_r(ns, tmp, sizeof tmp));
     return;
   }
   if (strchr(name, ' ')) {
-    notify_format(player, T("%s names may not contain spaces."),
+    notify_format(player, "%s names may not contain spaces.",
                   strinitial_r(ns, tmp, sizeof tmp));
     return;
   }
   if (!good_flag_name(strupper_r(name, tmp, sizeof tmp))) {
-    notify_format(player, T("That's not a valid %s name."),
+    notify_format(player, "That's not a valid %s name.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   Flagspace_Lookup(n, ns);
   /* Do we have a letter? */
   if (!args_right) {
-    notify(player, T("You must provide more information."));
+    notify(player, "You must provide more information.");
     return;
   }
   if (args_right[1]) {
     if (strlen(args_right[1]) > 1) {
-      notify_format(player, T("%s characters must be single characters."),
+      notify_format(player, "%s characters must be single characters.",
                     strinitial_r(ns, tmp, sizeof tmp));
       return;
     }
@@ -2559,14 +2559,14 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
       if (*args_right[2] && strcasecmp(args_right[2], "any"))
         type = string_to_privs(type_privs, args_right[2], 0);
       if (!type) {
-        notify(player, T("I don't understand the list of types."));
+        notify(player, "I don't understand the list of types.");
         return;
       }
     }
     /* Is this letter already in use for this type? */
     if (letter) {
       if ((f = letter_to_flagptr(n, letter, type))) {
-        notify_format(player, T("Letter conflicts with the %s %s."), f->name,
+        notify_format(player, "Letter conflicts with the %s %s.", f->name,
                       strlower_r(ns, tmp, sizeof tmp));
         return;
       }
@@ -2578,7 +2578,7 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
       } else {
         perms = string_to_privs(flag_privs, args_right[3], 0);
         if ((!perms) || (perms & (F_INTERNAL | F_DISABLED))) {
-          notify(player, T("I don't understand those permissions."));
+          notify(player, "I don't understand those permissions.");
           return;
         }
       }
@@ -2589,7 +2589,7 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
       } else {
         negate_perms = string_to_privs(flag_privs, args_right[4], 0);
         if ((!negate_perms) || (negate_perms & (F_INTERNAL | F_DISABLED))) {
-          notify(player, T("I don't understand those permissions."));
+          notify(player, "I don't understand those permissions.");
           return;
         }
       }
@@ -2605,17 +2605,17 @@ do_flag_add(const char *ns, dbref player, const char *name, char *args_right[])
     do_flag_info(ns, player, name);
     break;
   case FLAG_NAME:
-    notify_format(player, T("That's not a valid %s name."),
+    notify_format(player, "That's not a valid %s name.",
                   strlower_r(ns, tmp, sizeof tmp));
     break;
   case FLAG_LETTER:
-    notify_format(player, T("Invalid %s letter."),
+    notify_format(player, "Invalid %s letter.",
                   strlower_r(ns, tmp, sizeof tmp));
     break;
   case FLAG_PERMS:
   case FLAG_TYPE:
   default:
-    notify_format(player, T("Unknown failure adding %s."),
+    notify_format(player, "Unknown failure adding %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     break;
   }
@@ -2639,11 +2639,11 @@ do_flag_alias(const char *ns, dbref player, const char *name, const char *alias)
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't look like God."));
+    notify(player, "You don't look like God.");
     return;
   }
   if (!alias || !*alias) {
-    notify(player, T("You must provide a name for the alias."));
+    notify(player, "You must provide a name for the alias.");
     return;
   }
   if (*alias == '!') {
@@ -2651,53 +2651,53 @@ do_flag_alias(const char *ns, dbref player, const char *name, const char *alias)
     alias++;
   }
   if (strlen(alias) <= 1) {
-    notify_format(player, T("%s aliases must be longer than one character."),
+    notify_format(player, "%s aliases must be longer than one character.",
                   strinitial_r(ns, tmp, sizeof tmp));
     return;
   }
   if (strchr(alias, ' ')) {
-    notify_format(player, T("%s aliases may not contain spaces."),
+    notify_format(player, "%s aliases may not contain spaces.",
                   strinitial_r(ns, tmp, sizeof tmp));
     return;
   }
   n = hashfind(ns, &htab_flagspaces);
   if (!n) {
-    notify_format(player, T("Internal error: Unknown flag space '%s'!"), ns);
+    notify_format(player, "Internal error: Unknown flag space '%s'!", ns);
     return;
   }
 
   af = match_flag_ns(n, alias);
   if (!delete &&af) {
-    notify_format(player, T("That alias already matches the %s %s."), af->name,
+    notify_format(player, "That alias already matches the %s %s.", af->name,
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   f = match_flag_ns(n, name);
   if (!f) {
-    notify_format(player, T("I don't know that %s."),
+    notify_format(player, "I don't know that %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (f->perms & F_DISABLED) {
-    notify_format(player, T("That %s is disabled."),
+    notify_format(player, "That %s is disabled.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (delete &&!af) {
-    notify_format(player, T("That isn't an alias of the %s %s."), f->name,
+    notify_format(player, "That isn't an alias of the %s %s.", f->name,
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (delete) {
     /* Delete the alias in the ptab if it's really an alias! */
     if (!strcasecmp(n->flags[f->bitpos]->name, alias)) {
-      notify_format(player, T("That's the %s's name, not an alias."),
+      notify_format(player, "That's the %s's name, not an alias.",
                     strlower_r(ns, tmp, sizeof tmp));
       return;
     }
     ptab_delete(n->tab, alias);
     if (match_flag_ns(n, alias)) {
-      notify(player, T("Unknown failure deleting alias."));
+      notify(player, "Unknown failure deleting alias.");
     } else {
       do_flag_info(ns, player, f->name);
     }
@@ -2706,7 +2706,7 @@ do_flag_alias(const char *ns, dbref player, const char *name, const char *alias)
     if (alias_flag_generic(ns, name, alias)) {
       do_flag_info(ns, player, alias);
     } else {
-      notify(player, T("Unknown failure adding alias."));
+      notify(player, "Unknown failure adding alias.");
     }
   }
 }
@@ -2763,13 +2763,13 @@ do_flag_letter(const char *ns, dbref player, const char *name,
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't look like God."));
+    notify(player, "You don't look like God.");
     return;
   }
   Flagspace_Lookup(n, ns);
   f = match_flag_ns(n, name);
   if (!f) {
-    notify_format(player, T("I don't know that %s."),
+    notify_format(player, "I don't know that %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
@@ -2777,23 +2777,23 @@ do_flag_letter(const char *ns, dbref player, const char *name,
     const FLAG *other;
 
     if (strlen(letter) > 1) {
-      notify_format(player, T("%s characters must be single characters."),
+      notify_format(player, "%s characters must be single characters.",
                     strinitial_r(ns, tmp, sizeof tmp));
       return;
     }
 
     if ((other = letter_to_flagptr(n, *letter, f->type))) {
-      notify_format(player, T("Letter conflicts with the %s %s."), other->name,
+      notify_format(player, "Letter conflicts with the %s %s.", other->name,
                     strlower_r(ns, tmp, sizeof tmp));
       return;
     }
 
     f->letter = *letter;
-    notify_format(player, T("Letter for %s %s set to '%c'."),
+    notify_format(player, "Letter for %s %s set to '%c'.",
                   strlower_r(ns, tmp, sizeof tmp), f->name, *letter);
   } else { /* Clear a flag */
     f->letter = '\0';
-    notify_format(player, T("Letter for %s %s cleared."),
+    notify_format(player, "Letter for %s %s cleared.",
                   strlower_r(ns, tmp, sizeof tmp), f->name);
   }
 }
@@ -2817,24 +2817,24 @@ do_flag_disable(const char *ns, dbref player, const char *name)
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't look like God."));
+    notify(player, "You don't look like God.");
     return;
   }
   Flagspace_Lookup(n, ns);
   f = match_flag_ns(n, name);
   if (!f) {
-    notify_format(player, T("I don't know that %s."),
+    notify_format(player, "I don't know that %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (f->perms & F_DISABLED) {
-    notify_format(player, T("That %s is already disabled."),
+    notify_format(player, "That %s is already disabled.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   /* Do it. */
   f->perms |= F_DISABLED;
-  notify_format(player, T("%s %s disabled."), strinitial_r(ns, tmp, sizeof tmp),
+  notify_format(player, "%s %s disabled.", strinitial_r(ns, tmp, sizeof tmp),
                 f->name);
 }
 
@@ -2861,22 +2861,22 @@ do_flag_delete(const char *ns, dbref player, const char *name)
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't look like God."));
+    notify(player, "You don't look like God.");
     return;
   }
   n = hashfind(ns, &htab_flagspaces);
   if (!n) {
-    notify_format(player, T("Internal error: Unknown flagspace '%s'!"), ns);
+    notify_format(player, "Internal error: Unknown flagspace '%s'!", ns);
     return;
   }
   f = ptab_find_exact(n->tab, name);
   if (!f) {
-    notify_format(player, T("I don't know that %s."),
+    notify_format(player, "I don't know that %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (f->perms & F_INTERNAL) {
-    notify(player, T("There are probably easier ways to crash your MUSH."));
+    notify(player, "There are probably easier ways to crash your MUSH.");
     return;
   }
   /* Remove aliases. Convoluted because ptab_delete probably trashes
@@ -2908,7 +2908,7 @@ do_flag_delete(const char *ns, dbref player, const char *name)
   /* Remove the flag from the ptab */
   ptab_delete(n->tab, f->name);
   delete_private_vocab(f->name, n->name);
-  notify_format(player, T("%s %s deleted."), strinitial_r(ns, tmp, sizeof tmp),
+  notify_format(player, "%s %s deleted.", strinitial_r(ns, tmp, sizeof tmp),
                 f->name);
   /* Free the flag. */
   mush_free((void *) f->name, "flag.name");
@@ -2932,24 +2932,24 @@ do_flag_enable(const char *ns, dbref player, const char *name)
   char tmp[BUFFER_LEN];
 
   if (!God(player)) {
-    notify(player, T("You don't look like God."));
+    notify(player, "You don't look like God.");
     return;
   }
   Flagspace_Lookup(n, ns);
   f = match_flag_ns(n, name);
   if (!f) {
-    notify_format(player, T("I don't know that %s."),
+    notify_format(player, "I don't know that %s.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   if (!(f->perms & F_DISABLED)) {
-    notify_format(player, T("That %s is not disabled."),
+    notify_format(player, "That %s is not disabled.",
                   strlower_r(ns, tmp, sizeof tmp));
     return;
   }
   /* Do it. */
   f->perms &= ~F_DISABLED;
-  notify_format(player, T("%s %s enabled."), strinitial_r(ns, tmp, sizeof tmp),
+  notify_format(player, "%s %s enabled.", strinitial_r(ns, tmp, sizeof tmp),
                 f->name);
 }
 
@@ -3052,7 +3052,7 @@ list_all_flags(const char *ns, const char *name, dbref privs, int which)
       if (f->letter != '\0')
         safe_format(buf, &bp, " (%c)", f->letter);
       if (f->perms & F_DISABLED)
-        safe_str(T(" (disabled)"), buf, &bp);
+        safe_str(" (disabled)", buf, &bp);
     } else if (which & FLAG_LIST_NAME) {
       if (i)
         safe_chr(' ', buf, &bp);
@@ -3167,7 +3167,7 @@ do_flag_debug(const char *ns, dbref player)
   int i;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
