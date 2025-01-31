@@ -173,7 +173,7 @@ FUNCTION(fun_ctu)
   }
 
   if (!args[1] || !args[2]) {
-    safe_str(T("#-1 INVALID ANGLE TYPE"), buff, bp);
+    safe_str("#-1 INVALID ANGLE TYPE", buff, bp);
     return;
   }
   angle = angle_to_rad(parse_number(args[0]), args[1]);
@@ -268,7 +268,7 @@ FUNCTION(fun_inc)
   }
   /* Handle a null string */
   if (!*args[0]) {
-    safe_str(NULL_EQ_ZERO ? "1" : T("#-1 ARGUMENT MUST END IN AN INTEGER"),
+    safe_str(NULL_EQ_ZERO ? "1" : "#-1 ARGUMENT MUST END IN AN INTEGER",
              buff, bp);
     return;
   }
@@ -278,7 +278,7 @@ FUNCTION(fun_inc)
       safe_str(args[0], buff, bp);
       safe_str("1", buff, bp);
     } else
-      safe_str(T("#-1 ARGUMENT MUST END IN AN INTEGER"), buff, bp);
+      safe_str("#-1 ARGUMENT MUST END IN AN INTEGER", buff, bp);
     return;
   }
   while ((isdigit(*p) || (*p == '-')) && p != args[0]) {
@@ -315,7 +315,7 @@ FUNCTION(fun_dec)
   }
   /* Handle a null string */
   if (!*args[0]) {
-    safe_str(NULL_EQ_ZERO ? "-1" : T("#-1 ARGUMENT MUST END IN AN INTEGER"),
+    safe_str(NULL_EQ_ZERO ? "-1" : "#-1 ARGUMENT MUST END IN AN INTEGER",
              buff, bp);
     return;
   }
@@ -325,7 +325,7 @@ FUNCTION(fun_dec)
       safe_str(args[0], buff, bp);
       safe_str("-1", buff, bp);
     } else
-      safe_str(T("#-1 ARGUMENT MUST END IN AN INTEGER"), buff, bp);
+      safe_str("#-1 ARGUMENT MUST END IN AN INTEGER", buff, bp);
     return;
   }
   while ((isdigit(*p) || (*p == '-')) && p != args[0]) {
@@ -402,7 +402,7 @@ FUNCTION(fun_vmax)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -413,7 +413,7 @@ FUNCTION(fun_vmax)
 
   /* return if a list is empty */
   if (!*p1 || !*p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -433,7 +433,7 @@ FUNCTION(fun_vmax)
   /* make sure vectors were the same length */
   if (p1 || p2) {
     *bp = start;
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 }
@@ -448,7 +448,7 @@ FUNCTION(fun_vmin)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -477,7 +477,7 @@ FUNCTION(fun_vmin)
   /* make sure vectors were the same length */
   if (p1 || p2) {
     *bp = start;
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 }
@@ -491,7 +491,7 @@ FUNCTION(fun_vadd)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -502,7 +502,7 @@ FUNCTION(fun_vadd)
 
   /* return if a list is empty */
   if (!*p1 || !*p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -521,7 +521,7 @@ FUNCTION(fun_vadd)
   /* make sure vectors were the same length */
   if (p1 || p2) {
     *bp = start;
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 }
@@ -535,7 +535,7 @@ FUNCTION(fun_vsub)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -546,7 +546,7 @@ FUNCTION(fun_vsub)
 
   /* return if a list is empty */
   if (!*p1 || !*p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -565,7 +565,7 @@ FUNCTION(fun_vsub)
   /* make sure vectors were the same length */
   if (p1 || p2) {
     *bp = start;
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 }
@@ -580,7 +580,7 @@ FUNCTION(fun_vmul)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -591,7 +591,7 @@ FUNCTION(fun_vmul)
 
   /* return if a list is empty */
   if (!*p1 || !*p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -625,7 +625,7 @@ FUNCTION(fun_vmul)
     /* make sure vectors were the same length */
     if (p1 || p2) {
       *bp = start;
-      safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+      safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
       return;
     }
   }
@@ -640,7 +640,7 @@ FUNCTION(fun_vdot)
 
   /* return if a list is empty */
   if (!args[0] || !args[1]) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -651,7 +651,7 @@ FUNCTION(fun_vdot)
 
   /* return if a list is empty */
   if (!*p1 || !*p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
 
@@ -662,7 +662,7 @@ FUNCTION(fun_vdot)
       parse_number(split_token(&p1, sep)) * parse_number(split_token(&p2, sep));
   }
   if (p1 || p2) {
-    safe_str(T("#-1 VECTORS MUST BE SAME DIMENSIONS"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE SAME DIMENSIONS", buff, bp);
     return;
   }
   safe_number(product, buff, bp);
@@ -677,7 +677,7 @@ FUNCTION(fun_vmag)
 
   /* return if a list is empty */
   if (!args[0]) {
-    safe_str(T("#-1 VECTOR MUST NOT BE EMPTY"), buff, bp);
+    safe_str("#-1 VECTOR MUST NOT BE EMPTY", buff, bp);
     return;
   }
 
@@ -687,7 +687,7 @@ FUNCTION(fun_vmag)
 
   /* return if a list is empty */
   if (!*p1) {
-    safe_str(T("#-1 VECTOR MUST NOT BE EMPTY"), buff, bp);
+    safe_str("#-1 VECTOR MUST NOT BE EMPTY", buff, bp);
     return;
   }
 
@@ -712,7 +712,7 @@ FUNCTION(fun_vunit)
 
   /* return if a list is empty */
   if (!args[0]) {
-    safe_str(T("#-1 VECTOR MUST NOT BE EMPTY"), buff, bp);
+    safe_str("#-1 VECTOR MUST NOT BE EMPTY", buff, bp);
     return;
   }
 
@@ -722,7 +722,7 @@ FUNCTION(fun_vunit)
 
   /* return if a list is empty */
   if (!*p1) {
-    safe_str(T("#-1 VECTOR MUST NOT BE EMPTY"), buff, bp);
+    safe_str("#-1 VECTOR MUST NOT BE EMPTY", buff, bp);
     return;
   }
 
@@ -771,7 +771,7 @@ FUNCTION(fun_vcross)
   v2len = list2arr(v2, BUFFER_LEN / 2, args[1], sep, 1);
 
   if (v1len != 3 || v2len != 3) {
-    safe_str(T("#-1 VECTORS MUST BE THREE-DIMENSIONAL"), buff, bp);
+    safe_str("#-1 VECTORS MUST BE THREE-DIMENSIONAL", buff, bp);
     return;
   }
 
@@ -837,7 +837,7 @@ FUNCTION(fun_fmod)
   }
   y = parse_number(args[1]);
   if (EQ(y, 0)) {
-    safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+    safe_str("#-1 DIVISION BY ZERO", buff, bp);
     return;
   }
   x = parse_number(args[0]);
@@ -1186,7 +1186,7 @@ FUNCTION(fun_log)
     if (base_is_e)
       safe_number(log(num), buff, bp);
     else if (base <= 1)
-      safe_str(T("#-1 BASE OUT OF RANGE"), buff, bp);
+      safe_str("#-1 BASE OUT OF RANGE", buff, bp);
     else if (base == 10)
       safe_number(log10(num), buff, bp);
     else if (base == 2)
@@ -1207,7 +1207,7 @@ FUNCTION(fun_sqrt)
   }
   num = parse_number(args[0]);
   if (num < 0) {
-    safe_str(T("#-1 IMAGINARY NUMBER"), buff, bp);
+    safe_str("#-1 IMAGINARY NUMBER", buff, bp);
     return;
   }
   safe_number(sqrt(num), buff, bp);
@@ -1231,7 +1231,7 @@ FUNCTION(fun_root)
   n = parse_integer(args[1]);
 
   if (n < 0) {
-    safe_str(T("#-1 ROOT OUT OF RANGE"), buff, bp);
+    safe_str("#-1 ROOT OUT OF RANGE", buff, bp);
     return;
   }
 
@@ -1240,7 +1240,7 @@ FUNCTION(fun_root)
       sign = 1;
       x = fabs(x);
     } else { /* Even */
-      safe_str(T("#-1 IMAGINARY NUMBER"), buff, bp);
+      safe_str("#-1 IMAGINARY NUMBER", buff, bp);
       return;
     }
   }
@@ -1808,7 +1808,7 @@ FUNCTION(fun_lmath)
   op = math_hash_lookup(args[0], arglens[0]);
 
   if (!op) {
-    safe_str(T("#-1 UNKNOWN OPERATION"), buff, bp);
+    safe_str("#-1 UNKNOWN OPERATION", buff, bp);
     mush_free(ptr, "string");
     return;
   }
@@ -1878,7 +1878,7 @@ FUNCTION(fun_baseconv)
   to = parse_uinteger(args[2]);
 
   if (from < 2 || from > 64) {
-    safe_str(T("#-1 FROM BASE OUT OF RANGE"), buff, bp);
+    safe_str("#-1 FROM BASE OUT OF RANGE", buff, bp);
     return;
   }
 
@@ -1887,7 +1887,7 @@ FUNCTION(fun_baseconv)
   }
 
   if (to < 2 || to > 64) {
-    safe_str(T("#-1 TO BASE OUT OF RANGE"), buff, bp);
+    safe_str("#-1 TO BASE OUT OF RANGE", buff, bp);
     return;
   }
 
@@ -1910,7 +1910,7 @@ FUNCTION(fun_baseconv)
         n += frombase[*ptr];
         ptr++;
       } else {
-        safe_str(T("#-1 MALFORMED NUMBER"), buff, bp);
+        safe_str("#-1 MALFORMED NUMBER", buff, bp);
         return;
       }
     }
@@ -2140,12 +2140,12 @@ MATH_FUNC(math_div)
     temp = parse_ival(ptr[n]);
 
     if (temp == 0) {
-      safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+      safe_str("#-1 DIVISION BY ZERO", buff, bp);
       return;
     }
 
     if (divresult == INT64_MIN && temp == -1) {
-      safe_str(T("#-1 DOMAIN ERROR"), buff, bp);
+      safe_str("#-1 DOMAIN ERROR", buff, bp);
       return;
     }
 
@@ -2181,12 +2181,12 @@ MATH_FUNC(math_floordiv)
     temp = parse_ival(ptr[n]);
 
     if (temp == 0) {
-      safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+      safe_str("#-1 DIVISION BY ZERO", buff, bp);
       return;
     }
 
     if (divresult == INT_MIN && temp == -1) {
-      safe_str(T("#-1 DOMAIN ERROR"), buff, bp);
+      safe_str("#-1 DOMAIN ERROR", buff, bp);
       return;
     }
 
@@ -2231,7 +2231,7 @@ MATH_FUNC(math_fdiv)
     temp = parse_number(ptr[n]);
 
     if (EQ(temp, 0)) {
-      safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+      safe_str("#-1 DIVISION BY ZERO", buff, bp);
       return;
     }
 
@@ -2266,12 +2266,12 @@ MATH_FUNC(math_modulo)
     temp = parse_ival(ptr[n]);
 
     if (temp == 0) {
-      safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+      safe_str("#-1 DIVISION BY ZERO", buff, bp);
       return;
     }
 
     if (divresult == INT_MIN && temp == -1) {
-      safe_str(T("#-1 DOMAIN ERROR"), buff, bp);
+      safe_str("#-1 DOMAIN ERROR", buff, bp);
       return;
     }
 
@@ -2318,12 +2318,12 @@ MATH_FUNC(math_remainder)
     temp = parse_ival(ptr[n]);
 
     if (temp == 0) {
-      safe_str(T("#-1 DIVISION BY ZERO"), buff, bp);
+      safe_str("#-1 DIVISION BY ZERO", buff, bp);
       return;
     }
 
     if (divresult == INT_MIN && temp == -1) {
-      safe_str(T("#-1 DOMAIN ERROR"), buff, bp);
+      safe_str("#-1 DOMAIN ERROR", buff, bp);
       return;
     }
 
@@ -2498,7 +2498,7 @@ lmathcomp(char **ptr, int nptr, char *buff, char **bp, int eqokay, int isgt)
   int n;
 
   if (nptr < 2) {
-    safe_str(T("#-1 COMPARISON REQUIRES 2 OR MORE NUMBERS"), buff, bp);
+    safe_str("#-1 COMPARISON REQUIRES 2 OR MORE NUMBERS", buff, bp);
     return;
   }
 
@@ -2536,7 +2536,7 @@ MATH_FUNC(math_neq)
   int n;
 
   if (nptr < 2) {
-    safe_str(T("#-1 COMPARISON REQUIRES 2 OR MORE NUMBERS"), buff, bp);
+    safe_str("#-1 COMPARISON REQUIRES 2 OR MORE NUMBERS", buff, bp);
     return;
   }
 
@@ -2640,7 +2640,7 @@ MATH_FUNC(math_dist2d)
   NVAL d1, d2;
 
   if (nptr != 4) {
-    safe_str(T("#-1 FUNCTION (DIST2D) EXPECTS 4 ARGUMENTS"), buff, bp);
+    safe_str("#-1 FUNCTION (DIST2D) EXPECTS 4 ARGUMENTS", buff, bp);
     return;
   }
 
@@ -2663,7 +2663,7 @@ MATH_FUNC(math_dist3d)
   NVAL d1, d2, d3, r;
 
   if (nptr != 6) {
-    safe_str(T("#-1 FUNCTION (DIST3D) EXPECTS 6 ARGUMENTS"), buff, bp);
+    safe_str("#-1 FUNCTION (DIST3D) EXPECTS 6 ARGUMENTS", buff, bp);
     return;
   }
 
