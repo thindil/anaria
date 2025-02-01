@@ -180,7 +180,7 @@ do_dump(dbref player, const char *num, enum dump_type flag)
         globals.paranoid_checkpt = atoi(num);
         if ((globals.paranoid_checkpt < 1) ||
             (globals.paranoid_checkpt >= db_top)) {
-          notify(player, T("Permission denied. Invalid checkpoint interval."));
+          notify(player, "Permission denied. Invalid checkpoint interval.");
           globals.paranoid_dump = 0;
           return;
         }
@@ -191,12 +191,12 @@ do_dump(dbref player, const char *num, enum dump_type flag)
           globals.paranoid_checkpt = 1;
       }
       if (flag == DUMP_PARANOID) {
-        notify_format(player, T("Paranoid dumping, checkpoint interval %d."),
+        notify_format(player, "Paranoid dumping, checkpoint interval %d.",
                       globals.paranoid_checkpt);
         do_rawlog(LT_CHECK, "*** PARANOID DUMP *** done by %s(#%d),\n",
                   Name(player), player);
       } else {
-        notify_format(player, T("Debug dumping, checkpoint interval %d."),
+        notify_format(player, "Debug dumping, checkpoint interval %d.",
                       globals.paranoid_checkpt);
         do_rawlog(LT_CHECK, "*** DEBUG DUMP *** done by %s(#%d),\n",
                   Name(player), player);
@@ -206,15 +206,15 @@ do_dump(dbref player, const char *num, enum dump_type flag)
     } else {
       /* normal dump */
       globals.paranoid_dump = 0; /* just to be safe */
-      notify(player, T("Dumping..."));
+      notify(player, "Dumping...");
       do_rawlog(LT_CHECK, "** DUMP ** done by %s(#%d) at %s", Name(player),
                 player, show_time(mudtime, 0));
     }
     fork_and_dump(flag == DUMP_NORMAL);
     globals.paranoid_dump = 0;
-    notify(player, T("Dump complete."));
+    notify(player, "Dump complete.");
   } else {
-    notify(player, T("Sorry, you are in a no dumping zone."));
+    notify(player, "Sorry, you are in a no dumping zone.");
   }
 }
 
@@ -275,10 +275,10 @@ void
 do_shutdown(dbref player, enum shutdown_type flag)
 {
   if (flag == SHUT_PANIC && !God(player)) {
-    notify(player, T("It takes a God to make me panic."));
+    notify(player, "It takes a God to make me panic.");
     return;
   }
-  flag_broadcast(0, 0, T("GAME: Shutdown by %s"),
+  flag_broadcast(0, 0, "GAME: Shutdown by %s",
                  AName(player, AN_ANNOUNCE, NULL));
   do_log(LT_ERR, player, NOTHING, "SHUTDOWN by %s(%s)\n", Name(player),
          unparse_dbref(player));
@@ -341,9 +341,9 @@ dump_database_internal(void)
 
     do_rawlog(LT_ERR, "ERROR! Database save failed: %s", errmsg);
     queue_event(SYSEVENT, "DUMP`ERROR", "%s,%d,PERROR %s",
-                T("GAME: ERROR! Database save failed!"), 0, errmsg);
+                "GAME: ERROR! Database save failed!", 0, errmsg);
     flag_broadcast("WIZARD ROYALTY", 0,
-                   T("GAME: ERROR! Database save failed!"));
+                   "GAME: ERROR! Database save failed!");
     if (f) {
       penn_fclose(f);
     }
@@ -475,7 +475,7 @@ mush_panic(const char *message)
   already_panicking = 1;
   do_rawlog_lvl(LT_ERR, MLOG_EMERG, "PANIC: %s", message);
   report();
-  flag_broadcast(0, 0, T("EMERGENCY SHUTDOWN: %s"), message);
+  flag_broadcast(0, 0, "EMERGENCY SHUTDOWN: %s", message);
 
   /* turn off signals */
   block_signals();
@@ -591,7 +591,7 @@ fork_and_dump(int forking)
                     "nonforking dumps will be used.");
       flag_broadcast(
         "WIZARD", 0,
-        T("DUMP: Data are swapped to disk, so nonforking dumps will be used."));
+        "DUMP: Data are swapped to disk, so nonforking dumps will be used.");
       nofork = 1;
     }
 #endif
@@ -1014,7 +1014,7 @@ void
 do_readcache(dbref player)
 {
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   fcache_load(player);
@@ -1179,7 +1179,7 @@ process_command(dbref executor, char *command, MQUE *queue_entry)
   if (Halted(executor) &&
       (!IsPlayer(executor) || !(queue_entry->queue_type & QUEUE_SOCKET))) {
     notify_format(Owner(executor),
-                  T("Attempt to execute command by halted object #%d"),
+                  "Attempt to execute command by halted object #%d",
                   executor);
     return;
   }
@@ -1189,7 +1189,7 @@ process_command(dbref executor, char *command, MQUE *queue_entry)
   check_loc = speech_loc(executor);
   if (!GoodObject(check_loc) || IsGarbage(check_loc)) {
     notify_format(Owner(executor),
-                  T("Invalid location on command execution: %s(#%d)"),
+                  "Invalid location on command execution: %s(#%d)",
                   Name(executor), executor);
     do_rawlog_lvl(LT_ERR, MLOG_ERR,
                   "Command attempted by %s(#%d) in invalid location #%d.",
@@ -1397,14 +1397,14 @@ COMMAND(cmd_with)
         controls(executor, what))) {
     if (SW_ISSET(sw, SWITCH_ROOM)) {
       if (what != MASTER_ROOM && what != Zone(executor)) {
-        notify(executor, T("I don't see that here."));
+        notify(executor, "I don't see that here.");
         return;
       } else if (what == Zone(executor) && !IsRoom(what)) {
-        notify(executor, T("Make room! Make room!"));
+        notify(executor, "Make room! Make room!");
         return;
       }
     } else if (what != Zone(executor) || IsRoom(what)) {
-      notify(executor, T("I don't see that here."));
+      notify(executor, "I don't see that here.");
       return;
     }
   }
@@ -1416,19 +1416,19 @@ COMMAND(cmd_with)
     /* Should this be passing on QUEUE_DEBUG_PRIVS? */
     if (!cmd_match(what, NULL, QUEUE_DEFAULT)) {
       MAYBE_ADD_ERRDB(errdb);
-      notify(executor, T("No matching command."));
+      notify(executor, "No matching command.");
     }
   } else {
     /* Run commands on objects in a masterish room */
 
     if (!IsRoom(what) && what != Location(executor)) {
-      notify(executor, T("Make room! Make room!"));
+      notify(executor, "Make room! Make room!");
       return;
     }
 
     /* Should this be passing on QUEUE_DEBUG_PRIVS? */
     if (!list_match(Contents(what), NULL, QUEUE_DEFAULT))
-      notify(executor, T("No matching command."));
+      notify(executor, "No matching command.");
   }
 }
 
@@ -1628,14 +1628,14 @@ do_poor(dbref player, const char *arg1)
   int amt = atoi(arg1);
   dbref a;
   if (!God(player)) {
-    notify(player, T("Only God can cause financial ruin."));
+    notify(player, "Only God can cause financial ruin.");
     return;
   }
   for (a = 0; a < db_top; a++)
     if (IsPlayer(a))
       s_Pennies(a, amt);
   notify_format(player,
-                T("The money supply of all players has been reset to %d %s."),
+                "The money supply of all players has been reset to %d %s.",
                 amt, MONIES);
   do_log(LT_WIZ, player, NOTHING,
          "** POOR done ** Money supply reset to %d %s.", amt, MONIES);
@@ -1653,13 +1653,13 @@ void
 do_writelog(dbref player, char *str, int ltype)
 {
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   do_rawlog(ltype, "LOG: %s(#%d%s): %s", Name(player), player,
             unparse_flags(player, GOD), str);
 
-  notify(player, T("Logged."));
+  notify(player, "Logged.");
 }
 
 #define queue_dolist(al, pe_regs)                                              \
@@ -1737,11 +1737,11 @@ scan_list(dbref executor, dbref looker, const char *command, int flag)
   dbref loc = speech_loc(looker);
 
   if (!GoodObject(loc)) {
-    strcpy(tbuf, T("#-1 INVALID LOCATION"));
+    strcpy(tbuf, "#-1 INVALID LOCATION");
     return tbuf;
   }
   if (!command || !*command) {
-    strcpy(tbuf, T("#-1 NO COMMAND"));
+    strcpy(tbuf, "#-1 NO COMMAND");
     return tbuf;
   }
   tp = tbuf;
@@ -1878,15 +1878,15 @@ do_scan(dbref player, const char *command, int flag)
 
   ptr = atrname;
   if (!GoodObject(Location(player))) {
-    notify(player, T("Sorry, you are in an invalid location."));
+    notify(player, "Sorry, you are in an invalid location.");
     return;
   }
   if (!command || !*command) {
-    notify(player, T("What command do you want to scan for?"));
+    notify(player, "What command do you want to scan for?");
     return;
   }
   if (flag & CHECK_NEIGHBORS) {
-    notify(player, T("Matches on contents of this room:"));
+    notify(player, "Matches on contents of this room:");
     DOLIST (thing, Contents(Location(player))) {
       if (ScanFind(player, player, thing, 0)) {
         *ptr = '\0';
@@ -1900,14 +1900,14 @@ do_scan(dbref player, const char *command, int flag)
   if (flag & CHECK_HERE) {
     if (ScanFind(player, player, Location(player), 0)) {
       *ptr = '\0';
-      notify_format(player, T("Matched here: %s  [%d:%s]"),
+      notify_format(player, "Matched here: %s  [%d:%s]",
                     unparse_object(player, Location(player), AN_UNPARSE), num,
                     atrname);
     }
   }
   ptr = atrname;
   if (flag & CHECK_INVENTORY) {
-    notify(player, T("Matches on carried objects:"));
+    notify(player, "Matches on carried objects:");
     DOLIST (thing, Contents(player)) {
       if (ScanFind(player, player, thing, 0)) {
         *ptr = '\0';
@@ -1921,7 +1921,7 @@ do_scan(dbref player, const char *command, int flag)
   if (flag & CHECK_SELF) {
     if (ScanFind(player, player, player, 0)) {
       *ptr = '\0';
-      notify_format(player, T("Matched self: %s  [%d:%s]"),
+      notify_format(player, "Matched self: %s  [%d:%s]",
                     unparse_object(player, player, AN_UNPARSE), num, atrname);
     }
   }
@@ -1932,7 +1932,7 @@ do_scan(dbref player, const char *command, int flag)
       if (IsRoom(Zone(Location(player)))) {
         /* zone of player's location is a zone master room */
         if (Location(player) != Zone(player)) {
-          notify(player, T("Matches on zone master room of location:"));
+          notify(player, "Matches on zone master room of location:");
           DOLIST (thing, Contents(Zone(Location(player)))) {
             if (ScanFind(player, player, thing, 0)) {
               *ptr = '\0';
@@ -1948,7 +1948,7 @@ do_scan(dbref player, const char *command, int flag)
         if (ScanFind(player, player, Zone(Location(player)), 0)) {
           *ptr = '\0';
           notify_format(
-            player, T("Matched zone of location: %s  [%d:%s]"),
+            player, "Matched zone of location: %s  [%d:%s]",
             unparse_object(player, Zone(Location(player)), AN_UNPARSE), num,
             atrname);
         }
@@ -1959,7 +1959,7 @@ do_scan(dbref player, const char *command, int flag)
       /* check the player's personal zone */
       if (IsRoom(Zone(player))) {
         if (Location(player) != Zone(player)) {
-          notify(player, T("Matches on personal zone master room:"));
+          notify(player, "Matches on personal zone master room:");
           DOLIST (thing, Contents(Zone(player))) {
             if (ScanFind(player, player, thing, 0)) {
               *ptr = '\0';
@@ -1972,7 +1972,7 @@ do_scan(dbref player, const char *command, int flag)
         }
       } else if (ScanFind(player, player, Zone(player), 0)) {
         *ptr = '\0';
-        notify_format(player, T("Matched personal zone: %s  [%d:%s]"),
+        notify_format(player, "Matched personal zone: %s  [%d:%s]",
                       unparse_object(player, Zone(player), AN_UNPARSE), num,
                       atrname);
       }
@@ -1983,7 +1983,7 @@ do_scan(dbref player, const char *command, int flag)
       (Zone(Location(player)) != MASTER_ROOM) &&
       (Zone(player) != MASTER_ROOM)) {
     /* try Master Room stuff */
-    notify(player, T("Matches on objects in the Master Room:"));
+    notify(player, "Matches on objects in the Master Room:");
     DOLIST (thing, Contents(MASTER_ROOM)) {
       if (ScanFind(player, player, thing, 0)) {
         *ptr = '\0';
@@ -2021,7 +2021,7 @@ do_dolist(dbref executor, char *list, char *command, dbref enactor,
   int place;
   char delim = ' ';
   if (!command || !*command) {
-    notify(executor, T("What do you want to do with the list?"));
+    notify(executor, "What do you want to do with the list?");
     if (flags & DOL_NOTIFY) {
       queue_dolist("@notify me", NULL);
     }
@@ -2030,7 +2030,7 @@ do_dolist(dbref executor, char *list, char *command, dbref enactor,
 
   if (flags & DOL_DELIM) {
     if (list[1] != ' ') {
-      notify(executor, T("Separator must be one character."));
+      notify(executor, "Separator must be one character.");
       if (flags & DOL_NOTIFY) {
         queue_dolist("@notify me", NULL);
       }
@@ -2202,7 +2202,7 @@ unix_uptime(dbref player __attribute__((__unused__)))
 
   /* just in case the system is screwy */
   if (fp == NULL) {
-    notify(player, T("Error -- cannot execute uptime."));
+    notify(player, "Error -- cannot execute uptime.");
     do_rawlog(LT_ERR, "** ERROR ** popen for @uptime returned NULL.");
     return;
   }
@@ -2347,49 +2347,49 @@ do_uptime(dbref player, int mortal)
 
   when = localtime(&globals.first_start_time);
   strftime(tbuf1, sizeof tbuf1, "%a %b %d %X %Z %Y", when);
-  notify_format(player, "%13s: %s", T("Up since"), tbuf1);
+  notify_format(player, "%13s: %s", "Up since", tbuf1);
 
   when = localtime(&globals.start_time);
   strftime(tbuf1, sizeof tbuf1, "%a %b %d %X %Z %Y", when);
-  notify_format(player, "%13s: %s", T("Last reboot"), tbuf1);
+  notify_format(player, "%13s: %s", "Last reboot", tbuf1);
 
-  notify_format(player, "%13s: %d", T("Total reboots"), globals.reboot_count);
+  notify_format(player, "%13s: %d", "Total reboots", globals.reboot_count);
 
   when = localtime(&mudtime);
   strftime(tbuf1, sizeof tbuf1, "%a %b %d %X %Z %Y", when);
-  notify_format(player, "%13s: %s", T("Time now"), tbuf1);
+  notify_format(player, "%13s: %s", "Time now", tbuf1);
 
   if (globals.last_dump_time > 0) {
     when = localtime(&globals.last_dump_time);
     strftime(tbuf1, sizeof tbuf1, "%a %b %d %X %Z %Y", when);
-    notify_format(player, "%29s: %s", T("Time of last database save"), tbuf1);
+    notify_format(player, "%29s: %s", "Time of last database save", tbuf1);
   }
 
   /* calculate times until various events */
   when = localtime(&options.dump_counter);
   strftime(tbuf1, sizeof tbuf1, "%X", when);
   secs = ldiv((long) difftime(options.dump_counter, mudtime), 60);
-  notify_format(player, T("%29s: %ld minutes %ld seconds, at %s."),
-                T("Time until next database save"), secs.quot, secs.rem, tbuf1);
+  notify_format(player, "%29s: %ld minutes %ld seconds, at %s.",
+                "Time until next database save", secs.quot, secs.rem, tbuf1);
 
   when = localtime(&options.dbck_counter);
   strftime(tbuf1, sizeof tbuf1, "%X", when);
   secs = ldiv((long) difftime(options.dbck_counter, mudtime), 60);
-  notify_format(player, T("%29s: %ld minutes %ld seconds, at %s."),
-                T("Time until next dbck check"), secs.quot, secs.rem, tbuf1);
+  notify_format(player, "%29s: %ld minutes %ld seconds, at %s.",
+                "Time until next dbck check", secs.quot, secs.rem, tbuf1);
 
   when = localtime(&options.purge_counter);
   strftime(tbuf1, sizeof tbuf1, "%X", when);
   secs = ldiv((long) difftime(options.purge_counter, mudtime), 60);
-  notify_format(player, T("%29s: %ld minutes %ld seconds, at %s."),
-                T("Time until next purge"), secs.quot, secs.rem, tbuf1);
+  notify_format(player, "%29s: %ld minutes %ld seconds, at %s.",
+                "Time until next purge", secs.quot, secs.rem, tbuf1);
 
   if (options.warn_interval) {
     when = localtime(&options.warn_counter);
     strftime(tbuf1, sizeof tbuf1, "%X", when);
     secs = ldiv((long) difftime(options.warn_counter, mudtime), 60);
-    notify_format(player, T("%29s: %ld minutes %ld seconds, at %s."),
-                  T("Time until next @warnings"), secs.quot, secs.rem, tbuf1);
+    notify_format(player, "%29s: %ld minutes %ld seconds, at %s.",
+                  "Time until next @warnings", secs.quot, secs.rem, tbuf1);
   }
 
   {
@@ -2403,7 +2403,7 @@ do_uptime(dbref player, int mortal)
     mins = ldiv(hours.rem, 60);
 
     notify_format(
-      player, T("PennMUSH Uptime: %ld days %ld hours %ld minutes %ld seconds"),
+      player, "PennMUSH Uptime: %ld days %ld hours %ld minutes %ld seconds",
       days, hours.quot, mins.quot, mins.rem);
   }
   /* Mortals, go no further! */
