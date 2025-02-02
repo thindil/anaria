@@ -111,7 +111,7 @@ help_search(dbref executor, const help_file *h, const char *_term, const char *d
   int ulen;
 
   if (!_term || !*_term) {
-    notify(executor, T("What do you want to search for?"));
+    notify(executor, "What do you want to search for?");
     return NULL;
   }
 
@@ -206,9 +206,9 @@ help_search_find(dbref player, const help_file *h, const char *arg_left)
     }
   } while (rc == SQLITE_ROW);
   if (first) {
-    notify(player, T("No matches."));
+    notify(player, "No matches.");
   } else {
-    notify_format(player, T("Matches: %s"), sqlite3_str_value(output));
+    notify_format(player, "Matches: %s", sqlite3_str_value(output));
   }
 
   utf8 = sqlite3_str_finish(output);
@@ -224,12 +224,12 @@ COMMAND(cmd_helpcmd)
   h = hashfind(cmd->name, &help_files);
 
   if (!h) {
-    notify(executor, T("That command is unavailable."));
+    notify(executor, "That command is unavailable.");
     return;
   }
 
   if (h->admin && !Hasprivs(executor)) {
-    notify(executor, T("You don't look like an admin to me."));
+    notify(executor, "You don't look like an admin to me.");
     return;
   }
 
@@ -239,7 +239,7 @@ COMMAND(cmd_helpcmd)
     int matches;
     results = help_search(executor, h, arg_left, delim, &matches);
     if (matches == 0) {
-      notify(executor, T("No matches."));
+      notify(executor, "No matches.");
     }
     if (results) {
       if (matches > 0) {
@@ -271,16 +271,16 @@ COMMAND(cmd_helpcmd)
     if (!*p && aw) {
       if ((*arg_left == '*') && *(arg_left + 1) == '\0') {
         notify(executor,
-               T("You need to be more specific. Maybe you want 'help \\*'?"));
+               "You need to be more specific. Maybe you want 'help \\*'?");
       } else {
-        notify(executor, T("You need to be more specific."));
+        notify(executor, "You need to be more specific.");
       }
       return;
     }
 
     entries = list_matching_entries(arg_left, h, &len);
     if (len == 0) {
-      notify_format(executor, T("No entries matching '%s' were found."),
+      notify_format(executor, "No entries matching '%s' were found.",
                     arg_left);
     } else if (len == 1) {
       do_new_spitfile(executor, *entries, -1, h);
@@ -291,7 +291,7 @@ COMMAND(cmd_helpcmd)
       bp = buff;
       arr2list(entries, len, buff, &bp, ", ");
       *bp = '\0';
-      notify_format(executor, T("Here are the entries which match '%s':\n%s"),
+      notify_format(executor, "Here are the entries which match '%s':\n%s",
                     arg_left, buff);
     }
     if (entries) {
@@ -305,7 +305,7 @@ COMMAND(cmd_helpcmd)
     } else if (is_index_entry(arg_left, &offset)) {
       char *entries = entries_from_offset(h, offset);
       if (!entries) {
-        notify_format(executor, T("No entry for '%s'."), strupper(arg_left));
+        notify_format(executor, "No entry for '%s'.", strupper(arg_left));
         return;
       }
       notify_format(executor, "%s%s%s", ANSI_HILITE, strupper(arg_left),
@@ -336,7 +336,7 @@ COMMAND(cmd_helpcmd)
             *pp = '*';
             pp++;
             if (pp >= (pattern + BUFFER_LEN)) {
-              notify_format(executor, T("No entry for '%s'"), arg_left);
+              notify_format(executor, "No entry for '%s'", arg_left);
               return;
             }
           }
@@ -346,7 +346,7 @@ COMMAND(cmd_helpcmd)
             *pp = '*';
             pp++;
             if (pp >= (pattern + BUFFER_LEN)) {
-              notify_format(executor, T("No entry for '%s'"), arg_left);
+              notify_format(executor, "No entry for '%s'", arg_left);
               return;
             }
           }
@@ -356,7 +356,7 @@ COMMAND(cmd_helpcmd)
         *pp = *sp;
         pp++;
         if (pp >= (pattern + BUFFER_LEN)) {
-          notify_format(executor, T("No entry for '%s'"), arg_left);
+          notify_format(executor, "No entry for '%s'", arg_left);
           return;
         }
       }
@@ -369,7 +369,7 @@ COMMAND(cmd_helpcmd)
                         h->command, arg_left, suggestion);
           mush_free(suggestion, "string");
         } else {
-          notify_format(executor, T("No entry for '%s'"), arg_left);
+          notify_format(executor, "No entry for '%s'", arg_left);
         }
       } else if (len == 1) {
         do_new_spitfile(executor, *entries, -1, h);
@@ -379,7 +379,7 @@ COMMAND(cmd_helpcmd)
         bp = buff;
         arr2list(entries, len, buff, &bp, ", ");
         *bp = '\0';
-        notify_format(executor, T("Here are the entries which match '%s':\n%s"),
+        notify_format(executor, "Here are the entries which match '%s':\n%s",
                       arg_left, buff);
       }
       if (entries) {
@@ -778,7 +778,7 @@ help_rebuild(dbref player)
     build_help_file(curr);
   }
   if (player != NOTHING) {
-    notify(player, T("Help files reindexed."));
+    notify(player, "Help files reindexed.");
     do_rawlog(LT_WIZ, "Help files reindexed by %s(#%d)", Name(player), player);
   } else {
     do_rawlog(LT_WIZ, "Help files reindexed.");
@@ -825,7 +825,7 @@ do_new_spitfile(dbref player, const char *the_topic, sqlite3_int64 topicid,
   }
 
   if (!entry) {
-    notify_format(player, T("No entry for '%s'."), the_topic);
+    notify_format(player, "No entry for '%s'.", the_topic);
     return;
   }
 
@@ -1138,7 +1138,7 @@ FUNCTION(fun_textfile)
 
   h = hashfind(strupper(args[0]), &help_files);
   if (!h) {
-    safe_str(T("#-1 NO SUCH FILE"), buff, bp);
+    safe_str("#-1 NO SUCH FILE", buff, bp);
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
@@ -1151,7 +1151,7 @@ FUNCTION(fun_textfile)
     int len = 0;
     entries = list_matching_entries(args[1], h, &len);
     if (len == 0) {
-      safe_str(T("No matching help topics."), buff, bp);
+      safe_str("No matching help topics.", buff, bp);
     } else {
       arr2list(entries, len, buff, bp, ", ");
     }
@@ -1173,7 +1173,7 @@ FUNCTION(fun_textentries)
 
   h = hashfind(strupper(args[0]), &help_files);
   if (!h) {
-    safe_str(T("#-1 NO SUCH FILE"), buff, bp);
+    safe_str("#-1 NO SUCH FILE", buff, bp);
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
@@ -1203,7 +1203,7 @@ FUNCTION(fun_textsearch)
   const help_file *h;
   h = hashfind(strupper(args[0]), &help_files);
   if (!h) {
-    safe_str(T("#-1 NO SUCH FILE"), buff, bp);
+    safe_str("#-1 NO SUCH FILE", buff, bp);
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
@@ -1248,7 +1248,7 @@ normalize_entry(const help_file *help_dat, const char *arg1)
   if (*arg1 == '\0')
     arg1 = (char *) "help";
   else if (*arg1 == '&')
-    return T("#-1 INVALID ENTRY");
+    return "#-1 INVALID ENTRY";
   if (help_dat->admin)
     snprintf(the_topic, LINE_SIZE, "&%s", arg1);
   else
@@ -1271,14 +1271,14 @@ string_spitfile(help_file *help_dat, const char *arg1)
     char *entries = entries_from_offset(help_dat, offset);
 
     if (!entries)
-      return T("#-1 NO ENTRY");
+      return "#-1 NO ENTRY";
     else
       return entries;
   }
 
   entry = help_find_entry(help_dat, the_topic, -1);
   if (!entry) {
-    return T("#-1 NO ENTRY");
+    return "#-1 NO ENTRY";
   }
   safe_strl(entry->body, entry->bodylen, buff, &bp);
   help_free_entry(entry);
