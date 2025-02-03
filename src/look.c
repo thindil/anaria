@@ -183,22 +183,22 @@ look_exits(dbref player, dbref loc, const char *exit_name, NEW_PE_INFO *pe_info)
         s1 = tbuf1;
         safe_chr(' ', tbuf1, &s1);
         if (Destination(thing) == NOTHING)
-          safe_format(tbuf1, &s1, T("%s leads nowhere."), nbuf);
+          safe_format(tbuf1, &s1, "%s leads nowhere.", nbuf);
         else if (HomeExit(thing))
-          safe_format(tbuf1, &s1, T("%s leads home."), nbuf);
+          safe_format(tbuf1, &s1, "%s leads home.", nbuf);
         else if (VariableExit(thing))
-          safe_format(tbuf1, &s1, T("%s leads to a variable location."), nbuf);
+          safe_format(tbuf1, &s1, "%s leads to a variable location.", nbuf);
         else if (!GoodObject(thing))
-          safe_format(tbuf1, &s1, T("%s is corrupt!"), nbuf);
+          safe_format(tbuf1, &s1, "%s is corrupt!", nbuf);
         else {
-          safe_format(tbuf1, &s1, T("%s leads to %s."), nbuf,
+          safe_format(tbuf1, &s1, "%s leads to %s.", nbuf,
                       AName(Destination(thing), AN_LOOK, NULL));
         }
         *s1 = '\0';
         notify_nopenter_by(loc, player, tbuf1);
       } else {
         if (COMMA_EXIT_LIST) {
-          safe_itemizer(this_exit, (this_exit == exit_count), ",", T("and"),
+          safe_itemizer(this_exit, (this_exit == exit_count), ",", "and",
                         " ", tbuf2, &s2);
           safe_str(nbuf, tbuf2, &s2);
           this_exit++;
@@ -314,11 +314,11 @@ examine_helper_veiled(dbref player, dbref thing __attribute__((__unused__)),
   strcpy(fbuf, privs_to_letters(attr_privs_view, AL_FLAGS(atr)));
   if (AF_Veiled(atr)) {
     if (GoodObject(parent))
-      notify_format(player, T("%s#%d/%s [#%d%s]%s is veiled"), ANSI_HILITE,
+      notify_format(player, "%s#%d/%s [#%d%s]%s is veiled", ANSI_HILITE,
                     parent, AL_NAME(atr), Owner(AL_CREATOR(atr)), fbuf,
                     ANSI_END);
     else
-      notify_format(player, T("%s%s [#%d%s]%s is veiled"), ANSI_HILITE,
+      notify_format(player, "%s%s [#%d%s]%s is veiled", ANSI_HILITE,
                     AL_NAME(atr), Owner(AL_CREATOR(atr)), fbuf, ANSI_END);
   } else {
     char *r = safe_atr_value(atr, "atrval.examine");
@@ -380,12 +380,12 @@ examine_atrs(dbref player, dbref thing, const char *mstr, int all, int mortal,
       if (!atr_iter_get_parent(player, thing, mstr, flags, examine_helper,
                                NULL) &&
           mstr) {
-        notify(player, T("No matching attributes."));
+        notify(player, "No matching attributes.");
       }
     } else {
       if (!atr_iter_get(player, thing, mstr, flags, examine_helper, NULL) &&
           mstr) {
-        notify(player, T("No matching attributes."));
+        notify(player, "No matching attributes.");
       }
     }
   } else {
@@ -393,13 +393,13 @@ examine_atrs(dbref player, dbref thing, const char *mstr, int all, int mortal,
       if (!atr_iter_get_parent(player, thing, mstr, flags,
                                examine_helper_veiled, NULL) &&
           mstr) {
-        notify(player, T("No matching attributes."));
+        notify(player, "No matching attributes.");
       }
     } else {
       if (!atr_iter_get(player, thing, mstr, flags, examine_helper_veiled,
                         NULL) &&
           mstr) {
-        notify(player, T("No matching attributes."));
+        notify(player, "No matching attributes.");
       }
     }
   }
@@ -422,7 +422,7 @@ look_simple(dbref player, dbref thing, int key, NEW_PE_INFO *pe_info)
   safe_str(unparse_object_myopic(player, thing, AN_LOOK), pbuff, &pp);
   PEND;
   notify_by(thing, player, pbuff);
-  look_description(player, thing, T("You see nothing special."), "DESCRIBE",
+  look_description(player, thing, "You see nothing special.", "DESCRIBE",
                    "DESCFORMAT", pe_info);
   did_it(player, thing, NULL, NULL, "ODESCRIBE", NULL, "ADESCRIBE", NOTHING,
          AN_SYS);
@@ -526,9 +526,9 @@ look_room(dbref player, dbref loc, int key, NEW_PE_INFO *pe_info)
   /* tell him the contents */
   if (!(key & LOOK_NOCONTENTS) &&
       (!look_through_exit || (key & LOOK_CLOUDYTRANS) != LOOK_CLOUDYTRANS))
-    look_contents(player, loc, T("Contents:"), pe_info);
+    look_contents(player, loc, "Contents:", pe_info);
   if (!look_through_exit) {
-    look_exits(player, loc, T("Obvious exits:"), pe_info);
+    look_exits(player, loc, "Obvious exits:", pe_info);
   }
   if (made_pe_info)
     free_pe_info(pe_info);
@@ -608,7 +608,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
   if (outside) { /* look outside */
     /* can't see through opaque objects */
     if (IsRoom(Location(player)) || Opaque(Location(player))) {
-      notify(player, T("You can't see through that."));
+      notify(player, "You can't see through that.");
       return;
     }
     dbref loc = Location(Location(player));
@@ -624,10 +624,10 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
     thing = match_result(loc, name, NOTYPE,
                          MAT_POSSESSION | MAT_CARRIED_EXIT | MAT_ENGLISH);
     if (thing == NOTHING) {
-      notify(player, T("I don't see that here."));
+      notify(player, "I don't see that here.");
       return;
     } else if (thing == AMBIGUOUS) {
-      notify(player, T("I don't know which one you mean."));
+      notify(player, "I don't know which one you mean.");
       return;
     }
     nearthis = (loc == Location(thing));
@@ -647,17 +647,17 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
       objname = objnamebuf;
       box = parse_match_possessor(player, &objname, 1);
       if (box == NOTHING) {
-        notify(player, T("I don't see that here."));
+        notify(player, "I don't see that here.");
         return;
       } else if (box == AMBIGUOUS) {
-        notify_format(player, T("I can't tell which %s."), boxname);
+        notify_format(player, "I can't tell which %s.", boxname);
         return;
       }
       if (IsExit(box)) {
         /* Looking through an exit at an object on the other side */
         if (!(Transparented(box) && !Cloudy(box)) &&
             !(Cloudy(box) && !Transparented(box))) {
-          notify_format(player, T("You can't see through that."));
+          notify_format(player, "You can't see through that.");
           return;
         }
         box = Location(box);
@@ -666,7 +666,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
         if (!GoodObject(box)) {
           /* Do nothing for exits with no destination, or a variable destination
            */
-          notify(player, T("You can't see through that."));
+          notify(player, "You can't see through that.");
           return;
         }
         /* Including MAT_CARRIED_EXIT allows looking at remote exits, but gives
@@ -677,7 +677,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
         thing =
           match_result_relative(player, box, objname, NOTYPE, MAT_OBJ_CONTENTS);
         if (!GoodObject(thing)) {
-          notify(player, T("I don't see that here."));
+          notify(player, "I don't see that here.");
           return;
         }
         look_simple(player, thing, key, pe_info);
@@ -686,21 +686,21 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
       thing =
         match_result_relative(player, box, objname, NOTYPE, MAT_OBJ_CONTENTS);
       if (thing == NOTHING) {
-        notify(player, T("I don't see that here."));
+        notify(player, "I don't see that here.");
         return;
       } else if (thing == AMBIGUOUS) {
-        notify_format(player, T("I can't tell which %s."), name);
+        notify_format(player, "I can't tell which %s.", name);
         return;
       }
       if (Opaque(Location(thing)) &&
           (!See_All(player) && !controls(player, thing) &&
            !controls(player, Location(thing)))) {
-        notify(player, T("You can't look at that from here."));
+        notify(player, "You can't look at that from here.");
         return;
       }
       nearthis = nearby(player, box) && nearby(box, thing);
     } else if (thing == AMBIGUOUS) {
-      notify(player, T("I can't tell which one you mean."));
+      notify(player, "I can't tell which one you mean.");
       return;
     }
     nearthis = nearthis || nearby(player, thing);
@@ -721,7 +721,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
 
     desc = atr_get(thing, "DESCRIBE");
     if ((desc && AF_Nearby(desc)) || (!desc && !READ_REMOTE_DESC)) {
-      notify_format(player, T("You can't see that from here."));
+      notify_format(player, "You can't see that from here.");
       return;
     }
   }
@@ -734,7 +734,7 @@ do_look_at(dbref player, const char *name, int key, NEW_PE_INFO *pe_info)
   case TYPE_PLAYER:
     look_simple(player, thing, key, pe_info);
     if (!(Opaque(thing)) && !(key & LOOK_NOCONTENTS))
-      look_contents(player, thing, T("Carrying:"), pe_info);
+      look_contents(player, thing, "Carrying:", pe_info);
     break;
   default:
     look_simple(player, thing, key, pe_info);
@@ -785,7 +785,7 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
   }
   /*  can't examine destructed objects  */
   if (IsGarbage(thing)) {
-    notify(player, T("Garbage is garbage."));
+    notify(player, "Garbage is garbage.");
     if (name)
       mush_free(name, "de.string");
     return;
@@ -810,7 +810,7 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
      */
     tp = tbuf;
     safe_str(object_header(player, thing), tbuf, &tp);
-    safe_str(T(" is owned by "), tbuf, &tp);
+    safe_str(" is owned by ", tbuf, &tp);
     safe_str(object_header(player, Owner(thing)), tbuf, &tp);
     *tp = '\0';
     notify(player, tbuf);
@@ -838,28 +838,28 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
   if (ok) {
     char tbuf1[BUFFER_LEN];
     strcpy(tbuf1, object_header(player, Zone(thing)));
-    notify_format(player, T("Owner: %s  Zone: %s  %s: %d"),
+    notify_format(player, "Owner: %s  Zone: %s  %s: %d",
                   object_header(player, Owner(thing)), tbuf1, MONIES,
                   Pennies(thing));
-    notify_format(player, T("Parent: %s"), parent_chain(player, thing));
+    notify_format(player, "Parent: %s", parent_chain(player, thing));
     {
       struct lock_list *ll;
       for (ll = Locks(thing); ll; ll = ll->next) {
-        notify_format(player, T("%s Lock [#%d%s]: %s"), L_TYPE(ll),
+        notify_format(player, "%s Lock [#%d%s]: %s", L_TYPE(ll),
                       L_CREATOR(ll), lock_flags(ll),
                       unparse_boolexp(player, L_KEY(ll), UB_ALL));
       }
     }
-    notify_format(player, T("Powers: %s"), power_description(player, thing));
+    notify_format(player, "Powers: %s", power_description(player, thing));
 
     notify(player, channel_description(thing));
 
-    notify_format(player, T("Warnings checked: %s"),
+    notify_format(player, "Warnings checked: %s",
                   unparse_warnings(Warnings(thing)));
 
-    notify_format(player, T("Created: %s"), show_time(CreTime(thing), 0));
+    notify_format(player, "Created: %s", show_time(CreTime(thing), 0));
     if (!IsPlayer(thing))
-      notify_format(player, T("Last Modification: %s"),
+      notify_format(player, "Last Modification: %s",
                     show_time(ModTime(thing), 0));
   }
 
@@ -884,9 +884,9 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
       if (!listed) {
         listed = 1;
         if (IsPlayer(thing))
-          notify(player, T("Carrying:"));
+          notify(player, "Carrying:");
         else
-          notify(player, T("Contents:"));
+          notify(player, "Contents:");
       }
       notify(player, object_header(player, content));
     }
@@ -894,10 +894,10 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
   if (!ok) {
     /* if not examinable, just show obvious exits and name and owner */
     if (IsRoom(thing))
-      look_exits(player, thing, T("Obvious exits:"), NULL);
+      look_exits(player, thing, "Obvious exits:", NULL);
     tp = tbuf;
     safe_str(object_header(player, thing), tbuf, &tp);
-    safe_str(T(" is owned by "), tbuf, &tp);
+    safe_str(" is owned by ", tbuf, &tp);
     safe_str(object_header(player, Owner(thing)), tbuf, &tp);
     *tp = '\0';
     notify(player, tbuf);
@@ -910,25 +910,25 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
   case TYPE_ROOM:
     /* tell him about exits */
     if (Exits(thing) != NOTHING) {
-      notify(player, T("Exits:"));
+      notify(player, "Exits:");
       DOLIST (exit_dbref, Exits(thing))
         notify(player, object_header(player, exit_dbref));
     } else
-      notify(player, T("No exits."));
+      notify(player, "No exits.");
     /* print dropto if present */
     if (Location(thing) != NOTHING) {
-      notify_format(player, T("Dropped objects go to: %s"),
+      notify_format(player, "Dropped objects go to: %s",
                     object_header(player, Location(thing)));
     }
     break;
   case TYPE_THING:
   case TYPE_PLAYER:
     /* print home */
-    notify_format(player, T("Home: %s"),
+    notify_format(player, "Home: %s",
                   object_header(player, Home(thing))); /* home */
     /* print location if player can link to it */
     if (Location(thing) != NOTHING)
-      notify_format(player, T("Location: %s"),
+      notify_format(player, "Location: %s",
                     object_header(player, Location(thing)));
     break;
   case TYPE_EXIT:
@@ -950,20 +950,20 @@ do_examine(dbref player, const char *xname, enum exam_type flag, int all,
                 Name(thing), thing, Destination(thing));
       break;
     default:
-      notify_format(player, T("Source: %s"),
+      notify_format(player, "Source: %s",
                     object_header(player, Source(thing)));
       break;
     }
     /* print destination */
     switch (Destination(thing)) {
     case NOTHING:
-      notify(player, T("Destination: *UNLINKED*"));
+      notify(player, "Destination: *UNLINKED*");
       break;
     case HOME:
-      notify(player, T("Destination: *HOME*"));
+      notify(player, "Destination: *HOME*");
       break;
     default:
-      notify_format(player, T("Destination: %s"),
+      notify_format(player, "Destination: %s",
                     object_header(player, Destination(thing)));
       break;
     }
@@ -984,12 +984,12 @@ void
 do_score(dbref player)
 {
   if (NoPay(player))
-    notify_format(player, T("You have unlimited %s."), MONIES);
+    notify_format(player, "You have unlimited %s.", MONIES);
   else {
-    notify_format(player, T("You have %d %s."), Pennies(player),
+    notify_format(player, "You have %d %s.", Pennies(player),
                   Pennies(player) == 1 ? MONEY : MONIES);
     if (Moneybags(player))
-      notify_format(player, T("You may give unlimited %s."), MONIES);
+      notify_format(player, "You may give unlimited %s.", MONIES);
   }
 }
 
@@ -1045,9 +1045,9 @@ do_inventory(dbref player)
 
   /* Default if no INVFORMAT */
   if ((thing = Contents(player)) == NOTHING) {
-    notify(player, T("You aren't carrying anything."));
+    notify(player, "You aren't carrying anything.");
   } else {
-    notify(player, T("You are carrying:"));
+    notify(player, "You are carrying:");
     DOLIST (thing, thing) {
       notify(player, unparse_object_myopic(player, thing, AN_LOOK));
     }
@@ -1075,7 +1075,7 @@ do_find(dbref player, const char *name, char *argv[])
       offset = 1;
     bot = parse_integer(argv[1] + offset);
     if (!GoodObject(bot)) {
-      notify(player, T("Invalid range argument"));
+      notify(player, "Invalid range argument");
       return;
     }
   }
@@ -1085,7 +1085,7 @@ do_find(dbref player, const char *name, char *argv[])
       offset = 1;
     top = parse_integer(argv[2] + offset);
     if (!GoodObject(top)) {
-      notify(player, T("Invalid range argument"));
+      notify(player, "Invalid range argument");
       return;
     }
   }
@@ -1097,7 +1097,7 @@ do_find(dbref player, const char *name, char *argv[])
       count++;
     }
   }
-  notify_format(player, T("*** %d objects found ***"), count);
+  notify_format(player, "*** %d objects found ***", count);
 }
 
 /** Sweep the current location for bugs.
@@ -1130,7 +1130,7 @@ do_sweep(dbref player, const char *arg1)
     else if (string_prefix(arg1, "exits"))
       exit_flag = 1;
     else {
-      notify(player, T("Invalid parameter."));
+      notify(player, "Invalid parameter.");
       return;
     }
   }
@@ -1138,30 +1138,30 @@ do_sweep(dbref player, const char *arg1)
   strcpy(nhere, AName(here, AN_LOOK, NULL));
 
   if (!inven_flag && !exit_flag) {
-    notify(player, T("Listening in ROOM:"));
+    notify(player, "Listening in ROOM:");
 
     if (connect_flag) {
       /* only worry about puppet and players who's owner's are connected */
       if (Connected(here) || (Puppet(here) && Connected(Owner(here)))) {
         if (IsPlayer(here)) {
-          notify_format(player, T("%s is listening."), nhere);
+          notify_format(player, "%s is listening.", nhere);
         } else {
-          notify_format(player, T("%s [owner: %s] is listening."), nhere,
+          notify_format(player, "%s [owner: %s] is listening.", nhere,
                         AName(Owner(here), AN_LOOK, NULL));
         }
       }
     } else {
       if (Hearer(here) || Listener(here)) {
         if (Connected(here))
-          notify_format(player, T("%s (this room) [speech]. (connected)"),
+          notify_format(player, "%s (this room) [speech]. (connected)",
                         nhere);
         else
-          notify_format(player, T("%s (this room) [speech]."), nhere);
+          notify_format(player, "%s (this room) [speech].", nhere);
       }
       if (Commer(here))
-        notify_format(player, T("%s (this room) [commands]."), nhere);
+        notify_format(player, "%s (this room) [commands].", nhere);
       if (Audible(here))
-        notify_format(player, T("%s (this room) [broadcasting]."), nhere);
+        notify_format(player, "%s (this room) [broadcasting].", nhere);
     }
 
     for (here = Contents(here); here != NOTHING; here = Next(here)) {
@@ -1169,68 +1169,68 @@ do_sweep(dbref player, const char *arg1)
         /* only worry about puppet and players who's owner's are connected */
         if (Connected(here) || (Puppet(here) && Connected(Owner(here)))) {
           if (IsPlayer(here)) {
-            notify_format(player, T("%s is listening."),
+            notify_format(player, "%s is listening.",
                           AName(here, AN_LOOK, NULL));
           } else {
             strcpy(nhere, AName(here, AN_LOOK, NULL));
-            notify_format(player, T("%s [owner: %s] is listening."), nhere,
+            notify_format(player, "%s [owner: %s] is listening.", nhere,
                           AName(Owner(here), AN_LOOK, NULL));
           }
         }
       } else {
         if (Hearer(here) || Listener(here)) {
           if (Connected(here))
-            notify_format(player, T("%s [speech]. (connected)"),
+            notify_format(player, "%s [speech]. (connected)",
                           AName(here, AN_LOOK, NULL));
           else
-            notify_format(player, T("%s [speech]."),
+            notify_format(player, "%s [speech].",
                           AName(here, AN_LOOK, NULL));
         }
         if (Commer(here))
-          notify_format(player, T("%s [commands]."),
+          notify_format(player, "%s [commands].",
                         AName(here, AN_LOOK, NULL));
       }
     }
   }
   if (!connect_flag && !inven_flag && IsRoom(Location(player))) {
-    notify(player, T("Listening EXITS:"));
+    notify(player, "Listening EXITS:");
     if (Audible(Location(player))) {
       /* listening exits only work if the room is AUDIBLE */
       for (here = Exits(Location(player)); here != NOTHING; here = Next(here)) {
         if (Audible(here)) {
-          notify_format(player, T("%s [broadcasting]."),
+          notify_format(player, "%s [broadcasting].",
                         AName(here, AN_LOOK, NULL));
         }
       }
     }
   }
   if (!here_flag && !exit_flag) {
-    notify(player, T("Listening in your INVENTORY:"));
+    notify(player, "Listening in your INVENTORY:");
 
     for (here = Contents(player); here != NOTHING; here = Next(here)) {
       if (connect_flag) {
         /* only worry about puppet and players who's owner's are connected */
         if (Connected(here) || (Puppet(here) && Connected(Owner(here)))) {
           if (IsPlayer(here)) {
-            notify_format(player, T("%s is listening."),
+            notify_format(player, "%s is listening.",
                           AName(here, AN_LOOK, NULL));
           } else {
             strcpy(nhere, AName(here, AN_LOOK, NULL));
-            notify_format(player, T("%s [owner: %s] is listening."), nhere,
+            notify_format(player, "%s [owner: %s] is listening.", nhere,
                           AName(Owner(here), AN_LOOK, NULL));
           }
         }
       } else {
         if (Hearer(here) || Listener(here)) {
           if (Connected(here))
-            notify_format(player, T("%s [speech]. (connected)"),
+            notify_format(player, "%s [speech]. (connected)",
                           AName(here, AN_LOOK, NULL));
           else
-            notify_format(player, T("%s [speech]."),
+            notify_format(player, "%s [speech].",
                           AName(here, AN_LOOK, NULL));
         }
         if (Commer(here))
-          notify_format(player, T("%s [commands]."),
+          notify_format(player, "%s [commands].",
                         AName(here, AN_LOOK, NULL));
       }
     }
@@ -1249,23 +1249,23 @@ do_whereis(dbref player, const char *name)
 {
   dbref thing;
   if (*name == '\0') {
-    notify(player, T("You must specify a valid player name."));
+    notify(player, "You must specify a valid player name.");
     return;
   }
   if ((thing = lookup_player(name)) == NOTHING) {
-    notify(player, T("That player does not seem to exist."));
+    notify(player, "That player does not seem to exist.");
     return;
   }
   if (!Can_Locate(player, thing)) {
-    notify(player, T("That player wishes to have some privacy."));
-    notify_format(thing, T("%s tried to locate you and failed."),
+    notify(player, "That player wishes to have some privacy.");
+    notify_format(thing, "%s tried to locate you and failed.",
                   AName(player, AN_SYS, NULL));
     return;
   }
-  notify_format(player, T("%s is at: %s."), AName(thing, AN_SYS, NULL),
+  notify_format(player, "%s is at: %s.", AName(thing, AN_SYS, NULL),
                 unparse_object(player, Location(thing), AN_LOOK));
   if (!See_All(player))
-    notify_format(thing, T("%s has just located your position."),
+    notify_format(thing, "%s has just located your position.",
                   AName(player, AN_SYS, NULL));
   return;
 }
@@ -1384,7 +1384,7 @@ decompile_atrs(dbref player, dbref thing, const char *name, const char *pattern,
   dh.skipdef = skipdef;
   /* Comment complaints if none are found */
   if (!atr_iter_get(player, thing, pattern, AIG_NONE, decompile_helper, &dh)) {
-    notify_format(player, T("@@ No attributes match '%s'. @@"), pattern);
+    notify_format(player, "@@ No attributes match '%s'. @@", pattern);
   }
 }
 
@@ -1451,7 +1451,7 @@ do_decompile(dbref player, const char *xname, const char *prefix, int dec_type)
 
   /* @decompile must always have an argument */
   if (!xname || !*xname) {
-    notify(player, T("What do you want to @decompile?"));
+    notify(player, "What do you want to @decompile?");
     return;
   }
   name = mush_strdup(xname, "decompile.name");
@@ -1467,7 +1467,7 @@ do_decompile(dbref player, const char *xname, const char *prefix, int dec_type)
   }
 
   if (!GoodObject(thing) || IsGarbage(thing)) {
-    notify(player, T("Garbage is garbage."));
+    notify(player, "Garbage is garbage.");
     mush_free(name, "decompile.name");
     return;
   }
@@ -1516,7 +1516,7 @@ do_decompile(dbref player, const char *xname, const char *prefix, int dec_type)
 
   /* else we have a full decompile */
   if (!Can_Examine(player, thing)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     mush_free(name, "decompile.name");
     return;
   }
