@@ -361,7 +361,7 @@ match_result_internal(dbref who, dbref where, const char *xname, int type,
       ((flags & MAT_CONTENTS) && !goodwhere)) {
     /* It can't be nearby/in where's contents if where is invalid */
     if ((flags & MAT_NOISY) && GoodObject(who)) {
-      notify(who, T("I can't see that here."));
+      notify(who, "I can't see that here.");
     }
     return NOTHING;
   }
@@ -477,11 +477,11 @@ match_result_internal(dbref who, dbref where, const char *xname, int type,
   if (!GoodObject(bestmatch) && (flags & MAT_NOISY) && GoodObject(who)) {
     /* give error message */
     if (bestmatch == AMBIGUOUS) {
-      notify(who, T("I don't know which one you mean!"));
+      notify(who, "I don't know which one you mean!");
     } else if (nocontrol) {
-      notify(who, T("Permission denied."));
+      notify(who, "Permission denied.");
     } else {
-      notify(who, T("I can't see that here."));
+      notify(who, "I can't see that here.");
     }
   }
 
