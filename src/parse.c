@@ -91,23 +91,23 @@ dummy_errors()
   /* Just to make sure the error messages are in the translation
      tables. */
   char *temp;
-  temp = T("#-1 ARGUMENT MUST BE INTEGER");
-  temp = T("#-1 ARGUMENTS MUST BE INTEGERS");
-  temp = T("#-1 ARGUMENT MUST BE POSITIVE INTEGER");
-  temp = T("#-1 ARGUMENTS MUST BE POSITIVE INTEGERS");
-  temp = T("#-1 ARGUMENT MUST BE NUMBER");
-  temp = T("#-1 ARGUMENTS MUST BE NUMBERS");
-  temp = T("#-1 FUNCTION INVOCATION LIMIT EXCEEDED");
-  temp = T("#-1 CALL LIMIT EXCEEDED");
-  temp = T("#-1 PERMISSION DENIED");
-  temp = T("#-1 NO PERMISSION TO GET ATTRIBUTE");
-  temp = T("#-1 NO MATCH");
-  temp = T("#-1 NO SUCH OBJECT VISIBLE");
-  temp = T("#-1 FUNCTION DISABLED");
-  temp = T("#-1 OUT OF RANGE");
-  temp = T("#-1 ARGUMENT OUT OF RANGE");
-  temp = T("#-1 REGISTER NAME INVALID");
-  temp = T("#-1 TOO MANY REGISTERS");
+  temp = "#-1 ARGUMENT MUST BE INTEGER";
+  temp = "#-1 ARGUMENTS MUST BE INTEGERS";
+  temp = "#-1 ARGUMENT MUST BE POSITIVE INTEGER";
+  temp = "#-1 ARGUMENTS MUST BE POSITIVE INTEGERS";
+  temp = "#-1 ARGUMENT MUST BE NUMBER";
+  temp = "#-1 ARGUMENTS MUST BE NUMBERS";
+  temp = "#-1 FUNCTION INVOCATION LIMIT EXCEEDED";
+  temp = "#-1 CALL LIMIT EXCEEDED";
+  temp = "#-1 PERMISSION DENIED";
+  temp = "#-1 NO PERMISSION TO GET ATTRIBUTE";
+  temp = "#-1 NO MATCH";
+  temp = "#-1 NO SUCH OBJECT VISIBLE";
+  temp = "#-1 FUNCTION DISABLED";
+  temp = "#-1 OUT OF RANGE";
+  temp = "#-1 ARGUMENT OUT OF RANGE";
+  temp = "#-1 REGISTER NAME INVALID";
+  temp = "#-1 TOO MANY REGISTERS";
 }
 
 #endif
@@ -2081,7 +2081,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
        * it might never get displayed.
        */
       if (GoodObject(enactor) && !Quiet(enactor))
-        notify(enactor, T("CPU usage exceeded."));
+        notify(enactor, "CPU usage exceeded.");
       do_rawlog(
         LT_TRACE,
         "CPU time limit exceeded. enactor=#%d executor=#%d caller=#%d code=%s",
@@ -2789,9 +2789,9 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
           if (eflags & PE_FUNCTION_MANDATORY) {
             char *suggestion;
             *bp = startpos;
-            safe_str(T("#-1 FUNCTION ("), buff, bp);
+            safe_str("#-1 FUNCTION (", buff, bp);
             safe_str(name, buff, bp);
-            safe_str(T(") NOT FOUND"), buff, bp);
+            safe_str(") NOT FOUND", buff, bp);
             suggestion = suggest_name(name, "FUNCTIONS");
             if (suggestion) {
               safe_format(buff, bp, " DID YOU MEAN '%s'", suggestion);
@@ -2843,7 +2843,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
         /* Check for the recursion limit */
         if ((pe_info->fun_recursions + 1 >= RECURSION_LIMIT) ||
             (global_fun_recursions + 1 >= RECURSION_LIMIT * 5)) {
-          safe_str(T("#-1 FUNCTION RECURSION LIMIT EXCEEDED"), buff, bp);
+          safe_str("#-1 FUNCTION RECURSION LIMIT EXCEEDED", buff, bp);
           if (process_expression(name, &tp, str, executor, caller, enactor,
                                  PE_NOTHING, PT_PAREN, pe_info))
             retval = 1;
@@ -2954,7 +2954,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
         /* Warn about deprecated functions */
         if (fp->flags & FN_DEPRECATED)
           notify_format(Owner(executor),
-                        T("Deprecated function %s being used on object #%d."),
+                        "Deprecated function %s being used on object #%d.",
                         fp->name, executor);
 
         /* See if this function is enabled */
@@ -2978,23 +2978,23 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
             nfargs = 0;
           }
           if ((nfargs < fp->minargs) || (nfargs > abs(fp->maxargs))) {
-            safe_format(buff, bp, T("#-1 FUNCTION (%s) EXPECTS "), fp->name);
+            safe_format(buff, bp, "#-1 FUNCTION (%s) EXPECTS ", fp->name);
             if (fp->minargs == abs(fp->maxargs)) {
               safe_integer(fp->minargs, buff, bp);
             } else if ((fp->minargs + 1) == abs(fp->maxargs)) {
               safe_integer(fp->minargs, buff, bp);
-              safe_str(T(" OR "), buff, bp);
+              safe_str(" OR ", buff, bp);
               safe_integer(abs(fp->maxargs), buff, bp);
             } else if (fp->maxargs == INT_MAX) {
-              safe_str(T("AT LEAST "), buff, bp);
+              safe_str("AT LEAST ", buff, bp);
               safe_integer(fp->minargs, buff, bp);
             } else {
-              safe_str(T("BETWEEN "), buff, bp);
+              safe_str("BETWEEN ", buff, bp);
               safe_integer(fp->minargs, buff, bp);
-              safe_str(T(" AND "), buff, bp);
+              safe_str(" AND ", buff, bp);
               safe_integer(abs(fp->maxargs), buff, bp);
             }
-            safe_str(T(" ARGUMENTS BUT GOT "), buff, bp);
+            safe_str(" ARGUMENTS BUT GOT ", buff, bp);
             safe_integer(nfargs, buff, bp);
           } else {
             char *fbuff, *fbp;
@@ -3050,9 +3050,9 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
                 do_rawlog(LT_ERR,
                           "ERROR: @function (%s) without attribute (#%d/%s)",
                           fp->name, thing, fp->where.ufun->name);
-                safe_str(T("#-1 @FUNCTION ("), buff, bp);
+                safe_str("#-1 @FUNCTION (", buff, bp);
                 safe_str(fp->name, buff, bp);
-                safe_str(T(") MISSING ATTRIBUTE ("), buff, bp);
+                safe_str(") MISSING ATTRIBUTE (", buff, bp);
                 safe_dbref(thing, buff, bp);
                 safe_chr('/', buff, bp);
                 safe_str(fp->where.ufun->name, buff, bp);
