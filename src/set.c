@@ -76,7 +76,7 @@ do_name(dbref player, const char *name, char *newname_)
 
   /* check for bad name */
   if ((*newname_ == '\0') || strchr(newname_, '[')) {
-    notify(player, T("Give it what new name?"));
+    notify(player, "Give it what new name?");
     return;
   }
   switch (Typeof(thing)) {
@@ -85,14 +85,14 @@ do_name(dbref player, const char *name, char *newname_)
       ok_object_name(newname_, player, thing, TYPE_PLAYER, &newname, &alias)) {
     case OPAE_INVALID:
     case OPAE_NULL:
-      notify(player, T("You can't give a player that name or alias."));
+      notify(player, "You can't give a player that name or alias.");
       if (newname)
         mush_free(newname, "name.newname");
       if (alias)
         mush_free(alias, "name.newname");
       return;
     case OPAE_TOOMANY:
-      notify(player, T("Too many aliases."));
+      notify(player, "Too many aliases.");
       mush_free(newname, "name.newname");
       return;
     case OPAE_SUCCESS:
@@ -102,7 +102,7 @@ do_name(dbref player, const char *name, char *newname_)
   case TYPE_EXIT:
     if (ok_object_name(newname_, player, thing, TYPE_EXIT, &newname, &alias) !=
         OPAE_SUCCESS) {
-      notify(player, T("That is not a reasonable name."));
+      notify(player, "That is not a reasonable name.");
       if (newname)
         mush_free(newname, "name.newname");
       if (alias)
@@ -113,14 +113,14 @@ do_name(dbref player, const char *name, char *newname_)
   case TYPE_THING:
   case TYPE_ROOM:
     if (!ok_name(newname_, 0)) {
-      notify(player, T("That is not a reasonable name."));
+      notify(player, "That is not a reasonable name.");
       return;
     }
     newname = mush_strdup(trim_space_sep(newname_, ' '), "name.newname");
     break;
   default:
     /* Should never occur */
-    notify(player, T("I don't see that here."));
+    notify(player, "I don't see that here.");
     return;
   }
 
@@ -132,7 +132,7 @@ do_name(dbref player, const char *name, char *newname_)
            newname);
     if (Suspect(thing) && strcmp(Name(thing), newname) != 0)
       flag_broadcast("WIZARD", 0,
-                     T("Broadcast: Suspect %s changed name to %s."),
+                     "Broadcast: Suspect %s changed name to %s.",
                      Name(thing), newname);
     reset_player_list(thing, newname, alias);
   }
@@ -151,7 +151,7 @@ do_name(dbref player, const char *name, char *newname_)
               newname, oldname);
 
   if (!AreQuiet(player, thing))
-    notify(player, T("Name set."));
+    notify(player, "Name set.");
   pe_regs = pe_regs_create(PE_REGS_ARG, "do_name");
   pe_regs_setenv_nocopy(pe_regs, 0, oldname);
   pe_regs_setenv_nocopy(pe_regs, 1, newname);
@@ -197,27 +197,27 @@ do_chown(dbref player, const char *name, const char *newobj, int preserve,
     newowner = player;
   } else {
     if ((newowner = lookup_player(newobj)) == NOTHING) {
-      notify(player, T("I couldn't find that player."));
+      notify(player, "I couldn't find that player.");
       return 0;
     }
   }
 
   if (IsPlayer(thing) && !God(player)) {
-    notify(player, T("Players always own themselves."));
+    notify(player, "Players always own themselves.");
     return 0;
   }
   /* Permissions checking */
   if (!chown_ok(player, thing, newowner, pe_info)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return 0;
   }
   if (IsThing(thing) && !Hasprivs(player) &&
       !(GoodObject(Location(thing)) && (Location(thing) == player))) {
-    notify(player, T("You must carry the object to @chown it."));
+    notify(player, "You must carry the object to @chown it.");
     return 0;
   }
   if (preserve && !Wizard(player)) {
-    notify(player, T("You cannot @CHOWN/PRESERVE. Use normal @CHOWN."));
+    notify(player, "You cannot @CHOWN/PRESERVE. Use normal @CHOWN.");
     return 0;
   }
   /* chowns to the zone master don't count towards fees */
@@ -226,8 +226,8 @@ do_chown(dbref player, const char *name, const char *newobj, int preserve,
     if (!can_pay_fees(newowner, Pennies(thing))) {
       /* not enough money or quota */
       if (newowner != player)
-        notify(player, T("That player doesn't have enough money or quota to "
-                         "receive that object."));
+        notify(player, "That player doesn't have enough money or quota to "
+                         "receive that object.");
       return 0;
     }
     /* Credit the current owner */
@@ -235,7 +235,7 @@ do_chown(dbref player, const char *name, const char *newobj, int preserve,
     change_quota(Owner(thing), QUOTA_COST);
   }
   chown_object(player, thing, newowner, preserve);
-  notify(player, T("Owner changed."));
+  notify(player, "Owner changed.");
   return 1;
 }
 
@@ -313,7 +313,7 @@ chown_object(dbref player, dbref thing, dbref newowner, int preserve)
     int zone_depth = MAX_ZONES;
     for (tmp = Zone(Zone(newowner)); GoodObject(tmp); tmp = Zone(tmp)) {
       if (tmp == thing) {
-        notify(player, T("Circular zone broken."));
+        notify(player, "Circular zone broken.");
         ok_to_zone = 0;
         break;
       }
@@ -322,7 +322,7 @@ chown_object(dbref player, dbref thing, dbref newowner, int preserve)
       zone_depth--;
       if (!zone_depth) {
         ok_to_zone = 0;
-        notify(player, T("Overly deep zone chain broken."));
+        notify(player, "Overly deep zone chain broken.");
         break;
       }
     }
@@ -342,16 +342,16 @@ chown_object(dbref player, dbref thing, dbref newowner, int preserve)
     if (preserve == 1 && (newowner != player) && Wizard(thing) &&
         !Wizard(newowner)) {
       notify_format(player,
-                    T("Warning: WIZ flag reset on #%d because "
-                      "@CHOWN/PRESERVE is to a non-WIZ flagged third-party."),
+                    "Warning: WIZ flag reset on #%d because "
+                      "@CHOWN/PRESERVE is to a non-WIZ flagged third-party.",
                     thing);
       clear_flag_internal(thing, "WIZARD");
     }
     if (!null_flagmask("POWER", Powers(thing)) || Wizard(thing) ||
         Royalty(thing) || Inherit(thing))
       notify_format(player,
-                    T("Warning: @CHOWN/PRESERVE on an object (#%d) "
-                      "with WIZ, ROY, INHERIT, or @power privileges."),
+                    "Warning: @CHOWN/PRESERVE on an object (#%d) "
+                      "with WIZ, ROY, INHERIT, or @power privileges.",
                     thing);
   }
 }
@@ -390,13 +390,13 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
 
   if (Zone(thing) == zone) {
     if (noisy)
-      notify(player, T("That object is already in that zone."));
+      notify(player, "That object is already in that zone.");
     return 0;
   }
 
   if (!controls(player, thing)) {
     if (noisy)
-      notify(player, T("You don't have the power to shift reality."));
+      notify(player, "You don't have the power to shift reality.");
     return 0;
   }
   /* a player may change an object's zone to:
@@ -411,9 +411,9 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
     if (noisy) {
       if (has_lock) {
         fail_lock(player, zone, Chzone_Lock,
-                  T("You cannot move that object to that zone."), NOTHING);
+                  "You cannot move that object to that zone.", NOTHING);
       } else {
-        notify(player, T("You cannot move that object to that zone."));
+        notify(player, "You cannot move that object to that zone.");
       }
     }
     return 0;
@@ -421,7 +421,7 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
   /* Don't chzone object to itself for mortals! */
   if ((zone == thing) && !Hasprivs(player)) {
     if (noisy)
-      notify(player, T("You shouldn't zone objects to themselves!"));
+      notify(player, "You shouldn't zone objects to themselves!");
     return 0;
   }
   /* Don't allow circular zones */
@@ -430,14 +430,14 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
     int zone_depth = MAX_ZONES;
     for (tmp = Zone(zone); GoodObject(tmp); tmp = Zone(tmp)) {
       if (tmp == thing) {
-        notify(player, T("You can't make circular zones!"));
+        notify(player, "You can't make circular zones!");
         return 0;
       }
       if (tmp == Zone(tmp)) /* Ran into an object zoned to itself */
         break;
       zone_depth--;
       if (!zone_depth) {
-        notify(player, T("Overly deep zone chain."));
+        notify(player, "Overly deep zone chain.");
         return 0;
       }
     }
@@ -453,7 +453,7 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
   /* Warn Wiz/Royals when they zone their stuff */
   if ((zone != NOTHING) && Hasprivs(Owner(thing)) && !IsPlayer(thing)) {
     if (noisy)
-      notify(player, T("Warning: @chzoning admin-owned object!"));
+      notify(player, "Warning: @chzoning admin-owned object!");
   }
   /* everything is okay, do the change */
   Zone(thing) = zone;
@@ -477,13 +477,13 @@ do_chzone(dbref player, char const *name, char const *newobj, bool noisy,
   } else {
     if (noisy && (zone != NOTHING)) {
       if (Hasprivs(thing))
-        notify(player, T("Warning: @chzoning a privileged player."));
+        notify(player, "Warning: @chzoning a privileged player.");
       if (Inherit(thing))
-        notify(player, T("Warning: @chzoning a TRUST player."));
+        notify(player, "Warning: @chzoning a TRUST player.");
     }
   }
   if (noisy)
-    notify(player, T("Zone changed."));
+    notify(player, "Zone changed.");
   return 1;
 }
 
@@ -509,7 +509,7 @@ af_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
   if (!(Can_Write_Attr(player, thing, AL_ATTR(atr)) ||
         ((af->clrf & AF_SAFE) &&
          Can_Write_Attr_Ignore_Safe(player, thing, AL_ATTR(atr))))) {
-    notify_format(player, T("You cannot change that flag on %s/%s"),
+    notify_format(player, "You cannot change that flag on %s/%s",
                   AName(thing, AN_SYS, NULL), AL_NAME(atr));
     return 0;
   }
@@ -518,13 +518,13 @@ af_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
   if (af->clrf) {
     AL_FLAGS(atr) &= ~af->clrf;
     if (!AreQuiet(player, thing) && !AF_Quiet(atr))
-      notify_format(player, T("%s/%s - %s reset."), AName(thing, AN_SYS, NULL),
+      notify_format(player, "%s/%s - %s reset.", AName(thing, AN_SYS, NULL),
                     AL_NAME(atr), af->clrflags);
   }
   if (af->setf) {
     AL_FLAGS(atr) |= af->setf;
     if (!AreQuiet(player, thing) && !AF_Quiet(atr)) {
-      notify_format(player, T("%s/%s - %s set."), AName(thing, AN_SYS, NULL),
+      notify_format(player, "%s/%s - %s set.", AName(thing, AN_SYS, NULL),
                     AL_NAME(atr), af->setflags);
       if (af->setf & AF_REGEXP) {
         unanchored_regexp_attr_check(thing, atr, player);
@@ -541,7 +541,7 @@ copy_attrib_flags(dbref player, dbref target, ATTR *atr, int flags)
   if (!atr)
     return;
   if (!Can_Write_Attr(player, target, AL_ATTR(atr))) {
-    notify_format(player, T("You cannot set attrib flags on %s/%s"),
+    notify_format(player, "You cannot set attrib flags on %s/%s",
                   AName(target, AN_SYS, NULL), AL_NAME(atr));
     return;
   }
@@ -570,7 +570,7 @@ do_attrib_flags(dbref player, const char *obj, const char *atrname,
     return;
 
   if (!flag || !*flag) {
-    notify(player, T("What flag do you want to set?"));
+    notify(player, "What flag do you want to set?");
     return;
   }
 
@@ -581,18 +581,18 @@ do_attrib_flags(dbref player, const char *obj, const char *atrname,
 
   af.setf = af.clrf = 0;
   if (string_to_atrflagsets(player, p, &af.setf, &af.clrf) < 0) {
-    notify(player, T("Unrecognized attribute flag."));
+    notify(player, "Unrecognized attribute flag.");
     return;
   }
   if (af.clrf == 0 && af.setf == 0) {
-    notify(player, T("What flag do you want to set?"));
+    notify(player, "What flag do you want to set?");
     return;
   }
 
   af.clrflags = mush_strdup(atrflag_to_string(af.clrf), "af_flag list");
   af.setflags = mush_strdup(atrflag_to_string(af.setf), "af_flag list");
   if (!atr_iter_get(player, thing, atrname, AIG_NONE, af_helper, &af))
-    notify(player, T("No attribute found to change."));
+    notify(player, "No attribute found to change.");
   mush_free(af.clrflags, "af_flag list");
   mush_free(af.setflags, "af_flag list");
 }
@@ -616,11 +616,11 @@ do_set(dbref player, const char *xname, const char *flag)
   char flagbuff[BUFFER_LEN];
 
   if (!xname || !*xname) {
-    notify(player, T("I can't see that here."));
+    notify(player, "I can't see that here.");
     return 0;
   }
   if (!flag || !*flag) {
-    notify(player, T("What do you want to set?"));
+    notify(player, "What do you want to set?");
     return 0;
   }
 
@@ -642,14 +642,14 @@ do_set(dbref player, const char *xname, const char *flag)
   mush_free(name, "ds.string");
 
   if (God(thing) && !God(player)) {
-    notify(player, T("Only God can set himself!"));
+    notify(player, "Only God can set himself!");
     return 0;
   }
   /* check for attribute set first */
   if ((p = strchr(flag, ':')) != NULL) {
     *p++ = '\0';
     if (!command_check_byname(player, "ATTRIB_SET", NULL)) {
-      notify(player, T("You may not set attributes."));
+      notify(player, "You may not set attributes.");
       return 0;
     }
     return do_set_atr(thing, flag, p, player, 1);
@@ -658,7 +658,7 @@ do_set(dbref player, const char *xname, const char *flag)
   strcpy(flagbuff, flag);
   p = trim_space_sep(flagbuff, ' ');
   if (*p == '\0') {
-    notify(player, T("You must specify a flag to set."));
+    notify(player, "You must specify a flag to set.");
     return 0;
   }
   do {
@@ -702,14 +702,14 @@ do_cpattr(dbref player, const char *oldpair, char **newpair, int move, int nofla
 
   /* must copy from something */
   if (!oldpair || !*oldpair) {
-    notify(player, T("What do you want to copy from?"));
+    notify(player, "What do you want to copy from?");
     return;
   }
   /* find the old object */
   mush_strncpy(tbuf1, oldpair, sizeof tbuf1);
   p = strchr(tbuf1, '/');
   if (!p || !*p) {
-    notify(player, T("What object do you want to copy the attribute from?"));
+    notify(player, "What object do you want to copy the attribute from?");
     return;
   }
   *p++ = '\0';
@@ -722,12 +722,12 @@ do_cpattr(dbref player, const char *oldpair, char **newpair, int move, int nofla
   /* find the old attribute */
   a = atr_get_noparent(oldobj, p);
   if (!a) {
-    notify(player, T("No such attribute to copy from."));
+    notify(player, "No such attribute to copy from.");
     return;
   }
   /* check permissions to get it */
   if (!Can_Read_Attr(player, oldobj, a)) {
-    notify(player, T("Permission to read attribute denied."));
+    notify(player, "Permission to read attribute denied.");
     return;
   }
   /* we can read it. Copy the value. */
@@ -738,7 +738,7 @@ do_cpattr(dbref player, const char *oldpair, char **newpair, int move, int nofla
   /* now we loop through our new object pairs and copy, calling @set. */
   for (i = 1; i < MAX_ARG && (newpair[i] != NULL); i++) {
     if (!*newpair[i]) {
-      notify(player, T("What do you want to copy to?"));
+      notify(player, "What do you want to copy to?");
     } else {
       mush_strncpy(tbuf1, newpair[i], sizeof tbuf1);
       q = strchr(tbuf1, '/');
@@ -766,14 +766,14 @@ do_cpattr(dbref player, const char *oldpair, char **newpair, int move, int nofla
 
   mush_free(text, "atrval.cpattr");
   if (copies) {
-    notify_format(player, T("Attribute %s (%d copies)"),
-                  (move ? T("moved") : T("copied")), copies);
+    notify_format(player, "Attribute %s (%d copies)",
+                  (move ? "moved" : "copied"), copies);
     if (move) {
       do_set_atr(oldobj, origname, NULL, player, 1);
     }
   } else {
-    notify_format(player, T("Unable to %s attribute."),
-                  (move ? T("move") : T("copy")));
+    notify_format(player, "Unable to %s attribute.",
+                  (move ? "move" : "copy"));
   }
   return;
 }
@@ -813,11 +813,11 @@ edit_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
   tbufap = tbuf_ansi;
 
   if (!a) { /* Shouldn't ever happen, but better safe than sorry */
-    notify(player, T("No such attribute, try set instead."));
+    notify(player, "No such attribute, try set instead.");
     return 0;
   }
   if (!Can_Write_Attr(player, thing, a)) {
-    notify(player, T("You need to control an attribute to edit it."));
+    notify(player, "You need to control an attribute to edit it.");
     gargs->skipped++;
     return 0;
   }
@@ -930,22 +930,22 @@ edit_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
 
   if (!edited) {
     if (!(gargs->flags & EDIT_QUIET)) {
-      notify_format(player, T("%s - Unchanged."), AL_NAME(a));
+      notify_format(player, "%s - Unchanged.", AL_NAME(a));
     }
   } else if (!(gargs->flags & EDIT_CHECK)) {
     if ((do_set_atr(thing, AL_NAME(a), tbuf1, player, 0) == 1) &&
         !(gargs->flags & EDIT_QUIET) && !AreQuiet(player, thing)) {
       if (!ansi_long_flag)
-        notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbuf_ansi);
+        notify_format(player, "%s - Set: %s", AL_NAME(a), tbuf_ansi);
       else
-        notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbuf1);
+        notify_format(player, "%s - Set: %s", AL_NAME(a), tbuf1);
     }
   } else if (!(gargs->flags & EDIT_QUIET)) {
     /* We don't do it - we just pemit it. */
     if (!ansi_long_flag)
-      notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbuf_ansi);
+      notify_format(player, "%s - Set: %s", AL_NAME(a), tbuf_ansi);
     else
-      notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbuf1);
+      notify_format(player, "%s - Set: %s", AL_NAME(a), tbuf1);
   }
 
   return 1;
@@ -969,13 +969,13 @@ do_edit(dbref player, const char *it, char **argv, int flags)
   struct edit_args args;
 
   if (!(it && *it)) {
-    notify(player, T("I need to know what you want to edit."));
+    notify(player, "I need to know what you want to edit.");
     return;
   }
   strcpy(tbuf1, it);
   q = strchr(tbuf1, '/');
   if (!(q && *q)) {
-    notify(player, T("I need to know what you want to edit."));
+    notify(player, "I need to know what you want to edit.");
     return;
   }
   *q++ = '\0';
@@ -986,7 +986,7 @@ do_edit(dbref player, const char *it, char **argv, int flags)
     return;
 
   if (!argv[1] || !*argv[1]) {
-    notify(player, T("Nothing to do."));
+    notify(player, "Nothing to do.");
     return;
   }
 
@@ -997,9 +997,9 @@ do_edit(dbref player, const char *it, char **argv, int flags)
   args.edited = 0;
 
   if (!atr_iter_get(player, thing, q, AIG_NONE, edit_helper, &args))
-    notify(player, T("No matching attributes."));
+    notify(player, "No matching attributes.");
   else if (flags & EDIT_QUIET)
-    notify_format(player, T("%d attributes edited, %d skipped."), args.edited,
+    notify_format(player, "%d attributes edited, %d skipped.", args.edited,
                   args.skipped);
 }
 
@@ -1045,11 +1045,11 @@ regedit_helper(dbref player, dbref thing,
   }
 
   if (!a) { /* Shouldn't ever happen, but better safe than sorry */
-    notify(player, T("No such attribute, try set instead."));
+    notify(player, "No such attribute, try set instead.");
     return 0;
   }
   if (!Can_Write_Attr(player, thing, a)) {
-    notify(player, T("You need to control an attribute to edit it."));
+    notify(player, "You need to control an attribute to edit it.");
     gargs->skipped++;
     return 0;
   }
@@ -1135,7 +1135,7 @@ regedit_helper(dbref player, dbref thing,
     free_ansi_string(display_str);
     pe_regs_restore(gargs->pe_info, pe_regs);
     pe_regs_free(pe_regs);
-    notify(player, T("Bailing out."));
+    notify(player, "Bailing out.");
     return 0;
   }
 
@@ -1146,7 +1146,7 @@ regedit_helper(dbref player, dbref thing,
 
   if (!edited) {
     if (!(gargs->flags & EDIT_QUIET)) {
-      notify_format(player, T("%s - Unchanged."), AL_NAME(a));
+      notify_format(player, "%s - Unchanged.", AL_NAME(a));
     }
   } else {
     tbufp = tbuf1;
@@ -1162,11 +1162,11 @@ regedit_helper(dbref player, dbref thing,
     if (!(gargs->flags & EDIT_CHECK)) {
       if ((do_set_atr(thing, AL_NAME(a), tbuf1, player, 0) == 1) &&
           !(gargs->flags & EDIT_QUIET) && !AreQuiet(player, thing)) {
-        notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbufp);
+        notify_format(player, "%s - Set: %s", AL_NAME(a), tbufp);
       }
     } else if (!(gargs->flags & EDIT_QUIET)) {
       /* We don't do it - we just pemit it. */
-      notify_format(player, T("%s - Set: %s"), AL_NAME(a), tbufp);
+      notify_format(player, "%s - Set: %s", AL_NAME(a), tbufp);
     }
   }
 
@@ -1204,13 +1204,13 @@ do_edit_regexp(dbref player, const char *it, char **argv, int flags,
   PCRE2_SIZE erroffset;
 
   if (!(it && *it)) {
-    notify(player, T("I need to know what you want to edit."));
+    notify(player, "I need to know what you want to edit.");
     return;
   }
   strcpy(tbuf1, it);
   q = strchr(tbuf1, '/');
   if (!(q && *q)) {
-    notify(player, T("I need to know what you want to edit."));
+    notify(player, "I need to know what you want to edit.");
     return;
   }
   *q++ = '\0';
@@ -1221,7 +1221,7 @@ do_edit_regexp(dbref player, const char *it, char **argv, int flags,
     return;
 
   if (!argv[1] || !*argv[1]) {
-    notify(player, T("Nothing to do."));
+    notify(player, "Nothing to do.");
     return;
   }
 
@@ -1231,7 +1231,7 @@ do_edit_regexp(dbref player, const char *it, char **argv, int flags,
                           &errcode, &erroffset, re_compile_ctx)) == NULL) {
     char errmsg[120];
     pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errmsg, sizeof errmsg);
-    notify_format(player, T("Invalid regexp: %s"), errmsg);
+    notify_format(player, "Invalid regexp: %s", errmsg);
     return;
   }
   ADD_CHECK("pcre");
@@ -1246,9 +1246,9 @@ do_edit_regexp(dbref player, const char *it, char **argv, int flags,
   args.call_limit_hit = 0;
 
   if (!atr_iter_get(player, thing, q, AIG_NONE, regedit_helper, &args)) {
-    notify(player, T("No matching attributes."));
+    notify(player, "No matching attributes.");
   } else if (flags & EDIT_QUIET) {
-    notify_format(player, T("%d attributes edited, %d skipped."), args.edited,
+    notify_format(player, "%d attributes edited, %d skipped.", args.edited,
                   args.skipped);
   }
 
@@ -1292,7 +1292,7 @@ do_trigger(dbref executor, dbref enactor, char *object, char **argv,
   }
 
   if (!(attrib = strchr(object, '/')) || !*(attrib + 1)) {
-    notify(executor, T("I need to know what attribute to trigger."));
+    notify(executor, "I need to know what attribute to trigger.");
     return;
   }
   *attrib++ = '\0';
@@ -1304,20 +1304,20 @@ do_trigger(dbref executor, dbref enactor, char *object, char **argv,
 
   control = controls(executor, thing);
   if (!control && !(Owns(executor, thing) && LinkOk(thing))) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
 
   if (flags & TRIGGER_SPOOF) {
     if (!control) {
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
       return;
     }
     triggerer = enactor;
   }
 
   if (God(thing) && !God(executor)) {
-    notify(executor, T("You can't trigger God!"));
+    notify(executor, "You can't trigger God!");
     return;
   }
 
@@ -1343,9 +1343,9 @@ do_trigger(dbref executor, dbref enactor, char *object, char **argv,
   if (queue_attribute_base_priv(thing, upcasestr(attrib), triggerer, 0, pe_regs,
                                 qflags, executor, parent_queue, input)) {
     if (!AreQuiet(executor, thing))
-      notify_format(executor, T("%s - Triggered."), AName(thing, AN_SYS, NULL));
+      notify_format(executor, "%s - Triggered.", AName(thing, AN_SYS, NULL));
   } else {
-    notify(executor, T("No such attribute."));
+    notify(executor, "No such attribute.");
   }
   pe_regs_free(pe_regs);
 }
@@ -1373,7 +1373,7 @@ do_include(dbref executor, dbref enactor, char *object, char **argv,
   for (s = tbuf1; *s && (*s != '/'); s++)
     ;
   if (!*s) {
-    notify(executor, T("I need to know what attribute to include."));
+    notify(executor, "I need to know what attribute to include.");
     return;
   }
   *s++ = '\0';
@@ -1384,7 +1384,7 @@ do_include(dbref executor, dbref enactor, char *object, char **argv,
     return;
 
   if (God(thing) && !God(executor)) {
-    notify(executor, T("You can't include God!"));
+    notify(executor, "You can't include God!");
     return;
   }
 
@@ -1392,7 +1392,7 @@ do_include(dbref executor, dbref enactor, char *object, char **argv,
   if (!queue_include_attribute(thing, upcasestr(s), executor, enactor, enactor,
                                (rhs_present ? argv + 1 : NULL), queue_type,
                                parent_queue))
-    notify(executor, T("No such attribute."));
+    notify(executor, "No such attribute.");
 }
 
 /** The use command.
@@ -1411,10 +1411,10 @@ do_use(dbref player, const char *what, NEW_PE_INFO *pe_info)
   if ((thing = noisy_match_result(player, what, TYPE_THING,
                                   MAT_NEAR_THINGS | MAT_ENGLISH)) != NOTHING) {
     if (!eval_lock_with(player, thing, Use_Lock, pe_info)) {
-      fail_lock(player, thing, Use_Lock, T("Permission denied."), NOTHING);
+      fail_lock(player, thing, Use_Lock, "Permission denied.", NOTHING);
       return;
     } else {
-      did_it(player, thing, "USE", T("Used."), "OUSE", NULL,
+      did_it(player, thing, "USE", "Used.", "OUSE", NULL,
              (charge_action(thing) ? "AUSE" : "RUNOUT"), NOTHING, AN_SYS);
     }
   }
@@ -1447,7 +1447,7 @@ do_parent(dbref player, const char *name, const char *parent_name, NEW_PE_INFO *
 
   /* do control check */
   if (!controls(player, thing) && !(Owns(player, thing) && LinkOk(thing))) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   /* a player may change an object's parent to NOTHING or to an
@@ -1461,12 +1461,12 @@ do_parent(dbref player, const char *name, const char *parent_name, NEW_PE_INFO *
   if ((parent != NOTHING) && !controls(player, parent) &&
       !(LinkOk(parent) &&
         eval_lock_with(player, parent, Parent_Lock, pe_info))) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   /* check to make sure no recursion can happen */
   if (parent == thing) {
-    notify(player, T("A thing cannot be its own ancestor!"));
+    notify(player, "A thing cannot be its own ancestor!");
     return;
   }
   if (parent != NOTHING) {
@@ -1475,19 +1475,19 @@ do_parent(dbref player, const char *name, const char *parent_name, NEW_PE_INFO *
     for (i = 0, check = Parent(parent); (i < MAX_PARENTS) && (check != NOTHING);
          i++, check = Parent(check)) {
       if (check == thing) {
-        notify(player, T("You are not allowed to be your own ancestor!"));
+        notify(player, "You are not allowed to be your own ancestor!");
         return;
       }
     }
     if (i >= MAX_PARENTS) {
-      notify(player, T("Too many ancestors."));
+      notify(player, "Too many ancestors.");
       return;
     }
   }
   /* everything is okay, do the change */
   Parent(thing) = parent;
   if (!AreQuiet(player, thing))
-    notify(player, T("Parent changed."));
+    notify(player, "Parent changed.");
 }
 
 static int
@@ -1506,16 +1506,16 @@ wipe_helper(dbref player, dbref thing, dbref parent __attribute__((__unused__)),
 
   switch (wipe_atr(thing, AL_NAME(atr), player)) {
   case AE_SAFE:
-    notify_format(player, T("Attribute %s is SAFE. Set it !SAFE to modify it."),
+    notify_format(player, "Attribute %s is SAFE. Set it !SAFE to modify it.",
                   AL_NAME(atr));
     return 0;
   case AE_ERROR:
-    notify_format(player, T("Unable to wipe attribute %s"), AL_NAME(atr));
+    notify_format(player, "Unable to wipe attribute %s", AL_NAME(atr));
     return 0;
   case AE_TREE:
     notify_format(player,
-                  T("Attribute %s cannot be wiped because a child "
-                    "attribute cannot be wiped."),
+                  "Attribute %s cannot be wiped because a child "
+                    "attribute cannot be wiped.",
                   AL_NAME(atr));
   /* Fall through */
   default:
@@ -1549,18 +1549,18 @@ do_wipe(dbref player, const char *name)
    * doesn't own the object. Thus, the check is on Owns not controls.
    */
   if (!Wizard(player) && !Owns(player, thing)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   if (God(thing) && !God(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   /* protect SAFE objects unless doing a non-wildcard pattern */
   if (Safe(thing) && !(pattern && *pattern && !wildcard(pattern))) {
-    notify(player, T("That object is protected."));
+    notify(player, "That object is protected.");
     return;
   }
   in_wipe = true;
@@ -1568,12 +1568,12 @@ do_wipe(dbref player, const char *name)
   in_wipe = false;
   switch (wiped) {
   case 0:
-    notify(player, T("No attributes wiped."));
+    notify(player, "No attributes wiped.");
     break;
   case 1:
-    notify(player, T("One attribute wiped."));
+    notify(player, "One attribute wiped.");
     break;
   default:
-    notify_format(player, T("%d attributes wiped."), wiped);
+    notify_format(player, "%d attributes wiped.", wiped);
   }
 }
