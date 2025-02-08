@@ -81,7 +81,7 @@ okay_pemit(dbref player, dbref target, int dofails, int def,
   if (dofails && def) {
     dp = defmsg;
     safe_format(defmsg, &dp,
-                T("I'm sorry, but %s wishes to be left alone now."),
+                "I'm sorry, but %s wishes to be left alone now.",
                 AName(target, AN_SYS, NULL));
     *dp = '\0';
     dp = defmsg;
@@ -139,12 +139,12 @@ do_teach(dbref player, const char *tbuf1, int list, MQUE *parent_queue)
 
   if (!Loud(player) &&
       !eval_lock_with(player, loc, Speech_Lock, parent_queue->pe_info)) {
-    fail_lock(player, loc, Speech_Lock, T("You may not speak here!"), NOTHING);
+    fail_lock(player, loc, Speech_Lock, "You may not speak here!", NOTHING);
     return;
   }
 
   if (!tbuf1 || !*tbuf1) {
-    notify(player, T("What command do you want to teach?"));
+    notify(player, "What command do you want to teach?");
     return;
   }
 
@@ -152,7 +152,7 @@ do_teach(dbref player, const char *tbuf1, int list, MQUE *parent_queue)
     flags |= QUEUE_NOLIST;
 
   lp = lesson;
-  safe_format(lesson, &lp, T("%s types --> %s%s%s"), spname(player),
+  safe_format(lesson, &lp, "%s types --> %s%s%s", spname(player),
               ANSI_HILITE, tbuf1, ANSI_END);
   *lp = '\0';
   notify_anything(player, player, na_loc, &loc, NULL,
@@ -180,7 +180,7 @@ do_say(dbref player, const char *message, NEW_PE_INFO *pe_info)
     return;
 
   if (!Loud(player) && !eval_lock_with(player, loc, Speech_Lock, pe_info)) {
-    fail_lock(player, loc, Speech_Lock, T("You may not speak here!"), NOTHING);
+    fail_lock(player, loc, Speech_Lock, "You may not speak here!", NOTHING);
     return;
   }
 
@@ -198,9 +198,9 @@ do_say(dbref player, const char *message, NEW_PE_INFO *pe_info)
   pe_regs_free(pe_regs);
 
   /* notify everybody */
-  notify_format(player, T("You say, \"%s\""), (mod ? modmsg : message));
+  notify_format(player, "You say, \"%s\"", (mod ? modmsg : message));
   sp = says;
-  safe_format(says, &sp, T("%s says, \"%s\""), spname(player),
+  safe_format(says, &sp, "%s says, \"%s\"", spname(player),
               (mod ? modmsg : message));
   *sp = '\0';
   notify_except(player, loc, player, says, NA_INTER_HEAR);
@@ -264,13 +264,13 @@ do_oemit_list(dbref executor, dbref speaker, char *list, const char *message,
     *temp++ = '\0';
     room = noisy_match_result(executor, list, NOTYPE, MAT_EVERYTHING);
     if (!GoodObject(room)) {
-      notify(executor, T("I can't find that room."));
+      notify(executor, "I can't find that room.");
       return;
     }
 
     if (!Loud(speaker) &&
         !eval_lock_with(speaker, room, Speech_Lock, pe_info)) {
-      fail_lock(executor, room, Speech_Lock, T("You may not speak there!"),
+      fail_lock(executor, room, Speech_Lock, "You may not speak there!",
                 NOTHING);
       return;
     }
@@ -302,7 +302,7 @@ do_oemit_list(dbref executor, dbref speaker, char *list, const char *message,
         pass[matched] = who;
         matched++;
       } else {
-        notify(executor, T("Too many people to oemit to."));
+        notify(executor, "Too many people to oemit to.");
         break;
       }
     }
@@ -315,7 +315,7 @@ do_oemit_list(dbref executor, dbref speaker, char *list, const char *message,
       notify_anything(executor, speaker, na_loc, &room, NULL, na_flags, message,
                       NULL, room, format);
     } else {
-      notify(executor, T("No matching objects."));
+      notify(executor, "No matching objects.");
     }
     return;
   }
@@ -358,11 +358,11 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
   char pbuff[BUFFER_LEN];
 
   if (!arg1 || !*arg1) {
-    notify(player, T("Whisper to whom?"));
+    notify(player, "Whisper to whom?");
     return;
   }
   if (!arg2 || !*arg2) {
-    notify(player, T("Whisper what?"));
+    notify(player, "Whisper what?");
     return;
   }
   tp = tbuf = (char *) mush_malloc(BUFFER_LEN, "string");
@@ -398,13 +398,13 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
       safe_chr(' ', tbuf, &tp);
       safe_str_space(current, tbuf, &tp);
       if (GoodObject(who))
-        notify_format(player, T("%s can't hear you."),
+        notify_format(player, "%s can't hear you.",
                       AName(who, AN_SYS, NULL));
     } else {
       /* A good whisper */
       good[gcount++] = who;
       if (gcount >= 100) {
-        notify(player, T("Too many people to whisper to."));
+        notify(player, "Too many people to whisper to.");
         break;
       }
     }
@@ -412,7 +412,7 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
 
   *tp = '\0';
   if (*tbuf)
-    notify_format(player, T("Unable to whisper to:%s"), tbuf);
+    notify_format(player, "Unable to whisper to:%s", tbuf);
 
   if (!gcount) {
     mush_free(tbuf, "string");
@@ -425,26 +425,26 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
 
   /* Set up list of good names */
   tp = tbuf;
-  safe_str(T(" to "), tbuf, &tp);
+  safe_str(" to ", tbuf, &tp);
   for (who = 0; who < gcount; who++) {
     if (noisy && (get_random_u32(0, 100) < (uint32_t) WHISPER_LOUDNESS))
       overheard = 1;
-    safe_itemizer(who + 1, (who == gcount - 1), ",", T("and"), " ", tbuf, &tp);
+    safe_itemizer(who + 1, (who == gcount - 1), ",", "and", " ", tbuf, &tp);
     safe_str(AName(good[who], AN_SAY, NULL), tbuf, &tp);
   }
   *tp = '\0';
 
   if (key == 1) {
     notify_format(player,
-                  (gcount > 1) ? T("%s sense: %s%s%s") : T("%s senses: %s%s%s"),
+                  (gcount > 1) ? "%s sense: %s%s%s" : "%s senses: %s%s%s",
                   tbuf + 4, AName(player, AN_SAY, NULL), gap, arg2);
 
     snprintf(pbuff, BUFFER_LEN, "You sense: %s%s%s",
              AName(player, AN_SAY, NULL), gap, arg2);
     p = pbuff;
   } else {
-    notify_format(player, T("You whisper, \"%s\"%s."), arg2, tbuf);
-    snprintf(pbuff, BUFFER_LEN, T("%s whispers%s: %s"),
+    notify_format(player, "You whisper, \"%s\"%s.", arg2, tbuf);
+    snprintf(pbuff, BUFFER_LEN, "%s whispers%s: %s",
              AName(player, AN_SAY, NULL), gcount > 1 ? tbuf : "", arg2);
     p = pbuff;
   }
@@ -463,7 +463,7 @@ do_whisper(dbref player, const char *arg1, const char *arg2, int noisy,
       return;
     }
     int ignoreme __attribute__((__unused__));
-    ignoreme = snprintf(pbuff, BUFFER_LEN, T("%.4096s whispers%s."), sname, tbuf);
+    ignoreme = snprintf(pbuff, BUFFER_LEN, "%.4096s whispers%s.", sname, tbuf);
     p = pbuff;
     DOLIST (first, first) {
       overheard = 1;
@@ -594,10 +594,10 @@ do_pemit(dbref executor, dbref speaker, char *target, const char *message,
 
   if (!(flags & PEMIT_SILENT) && count) {
     if (count > 1)
-      notify_format(executor, T("You pemit \"%s\" to %d objects."), message,
+      notify_format(executor, "You pemit \"%s\" to %d objects.", message,
                     count);
     else if (last != executor)
-      notify_format(executor, T("You pemit \"%s\" to %s."), message,
+      notify_format(executor, "You pemit \"%s\" to %s.", message,
                     AName(last, AN_SAY, NULL));
   }
 }
@@ -622,7 +622,7 @@ do_pose(dbref player, const char *tbuf1, int nospace, NEW_PE_INFO *pe_info)
     return;
 
   if (!Loud(player) && !eval_lock_with(player, loc, Speech_Lock, pe_info)) {
-    fail_lock(player, loc, Speech_Lock, T("You may not speak here!"), NOTHING);
+    fail_lock(player, loc, Speech_Lock, "You may not speak here!", NOTHING);
     return;
   }
 
@@ -678,7 +678,7 @@ do_wall(dbref player, const char *message, enum wall_type target, int emit)
   }
 
   if (!*message) {
-    notify(player, T("What did you want to say?"));
+    notify(player, "What did you want to say?");
     return;
   }
   if (target == WALL_WIZ) {
@@ -705,7 +705,7 @@ do_wall(dbref player, const char *message, enum wall_type target, int emit)
   else
     flag_broadcast(mask, 0, "%s %s %s, \"%s\"", prefix,
                    AName(player, AN_SAY, NULL),
-                   target == WALL_ALL ? T("shouts") : T("says"), message);
+                   target == WALL_ALL ? "shouts" : "says", message);
 }
 
 /** messageformat. This is the wrapper that makes calling PAGEFORMAT,
@@ -839,7 +839,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   }
 
   if (has_eq && (!message || !*message)) {
-    notify(executor, T("What do you want to page?"));
+    notify(executor, "What do you want to page?");
     return;
   }
 
@@ -852,7 +852,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   if (repage) {
     ATTR *a = atr_get_noparent(executor, "LASTPAGED");
     if (!a || !*((hp = head = safe_atr_value(a, "atrval.page")))) {
-      notify(executor, T("You haven't paged anyone since connecting."));
+      notify(executor, "You haven't paged anyone since connecting.");
       if (hp)
         mush_free(hp, "atrval.page");
       mush_free(tbuf2, "page_buff");
@@ -873,15 +873,15 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
         }
       }
       if (!gcount) {
-        notify(executor, T("I can't find who you last paged."));
+        notify(executor, "I can't find who you last paged.");
       } else {
         for (repage = 1; repage <= gcount; repage++) {
-          safe_itemizer(repage, (repage == gcount), ",", T("and"), " ", tbuf2,
+          safe_itemizer(repage, (repage == gcount), ",", "and", " ", tbuf2,
                         &tp2);
           safe_str(AName(good[repage - 1], AN_SAY, NULL), tbuf2, &tp2);
         }
         *tp2 = '\0';
-        notify_format(executor, T("You last paged %s."), tbuf2);
+        notify_format(executor, "You last paged %s.", tbuf2);
       }
       mush_free(tbuf2, "page_buff");
       mush_free(namebuf, "page_buff");
@@ -896,7 +896,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
     mush_panic("Unable to allocate memory in do_page");
 
   if (override && !Pemit_All(executor)) {
-    notify(executor, T("Try again after you get the pemit_all power."));
+    notify(executor, "Try again after you get the pemit_all power.");
     override = 0;
   }
 
@@ -908,12 +908,12 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
       target = short_page(current);
     if (target == NOTHING) {
       notify_format(executor,
-                    T("I can't find who you're trying to page with: %s"),
+                    "I can't find who you're trying to page with: %s",
                     current);
       safe_chr(' ', tbuf, &tp);
       safe_str_space(current, tbuf, &tp);
     } else if (target == AMBIGUOUS) {
-      notify_format(executor, T("I'm not sure who you want to page with: %s"),
+      notify_format(executor, "I'm not sure who you want to page with: %s",
                     current);
       safe_chr(' ', tbuf, &tp);
       safe_str_space(current, tbuf, &tp);
@@ -925,7 +925,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
       if (!Connected(target) || (Dark(target) && (is_haven || fails_lock))) {
         /* A player isn't connected if they aren't connected, or if
          * they're DARK and HAVEN, or DARK and the pagelock fails. */
-        snprintf(msg, BUFFER_LEN, T("%s is not connected."),
+        snprintf(msg, BUFFER_LEN, "%s is not connected.",
                  AName(target, AN_SYS, NULL));
         page_return(executor, target, "Away", "AWAY", msg, pe_info);
         if (fails_lock) {
@@ -934,13 +934,13 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
         safe_chr(' ', tbuf, &tp);
         safe_str_space(AName(target, AN_SYS, NULL), tbuf, &tp);
       } else if (is_haven) {
-        snprintf(msg, sizeof msg, T("%s is not accepting any pages."),
+        snprintf(msg, sizeof msg, "%s is not accepting any pages.",
                  AName(target, AN_SYS, NULL));
         page_return(executor, target, "Haven", "HAVEN", msg, pe_info);
         safe_chr(' ', tbuf, &tp);
         safe_str_space(AName(target, AN_SYS, NULL), tbuf, &tp);
       } else if (fails_lock) {
-        snprintf(msg, sizeof msg, T("%s is not accepting your pages."),
+        snprintf(msg, sizeof msg, "%s is not accepting your pages.",
                  AName(target, AN_SYS, NULL));
         page_return(executor, target, "Haven", "HAVEN", msg, pe_info);
         fail_lock(executor, target, Page_Lock, NULL, NOTHING);
@@ -961,7 +961,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   if (gcount == 99) {
     /* We don't know what the heck's going on here, but we're not paging
      * anyone, this looks like a spam attack. */
-    notify(executor, T("You're trying to page too many people at once."));
+    notify(executor, "You're trying to page too many people at once.");
     mush_free(tbuf, "page_buff");
     mush_free(tbuf2, "page_buff");
     mush_free(namebuf, "page_buff");
@@ -976,7 +976,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
    * name if we're repaging, which is probably 75% of all pages */
   *tp = '\0';
   if (*tbuf)
-    notify_format(executor, T("Unable to page:%s"), tbuf);
+    notify_format(executor, "Unable to page:%s", tbuf);
 
   if (!gcount) {
     /* Well, that was a total waste of time. */
@@ -992,7 +992,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
    * actually going to someone. We're in this for keeps now. */
 
   if (Haven(executor))
-    notify(executor, T("You are set HAVEN and cannot receive pages."));
+    notify(executor, "You are set HAVEN and cannot receive pages.");
 
   /* Figure out what kind of message */
   gap = " ";
@@ -1024,7 +1024,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
     safe_dbref(good[i], tbuf, &tp);
     safe_chr(':', tbuf, &tp);
     safe_integer(CreTime(good[i]), tbuf, &tp);
-    safe_itemizer(i + 1, (i == gcount - 1), ",", T("and"), " ", namebuf, &nbp);
+    safe_itemizer(i + 1, (i == gcount - 1), ",", "and", " ", namebuf, &nbp);
     safe_str(AName(good[i], AN_SAY, NULL), namebuf, &nbp);
   }
   *tp = '\0';
@@ -1055,9 +1055,9 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
 
   /* Build the header */
   if (key == 1) {
-    safe_str(T("From afar"), tbuf, &tp);
+    safe_str("From afar", tbuf, &tp);
     if (gcount > 1) {
-      safe_str(T(" (to "), tbuf, &tp);
+      safe_str(" (to ", tbuf, &tp);
       safe_str(namebuf, tbuf, &tp);
       safe_chr(')', tbuf, &tp);
     }
@@ -1066,7 +1066,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
     safe_str(gap, tbuf, &tp);
   } else {
     safe_str(current, tbuf, &tp);
-    safe_str(T(" pages"), tbuf, &tp);
+    safe_str(" pages", tbuf, &tp);
     if (gcount > 1) {
       safe_chr(' ', tbuf, &tp);
       safe_str(namebuf, tbuf, &tp);
@@ -1087,10 +1087,10 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
   /* Figure out the one success message, and send it */
   tosend = mush_malloc(BUFFER_LEN, "page_buff");
   if (key == 1) {
-    snprintf(tosend, BUFFER_LEN, T("Long distance to %s: %s%s%s"), namebuf,
+    snprintf(tosend, BUFFER_LEN, "Long distance to %s: %s%s%s", namebuf,
              AName(executor, AN_SAY, NULL), gap, message);
   } else {
-    snprintf(tosend, BUFFER_LEN, T("You paged %s with '%s'"), namebuf, message);
+    snprintf(tosend, BUFFER_LEN, "You paged %s with '%s'", namebuf, message);
   }
   if (vmessageformat(executor, "OUTPAGEFORMAT", executor, 0, 5, message,
                      (key == 1) ? (*gap ? ":" : ";") : "\"",
@@ -1119,7 +1119,7 @@ do_page(dbref executor, const char *arg1, const char *arg2, int override,
     page_return(executor, good[i], "Idle", "IDLE", NULL, pe_info);
     if (!okay_pemit(good[i], executor, 0, 0, pe_info)) {
       notify_format(executor,
-                    T("You paged %s, but they are unable to page you."),
+                    "You paged %s, but they are unable to page you.",
                     AName(good[i], AN_SYS, NULL));
     }
   }
@@ -1219,7 +1219,7 @@ do_emit(dbref executor, dbref speaker, const char *message, int flags,
     return;
 
   if (!Loud(speaker) && !eval_lock_with(speaker, loc, Speech_Lock, pe_info)) {
-    fail_lock(executor, loc, Speech_Lock, T("You may not speak here!"),
+    fail_lock(executor, loc, Speech_Lock, "You may not speak here!",
               NOTHING);
     return;
   }
@@ -1257,21 +1257,21 @@ do_one_remit(dbref executor, dbref speaker, const char *target, const char *msg,
   int na_flags = NA_INTER_HEAR | NA_PROPAGATE;
   room = match_result(executor, target, NOTYPE, MAT_EVERYTHING);
   if (!GoodObject(room)) {
-    notify(executor, T("I can't find that."));
+    notify(executor, "I can't find that.");
   } else {
     if (IsExit(room)) {
-      notify(executor, T("There can't be anything in that!"));
+      notify(executor, "There can't be anything in that!");
     } else if (!okay_pemit(speaker, room, 1, 1, pe_info)) {
       /* Do nothing, but do it well */
     } else if (!Loud(speaker) &&
                !eval_lock_with(speaker, room, Speech_Lock, pe_info)) {
-      fail_lock(executor, room, Speech_Lock, T("You may not speak there!"),
+      fail_lock(executor, room, Speech_Lock, "You may not speak there!",
                 NOTHING);
     } else {
       if (!(flags & PEMIT_SILENT) && (Location(executor) != room)) {
         const char *rmno;
         rmno = unparse_object(executor, room, AN_SYS);
-        notify_format(executor, T("You remit, \"%s\" in %s"), msg, rmno);
+        notify_format(executor, "You remit, \"%s\" in %s", msg, rmno);
       }
       if (flags & PEMIT_SPOOF)
         na_flags |= NA_SPOOF;
@@ -1331,16 +1331,16 @@ do_lemit(dbref executor, dbref speaker, const char *message, int flags,
 
   room = absolute_room(executor);
   if (!GoodObject(room) || !IsRoom(room)) {
-    notify(executor, T("Too many containers."));
+    notify(executor, "Too many containers.");
     return;
   } else if (!Loud(speaker) &&
              !eval_lock_with(speaker, room, Speech_Lock, pe_info)) {
-    fail_lock(executor, room, Speech_Lock, T("You may not speak there!"),
+    fail_lock(executor, room, Speech_Lock, "You may not speak there!",
               NOTHING);
     return;
   } else {
     if (!silent && (Location(executor) != room))
-      notify_format(executor, T("You lemit: \"%s\""), message);
+      notify_format(executor, "You lemit: \"%s\"", message);
     if (flags & PEMIT_SPOOF)
       na_flags |= NA_SPOOF;
     notify_anything(executor, speaker, na_loc, &room, NULL, na_flags, message,
@@ -1398,11 +1398,11 @@ do_zemit(dbref player, const char *target, const char *message, int flags)
 
   zone = match_result(player, target, NOTYPE, MAT_ABSOLUTE);
   if (!GoodObject(zone)) {
-    notify(player, T("Invalid zone."));
+    notify(player, "Invalid zone.");
     return;
   }
   if (!controls(player, zone)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -1417,6 +1417,6 @@ do_zemit(dbref player, const char *target, const char *message, int flags)
 
   if (!(flags & PEMIT_SILENT) && pass[3] != NOTHING) {
     const char *where = unparse_object(player, zone, AN_SYS);
-    notify_format(player, T("You zemit, \"%s\" in zone %s"), message, where);
+    notify_format(player, "You zemit, \"%s\" in zone %s", message, where);
   }
 }
