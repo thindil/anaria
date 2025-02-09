@@ -54,7 +54,7 @@ complain(dbref player, dbref i, const char *name, const char *desc, ...)
   mush_vsnprintf(buff, sizeof buff, desc, args);
   va_end(args);
 
-  notify_format(player, T("Warning '%s' for %s:"), name,
+  notify_format(player, "Warning '%s' for %s:", name,
                 unparse_object(player, i, AN_SYS));
   notify(player, buff);
 }
@@ -74,7 +74,7 @@ static void
 ct_room(dbref player, dbref i, warn_type flags)
 {
   if ((flags & W_ROOM_DESC) && !atr_get(i, "DESCRIBE"))
-    complain(player, i, "room-desc", T("room has no description"));
+    complain(player, i, "room-desc", "room has no description");
 }
 
 static void
@@ -93,7 +93,7 @@ ct_exit(dbref player, dbref i, warn_type flags)
   dst = Destination(i);
   if ((flags & W_EXIT_UNLINKED) && (dst == NOTHING))
     complain(player, i, "exit-unlinked",
-             T("exit is unlinked; anyone can steal it"));
+             "exit is unlinked; anyone can steal it");
 
   if ((flags & W_EXIT_UNLINKED) && dst == AMBIGUOUS) {
     ATTR *a;
@@ -105,12 +105,12 @@ ct_exit(dbref player, dbref i, warn_type flags)
       var = "EXITTO";
     if (!a)
       complain(player, i, "exit-unlinked",
-               T("Variable exit has no %s attribute"), var);
+               "Variable exit has no %s attribute", var);
     else {
       const char *x = atr_value(a);
       if (!x || !*x)
         complain(player, i, "exit-unlinked",
-                 T("Variable exit has empty %s attribute"), var);
+                 "Variable exit has empty %s attribute", var);
     }
   }
 
@@ -120,14 +120,14 @@ ct_exit(dbref player, dbref i, warn_type flags)
       if ((lt & W_UNLOCKED) && (!atr_get(i, "OSUCCESS") ||
                                 !atr_get(i, "ODROP") || !atr_get(i, "SUCCESS")))
         complain(player, i, "exit-msgs",
-                 T("possibly unlocked exit missing succ/osucc/odrop"));
+                 "possibly unlocked exit missing succ/osucc/odrop");
       if ((lt & W_LOCKED) && !atr_get(i, "FAILURE"))
         complain(player, i, "exit-msgs",
-                 T("possibly locked exit missing fail"));
+                 "possibly locked exit missing fail");
     }
     if (flags & W_EXIT_DESC) {
       if (!atr_get(i, "DESCRIBE"))
-        complain(player, i, "exit-desc", T("exit is missing description"));
+        complain(player, i, "exit-desc", "exit is missing description");
     }
   }
   src = Source(i);
@@ -153,17 +153,17 @@ ct_exit(dbref player, dbref i, warn_type flags)
   if (count <= 1 && flags & W_EXIT_ONEWAY) {
     if (global_return)
       complain(player, i, "exit-oneway",
-               T("exit only has a global return exit"));
+               "exit only has a global return exit");
     else if (count == 0)
-      complain(player, i, "exit-oneway", T("exit has no return exit"));
+      complain(player, i, "exit-oneway", "exit has no return exit");
   } else if ((count > 1) && (flags & W_EXIT_MULTIPLE)) {
     if (global_return)
       complain(player, i, "exit-multiple",
-               T("exit has multiple (%d) return exits including global exits"),
+               "exit has multiple (%d) return exits including global exits",
                count);
     else
       complain(player, i, "exit-multiple",
-               T("exit has multiple (%d) return exits"), count);
+               "exit has multiple (%d) return exits", count);
   }
 }
 
@@ -171,7 +171,7 @@ static void
 ct_player(dbref player, dbref i, warn_type flags)
 {
   if ((flags & W_PLAYER_DESC) && !atr_get(i, "DESCRIBE"))
-    complain(player, i, "my-desc", T("player is missing description"));
+    complain(player, i, "my-desc", "player is missing description");
 }
 
 static void
@@ -181,17 +181,17 @@ ct_thing(dbref player, dbref i, warn_type flags)
   if (Location(i) == player)
     return;
   if ((flags & W_THING_DESC) && !atr_get(i, "DESCRIBE"))
-    complain(player, i, "thing-desc", T("thing is missing description"));
+    complain(player, i, "thing-desc", "thing is missing description");
 
   if (flags & W_THING_MSGS) {
     int lt = warning_lock_type(getlock(i, Basic_Lock));
     if ((lt & W_UNLOCKED) && (!atr_get(i, "OSUCCESS") || !atr_get(i, "ODROP") ||
                               !atr_get(i, "SUCCESS") || !atr_get(i, "DROP")))
       complain(player, i, "thing-msgs",
-               T("possibly unlocked thing missing succ/osucc/drop/odrop"));
+               "possibly unlocked thing missing succ/osucc/drop/odrop");
     if ((lt & W_LOCKED) && !atr_get(i, "FAILURE"))
       complain(player, i, "thing-msgs",
-               T("possibly locked thing missing fail"));
+               "possibly locked thing missing fail");
   }
 }
 
@@ -221,18 +221,18 @@ do_warnings(dbref player, const char *name, const char *warns)
 
   switch (thing = match_result(player, name, NOTYPE, MAT_EVERYTHING)) {
   case NOTHING:
-    notify(player, T("I don't see that object."));
+    notify(player, "I don't see that object.");
     return;
   case AMBIGUOUS:
-    notify(player, T("I don't know which one you mean."));
+    notify(player, "I don't know which one you mean.");
     return;
   default:
     if (!controls(player, thing)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     if (IsGarbage(thing)) {
-      notify(player, T("Why would you want to be warned about garbage?"));
+      notify(player, "Why would you want to be warned about garbage?");
       return;
     }
     break;
@@ -243,12 +243,12 @@ do_warnings(dbref player, const char *name, const char *warns)
   if (w != old) {
     Warnings(thing) = w;
     if (Warnings(thing))
-      notify_format(player, T("@warnings set to: %s"),
+      notify_format(player, "@warnings set to: %s",
                     unparse_warnings(Warnings(thing)));
     else
-      notify(player, T("@warnings cleared."));
+      notify(player, "@warnings cleared.");
   } else {
-    notify(player, T("@warnings not changed."));
+    notify(player, "@warnings not changed.");
   }
 }
 
@@ -294,7 +294,7 @@ parse_warnings(dbref player, const char *warnings)
       }
       /* At this point, we haven't matched any warnings. */
       if (!found && player != NOTHING) {
-        notify_format(player, T("Unknown warning: %s"), w);
+        notify_format(player, "Unknown warning: %s", w);
       }
       w = split_token(&s, ' ');
     }
@@ -403,12 +403,12 @@ void
 do_wcheck_all(dbref player)
 {
   if (!Wizard(player)) {
-    notify(player, T("You'd better check your wizbit first."));
+    notify(player, "You'd better check your wizbit first.");
     return;
   }
-  notify(player, T("Running database topology warning checks"));
+  notify(player, "Running database topology warning checks");
   run_topology();
-  notify(player, T("Warning checks complete."));
+  notify(player, "Warning checks complete.");
 }
 
 /** Check warnings on a specific player by themselves.
@@ -424,7 +424,7 @@ do_wcheck_me(dbref player)
     if ((Owner(ndone) == player) && !IsGarbage(ndone))
       check_topology_on(player, ndone);
   }
-  notify(player, T("@wcheck complete."));
+  notify(player, "@wcheck complete.");
   return;
 }
 
@@ -440,24 +440,24 @@ do_wcheck(dbref player, const char *name)
 
   switch (thing = match_result(player, name, NOTYPE, MAT_EVERYTHING)) {
   case NOTHING:
-    notify(player, T("I don't see that object."));
+    notify(player, "I don't see that object.");
     return;
   case AMBIGUOUS:
-    notify(player, T("I don't know which one you mean."));
+    notify(player, "I don't know which one you mean.");
     return;
   default:
     if (!(See_All(player) || (Owner(player) == Owner(thing)))) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     if (IsGarbage(thing)) {
-      notify(player, T("Why would you want to be warned about garbage?"));
+      notify(player, "Why would you want to be warned about garbage?");
       return;
     }
     break;
   }
 
   check_topology_on(player, thing);
-  notify(player, T("@wcheck complete."));
+  notify(player, "@wcheck complete.");
   return;
 }
