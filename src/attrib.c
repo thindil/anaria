@@ -900,7 +900,7 @@ unanchored_regexp_attr_check(dbref thing, ATTR *atr, dbref player)
   return;
 
 warn:
-  notify_format(player, T("Warning: Unanchored regexp command in #%d/%s."),
+  notify_format(player, "Warning: Unanchored regexp command in #%d/%s.",
                 thing, AL_NAME(atr));
   return;
 }
@@ -2259,7 +2259,7 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
   if (!EMPTY_ATTRS && s && !*s)
     s = NULL;
   if (IsGarbage(thing)) {
-    notify(player, T("Garbage is garbage."));
+    notify(player, "Garbage is garbage.");
     return 0;
   }
   if (!controls(player, thing))
@@ -2273,20 +2273,20 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
         /* Old alias - we're allowed to change to a different case */
         strcpy(tbuf1, atr_value(old));
         if (s && !*s) {
-          notify_format(player, T("'%s' is not a valid alias."), s);
+          notify_format(player, "'%s' is not a valid alias.", s);
           return -1;
         }
         if (s && strcasecmp(s, tbuf1)) {
           enum opa_error opae_res = ok_player_alias(s, player, thing);
           switch (opae_res) {
           case OPAE_INVALID:
-            notify_format(player, T("'%s' is not a valid alias."), s);
+            notify_format(player, "'%s' is not a valid alias.", s);
             return -1;
           case OPAE_TOOMANY:
-            notify_format(player, T("'%s' contains too many aliases."), s);
+            notify_format(player, "'%s' contains too many aliases.", s);
             return -1;
           case OPAE_NULL:
-            notify_format(player, T("Null aliases are not valid."));
+            notify_format(player, "Null aliases are not valid.");
             return -1;
           case OPAE_SUCCESS:
             break;
@@ -2298,13 +2298,13 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
           enum opa_error opae_res = ok_player_alias(s, player, thing);
           switch (opae_res) {
           case OPAE_INVALID:
-            notify_format(player, T("'%s' is not a valid alias."), s);
+            notify_format(player, "'%s' is not a valid alias.", s);
             return -1;
           case OPAE_TOOMANY:
-            notify_format(player, T("'%s' contains too many aliases."), s);
+            notify_format(player, "'%s' contains too many aliases.", s);
             return -1;
           case OPAE_NULL:
-            notify_format(player, T("Null aliases are not valid."));
+            notify_format(player, "Null aliases are not valid.");
             return -1;
           case OPAE_SUCCESS:
             break;
@@ -2318,7 +2318,7 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
       aliases = tbuf1;
       while ((alias = split_token(&aliases, ';')) != NULL) {
         if (!ok_name(alias, 1)) {
-          notify_format(player, T("'%s' is not a valid exit name."), alias);
+          notify_format(player, "'%s' is not a valid exit name.", alias);
           return -1;
         }
       }
@@ -2336,22 +2336,22 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
     fwdstr = trim_space_sep(tbuf1, ' ');
     while ((curr = split_token(&fwdstr, ' ')) != NULL) {
       if (!is_objid(curr)) {
-        notify_format(player, T("%s should contain only dbrefs."), name);
+        notify_format(player, "%s should contain only dbrefs.", name);
         return -1;
       }
       fwd = parse_objid(curr);
       if (!GoodObject(fwd) || IsGarbage(fwd)) {
-        notify_format(player, T("Invalid dbref #%d in %s."), fwd, name);
+        notify_format(player, "Invalid dbref #%d in %s.", fwd, name);
         return -1;
       }
       if ((!strcmp(name, "FORWARDLIST") || !strcmp(name, "DEBUGFORWARDLIST")) &&
           !Can_Forward(thing, fwd)) {
-        notify_format(player, T("I don't think #%d wants to hear from %s."),
+        notify_format(player, "I don't think #%d wants to hear from %s.",
                       fwd, AName(thing, AN_SYS, NULL));
         return -1;
       }
       if (!strcmp(name, "MAILFORWARDLIST") && !Can_MailForward(thing, fwd)) {
-        notify_format(player, T("I don't think #%d wants %s's mail."), fwd,
+        notify_format(player, "I don't think #%d wants %s's mail.", fwd,
                       AName(thing, AN_SYS, NULL));
         return -1;
       }
@@ -2374,42 +2374,42 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
           : atr_clr(thing, name, player);
   switch (res) {
   case AE_SAFE:
-    notify_format(player, T("Attribute %s is SAFE. Set it !SAFE to modify it."),
+    notify_format(player, "Attribute %s is SAFE. Set it !SAFE to modify it.",
                   name);
     return 0;
   case AE_TREE:
     if (!s) {
       notify_format(
         player,
-        T("Unable to remove '%s' because of a protected tree attribute."),
+        "Unable to remove '%s' because of a protected tree attribute.",
         name);
       return 0;
     } else {
       notify_format(player,
-                    T("Unable to set '%s' because of a failure to "
-                      "create a needed parent attribute."),
+                    "Unable to set '%s' because of a failure to "
+                      "create a needed parent attribute.",
                     name);
       return 0;
     }
   case AE_BADNAME:
-    notify(player, T("That's not a very good name for an attribute."));
+    notify(player, "That's not a very good name for an attribute.");
     return 0;
   case AE_ERROR:
     if (*missing_name) {
       if (s && (EMPTY_ATTRS || *s))
-        notify_format(player, T("You must set %s first."), missing_name);
+        notify_format(player, "You must set %s first.", missing_name);
       else
         notify_format(player,
-                      T("%s is a branch attribute; remove its children first."),
+                      "%s is a branch attribute; remove its children first.",
                       missing_name);
     } else
-      notify(player, T("That attribute cannot be changed by you."));
+      notify(player, "That attribute cannot be changed by you.");
     return 0;
   case AE_TOOMANY:
-    notify(player, T("Too many attributes on that object to add another."));
+    notify(player, "Too many attributes on that object to add another.");
     return 0;
   case AE_NOTFOUND:
-    notify(player, T("No such attribute to reset."));
+    notify(player, "No such attribute to reset.");
     return 0;
   case AE_OKAY:
     /* Success */
@@ -2418,9 +2418,9 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
   if (!strcmp(name, "ALIAS") && IsPlayer(thing)) {
     reset_player_list(thing, Name(thing), s);
     if (s && *s)
-      notify(player, T("Alias set."));
+      notify(player, "Alias set.");
     else
-      notify(player, T("Alias removed."));
+      notify(player, "Alias removed.");
     return 1;
   } else if (!strcmp(name, "LISTEN")) {
     dbref announceloc;
@@ -2432,12 +2432,12 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
     if (GoodObject(announceloc)) {
       char *bp = tbuf1;
       if (!s && !was_listener && !Hearer(thing)) {
-        safe_format(tbuf1, &bp, T("%s loses its ears and becomes deaf."),
+        safe_format(tbuf1, &bp, "%s loses its ears and becomes deaf.",
                     AName(thing, AN_SAY, NULL));
         *bp = '\0';
         notify_except(thing, announceloc, thing, tbuf1, NA_INTER_PRESENCE);
       } else if (s && !was_hearer && !was_listener) {
-        safe_format(tbuf1, &bp, T("%s grows ears and can now hear."),
+        safe_format(tbuf1, &bp, "%s grows ears and can now hear.",
                     AName(thing, AN_SAY, NULL));
         *bp = '\0';
         notify_except(thing, announceloc, thing, tbuf1, NA_INTER_PRESENCE);
@@ -2448,7 +2448,7 @@ do_set_atr(dbref thing, const char *RESTRICT atr, const char *RESTRICT s,
     old = atr_get(thing, name);
     if (!old || !AF_Quiet(old)) {
       notify_format(player, "%s/%s - %s.", AName(thing, AN_SYS, NULL), name,
-                    s ? T("Set") : T("Cleared"));
+                    s ? "Set" : "Cleared");
     }
   }
   return 1;
@@ -2480,20 +2480,20 @@ do_atrlock(dbref player, const char *src, const char *action)
              !strcasecmp(action, "0"))
       status = ATRLOCK_UNLOCK;
     else {
-      notify(player, T("Invalid argument."));
+      notify(player, "Invalid argument.");
       return;
     }
   }
 
   if (!src || !*src) {
-    notify(player, T("You need to give an object/attribute pair."));
+    notify(player, "You need to give an object/attribute pair.");
     return;
   }
 
   target = mush_strdup(src, "atrlock.string");
 
   if (!(attrib = strchr(target, '/')) || !(*(attrib + 1))) {
-    notify(player, T("You need to give an object/attribute pair."));
+    notify(player, "You need to give an object/attribute pair.");
     mush_free(target, "atrlock.string");
     return;
   }
@@ -2505,7 +2505,7 @@ do_atrlock(dbref player, const char *src, const char *action)
     return;
   }
   if (!controls(player, thing)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     mush_free(target, "atrlock.string");
     return;
   }
@@ -2513,30 +2513,30 @@ do_atrlock(dbref player, const char *src, const char *action)
   ptr = atr_get_noparent(thing, strupper_r(attrib, abuff, sizeof abuff));
   mush_free(target, "atrlock.string");
   if (!ptr || !Can_Read_Attr(player, thing, ptr)) {
-    notify(player, T("No such attribute."));
+    notify(player, "No such attribute.");
     return;
   }
 
   if (status == ATRLOCK_CHECK) {
     if (AF_Locked(ptr))
-      notify(player, T("That attribute is locked."));
+      notify(player, "That attribute is locked.");
     else
-      notify(player, T("That attribute is unlocked."));
+      notify(player, "That attribute is unlocked.");
     return;
   } else if (!Can_Write_Attr(player, thing, ptr)) {
     notify(player,
-           T("You need to be able to set the attribute to change its lock."));
+           "You need to be able to set the attribute to change its lock.");
     return;
   } else {
     if (status == ATRLOCK_LOCK) {
       AL_FLAGS(ptr) |= AF_LOCKED;
       AL_CREATOR(ptr) = Owner(player);
-      notify(player, T("Attribute locked."));
+      notify(player, "Attribute locked.");
     } else if (status == ATRLOCK_UNLOCK) {
       AL_FLAGS(ptr) &= ~AF_LOCKED;
-      notify(player, T("Attribute unlocked."));
+      notify(player, "Attribute unlocked.");
     } else {
-      notify(player, T("Invalid status."));
+      notify(player, "Invalid status.");
       return;
     }
   }
@@ -2562,14 +2562,14 @@ do_atrchown(dbref player, const char *xarg1, const char *arg2)
   int retval = 0;
 
   if (!xarg1 || !*xarg1) {
-    notify(player, T("You need to give an object/attribute pair."));
+    notify(player, "You need to give an object/attribute pair.");
     return 0;
   }
 
   arg1 = mush_strdup(xarg1, "atrchown.string");
 
   if (!(p = strchr(arg1, '/')) || !(*(p + 1))) {
-    notify(player, T("You need to give an object/attribute pair."));
+    notify(player, "You need to give an object/attribute pair.");
     retval = 0;
     goto cleanup;
   }
@@ -2580,7 +2580,7 @@ do_atrchown(dbref player, const char *xarg1, const char *arg2)
     goto cleanup;
   }
   if (!controls(player, thing)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     retval = 0;
     goto cleanup;
   }
@@ -2590,7 +2590,7 @@ do_atrchown(dbref player, const char *xarg1, const char *arg2)
   else
     new_owner = lookup_player(arg2);
   if (new_owner == NOTHING) {
-    notify(player, T("I can't find that player"));
+    notify(player, "I can't find that player");
     retval = 0;
     goto cleanup;
   }
@@ -2599,21 +2599,21 @@ do_atrchown(dbref player, const char *xarg1, const char *arg2)
   if (ptr && Can_Read_Attr(player, thing, ptr)) {
     if (Can_Write_Attr(player, thing, ptr)) {
       if (new_owner != Owner(player) && !Wizard(player)) {
-        notify(player, T("You can only chown an attribute to yourself."));
+        notify(player, "You can only chown an attribute to yourself.");
         retval = 0;
         goto cleanup;
       }
       AL_CREATOR(ptr) = Owner(new_owner);
-      notify(player, T("Attribute owner changed."));
+      notify(player, "Attribute owner changed.");
       retval = 1;
       goto cleanup;
     } else {
-      notify(player, T("You don't have the permission to chown that."));
+      notify(player, "You don't have the permission to chown that.");
       retval = 0;
       goto cleanup;
     }
   } else {
-    notify(player, T("No such attribute."));
+    notify(player, "No such attribute.");
     retval = 0;
   }
 cleanup:
