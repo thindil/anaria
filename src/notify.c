@@ -613,7 +613,7 @@ make_prefix_str(dbref thing, dbref enactor, const char *msg, char *tbuf1)
   if (!call_attrib(thing, "PREFIX", tbuf1, enactor, NULL, pe_regs) ||
       *tbuf1 == '\0') {
     bp = tbuf1;
-    safe_format(tbuf1, &bp, T("From %s, "),
+    safe_format(tbuf1, &bp, "From %s, ",
                 Name(IsExit(thing) ? Source(thing) : thing));
     *bp = '\0';
   } else {
@@ -722,7 +722,7 @@ make_nospoof(dbref speaker, int paranoid)
     if (speaker == Owner(speaker))
       safe_format(dest, &bp, "[%s(#%d)] ", Name(speaker), speaker);
     else
-      safe_format(dest, &bp, T("[%s(#%d)'s %s(#%d)] "), Name(Owner(speaker)),
+      safe_format(dest, &bp, "[%s(#%d)'s %s(#%d)] ", Name(Owner(speaker)),
                   Owner(speaker), Name(speaker), speaker);
   } else
     safe_format(dest, &bp, "[%s:] ", spname_int(speaker, 0));
