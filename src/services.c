@@ -240,7 +240,7 @@ service_ctrl(DWORD dwCtrlCode)
 
     shutdown_flag = 1;
 
-    flag_broadcast(0, 0, T("GAME: Game shutdown by system operator"));
+    flag_broadcast(0, 0, "GAME: Game shutdown by system operator");
 
     return;
 
