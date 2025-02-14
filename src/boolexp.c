@@ -405,7 +405,7 @@ eval_boolexp(dbref player, boolexp b, dbref target, NEW_PE_INFO *pe_info)
   if (boolexp_recursion > MAX_DEPTH) {
     if (!recurse_err_shown) {
       recurse_err_shown = 1;
-      notify(player, T("Too much recursion in lock!"));
+      notify(player, "Too much recursion in lock!");
     }
     return 0;
   }
@@ -1001,7 +1001,7 @@ test_atr(char *s, char c)
           is_allowed_bflag(tbuf1, strlen(tbuf1));
 
         if (!flag) {
-          notify_format(parse_player, T("'%s' is not a valid flag lock name."),
+          notify_format(parse_player, "'%s' is not a valid flag lock name.",
                         tbuf1);
           test_atr_err = TAE_PARSE;
           return NULL;
@@ -1070,7 +1070,7 @@ test_atr(char *s, char c)
           b->thing = d;
         } else {
           /* Fail on invalid objids */
-          notify_format(parse_player, T("I don't see %s here."), s);
+          notify_format(parse_player, "I don't see %s here.", s);
           free_boolexp_node(b);
           test_atr_err = TAE_PARSE;
           return NULL;
@@ -1148,11 +1148,11 @@ parse_boolexp_R(void)
     }
     b->thing = match_result(parse_player, tbuf1, TYPE_THING, MAT_EVERYTHING);
     if (b->thing == NOTHING) {
-      notify_format(parse_player, T("I don't see %s here."), tbuf1);
+      notify_format(parse_player, "I don't see %s here.", tbuf1);
       free_bool(b);
       return NULL;
     } else if (b->thing == AMBIGUOUS) {
-      notify_format(parse_player, T("I don't know which %s you mean!"), tbuf1);
+      notify_format(parse_player, "I don't know which %s you mean!", tbuf1);
       free_bool(b);
       return NULL;
     } else {
@@ -2214,7 +2214,7 @@ check_lock(dbref player, dbref i, const char *name, boolexp be)
     case OP_TOWNER:
       if (!GoodObject(arg) || IsGarbage(arg))
         complain(player, i, "lock-checks",
-                 T("%s lock refers to garbage object"), name);
+                 "%s lock refers to garbage object", name);
       break;
     case OP_TEVAL: {
       ATTR *a;
@@ -2222,16 +2222,16 @@ check_lock(dbref player, dbref i, const char *name, boolexp be)
       if (!a || !Can_Read_Attr(i, i, a))
         complain(
           player, i, "lock-checks",
-          T("%s lock has eval-lock that uses a nonexistant attribute '%s'."),
+          "%s lock has eval-lock that uses a nonexistant attribute '%s'.",
           name, s);
     } break;
     case OP_TIND:
       if (!GoodObject(arg) || IsGarbage(arg))
         complain(player, i, "lock-checks",
-                 T("%s lock refers to garbage object"), name);
+                 "%s lock refers to garbage object", name);
       else if (!(Can_Read_Lock(i, arg, s) && getlock(arg, s) != TRUE_BOOLEXP))
         complain(player, i, "lock-checks",
-                 T("%s lock has indirect lock to %s/%s that it can't read"),
+                 "%s lock has indirect lock to %s/%s that it can't read",
                  name, unparse_object(player, arg, AN_UNPARSE), s);
       break;
     default:
