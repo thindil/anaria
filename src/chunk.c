@@ -342,7 +342,7 @@ acm_chunk_stats(dbref player,
                 enum chunk_stats_type which __attribute__((__unused__)))
 {
   notify(player,
-         T("Attribute storage stats are not supported for malloc scheme."));
+         "Attribute storage stats are not supported for malloc scheme.");
 }
 
 static void
