@@ -55,7 +55,7 @@ do_get_attrib(dbref executor, dbref thing, const char *attrib)
       if (strlen(value = atr_value(a)) < BUFFER_LEN)
         return value;
       else
-        return T("#-1 ATTRIBUTE LENGTH TOO LONG");
+        return "#-1 ATTRIBUTE LENGTH TOO LONG";
     }
     return T(e_atrperm);
   }
@@ -222,7 +222,7 @@ FUNCTION(fun_hasattr)
   if (nargs == 1) {
     attrib = strchr(args[0], '/');
     if (!attrib) {
-      safe_format(buff, bp, T("#-1 BAD ARGUMENT FORMAT TO %s"), called_as);
+      safe_format(buff, bp, "#-1 BAD ARGUMENT FORMAT TO %s", called_as);
       return;
     }
     *attrib++ = '\0';
@@ -267,7 +267,7 @@ FUNCTION(fun_get)
 
   s = strchr(args[0], '/');
   if (!s) {
-    safe_str(T("#-1 BAD ARGUMENT FORMAT TO GET"), buff, bp);
+    safe_str("#-1 BAD ARGUMENT FORMAT TO GET", buff, bp);
     return;
   }
   *s++ = '\0';
@@ -377,7 +377,7 @@ FUNCTION(fun_get_eval)
 
   s = strchr(args[0], '/');
   if (!s) {
-    safe_str(T("#-1 BAD ARGUMENT FORMAT TO GET_EVAL"), buff, bp);
+    safe_str("#-1 BAD ARGUMENT FORMAT TO GET_EVAL", buff, bp);
     return;
   }
   *s++ = '\0';
@@ -900,7 +900,7 @@ FUNCTION(fun_nearby)
   if (!controls(executor, obj1) && !controls(executor, obj2) &&
       !See_All(executor) && !nearby(executor, obj1) &&
       !nearby(executor, obj2)) {
-    safe_str(T("#-1 NO OBJECTS CONTROLLED"), buff, bp);
+    safe_str("#-1 NO OBJECTS CONTROLLED", buff, bp);
     return;
   }
   if (!GoodObject(obj1) || !GoodObject(obj2)) {
@@ -918,7 +918,7 @@ FUNCTION(fun_controls)
   char *attrname;
 
   if (!GoodObject(it)) {
-    safe_str(T("#-1 ARG1 NOT FOUND"), buff, bp);
+    safe_str("#-1 ARG1 NOT FOUND", buff, bp);
     return;
   }
 
@@ -926,7 +926,7 @@ FUNCTION(fun_controls)
     *attrname++ = '\0';
   thing = match_thing(executor, args[1]);
   if (!GoodObject(thing)) {
-    safe_str(T("#-1 ARG2 NOT FOUND"), buff, bp);
+    safe_str("#-1 ARG2 NOT FOUND", buff, bp);
     return;
   }
   if (!(controls(executor, it) || controls(executor, thing) ||
@@ -935,7 +935,7 @@ FUNCTION(fun_controls)
   } else if (attrname) {
     char tmp[BUFFER_LEN];
     if (!good_atr_name(strupper_r(attrname, tmp, sizeof tmp))) {
-      safe_str(T("#-1 BAD ATTR NAME"), buff, bp);
+      safe_str("#-1 BAD ATTR NAME", buff, bp);
       return;
     }
     if (controls(it, thing) && can_edit_attr(it, thing, attrname)) {
@@ -1089,7 +1089,7 @@ FUNCTION(fun_hastype)
         found = 1;
       break;
     default:
-      safe_str(T("#-1 NO SUCH TYPE"), buff, bp);
+      safe_str("#-1 NO SUCH TYPE", buff, bp);
       return;
     }
     if (found) {
@@ -1107,7 +1107,7 @@ FUNCTION(fun_orflags)
   int hasflag;
   hasflag = flaglist_check("FLAG", executor, it, args[1], 0);
   if (hasflag == -1)
-    safe_str(T("#-1 INVALID FLAG"), buff, bp);
+    safe_str("#-1 INVALID FLAG", buff, bp);
   else
     safe_boolean(hasflag, buff, bp);
 }
@@ -1119,7 +1119,7 @@ FUNCTION(fun_andflags)
   int hasflag;
   hasflag = flaglist_check("FLAG", executor, it, args[1], 1);
   if (hasflag == -1)
-    safe_str(T("#-1 INVALID FLAG"), buff, bp);
+    safe_str("#-1 INVALID FLAG", buff, bp);
   else
     safe_boolean(hasflag, buff, bp);
 }
@@ -1135,9 +1135,9 @@ FUNCTION(fun_orlflags)
     hasflag = flaglist_check_long("FLAG", executor, it, args[1], 0);
   if (hasflag == -1)
     if (!strcmp(called_as, "ORLPOWERS"))
-      safe_str(T("#-1 INVALID POWER"), buff, bp);
+      safe_str("#-1 INVALID POWER", buff, bp);
     else
-      safe_str(T("#-1 INVALID FLAG"), buff, bp);
+      safe_str("#-1 INVALID FLAG", buff, bp);
   else
     safe_boolean(hasflag, buff, bp);
 }
@@ -1153,9 +1153,9 @@ FUNCTION(fun_andlflags)
     hasflag = flaglist_check_long("FLAG", executor, it, args[1], 1);
   if (hasflag == -1)
     if (!strcmp(called_as, "ANDLPOWERS"))
-      safe_str(T("#-1 INVALID POWER"), buff, bp);
+      safe_str("#-1 INVALID POWER", buff, bp);
     else
-      safe_str(T("#-1 INVALID FLAG"), buff, bp);
+      safe_str("#-1 INVALID FLAG", buff, bp);
   else
     safe_boolean(hasflag, buff, bp);
 }
@@ -1256,11 +1256,11 @@ FUNCTION(fun_lockflags)
         safe_str(lock_flags(ll), buff, bp);
       return;
     } else {
-      safe_str(T("#-1 NO SUCH LOCK"), buff, bp);
+      safe_str("#-1 NO SUCH LOCK", buff, bp);
       return;
     }
   }
-  safe_str(T("#-1 NO SUCH LOCK"), buff, bp);
+  safe_str("#-1 NO SUCH LOCK", buff, bp);
 }
 
 /* ARGSUSED */
@@ -1281,14 +1281,14 @@ FUNCTION(fun_lockowner)
   }
   ltype = get_locktype(p);
   if (ltype == NULL || !Can_Read_Lock(executor, it, ltype)) {
-    safe_str(T("#-1 NO SUCH LOCK"), buff, bp);
+    safe_str("#-1 NO SUCH LOCK", buff, bp);
     return;
   }
   ll = getlockstruct(it, ltype);
   if (ll)
     safe_dbref(L_CREATOR(ll), buff, bp);
   else
-    safe_str(T("#-1 NO SUCH LOCK"), buff, bp);
+    safe_str("#-1 NO SUCH LOCK", buff, bp);
 }
 
 /* ARGSUSED */
@@ -1383,7 +1383,7 @@ FUNCTION(fun_lockfilter)
   elock = parse_boolexp(executor, args[0], "Search");
 
   if (elock == TRUE_BOOLEXP) {
-    safe_str(T("#-1 INVALID BOOLEXP"), buff, bp);
+    safe_str("#-1 INVALID BOOLEXP", buff, bp);
     return;
   }
 
@@ -1417,7 +1417,7 @@ FUNCTION(fun_testlock)
   elock = parse_boolexp(executor, args[0], "Search");
 
   if (elock == TRUE_BOOLEXP) {
-    safe_str(T("#-1 INVALID BOOLEXP"), buff, bp);
+    safe_str("#-1 INVALID BOOLEXP", buff, bp);
     return;
   }
 
@@ -1441,9 +1441,9 @@ FUNCTION(fun_findable)
   dbref victim = match_thing(executor, args[1]);
 
   if (!GoodObject(obj))
-    safe_str(T("#-1 ARG1 NOT FOUND"), buff, bp);
+    safe_str("#-1 ARG1 NOT FOUND", buff, bp);
   else if (!GoodObject(victim))
-    safe_str(T("#-1 ARG2 NOT FOUND"), buff, bp);
+    safe_str("#-1 ARG2 NOT FOUND", buff, bp);
   else if (!See_All(executor) && !controls(executor, obj) &&
            !controls(executor, victim))
     safe_str(T(e_perm), buff, bp);
@@ -1897,10 +1897,10 @@ FUNCTION(fun_pmatch)
   /* Not using MAT_NOISY, as #-1 gives a different error message */
   switch (target) {
   case NOTHING:
-    notify(executor, T("No match."));
+    notify(executor, "No match.");
     break;
   case AMBIGUOUS:
-    notify(executor, T("I'm not sure who you mean."));
+    notify(executor, "I'm not sure who you mean.");
     break;
   }
   safe_dbref(target, buff, bp);
@@ -2045,7 +2045,7 @@ FUNCTION(fun_locate)
     case ' ':
       break; /* skip over spaces */
     default:
-      notify_format(executor, T("I don't understand switch '%c'."), *p);
+      notify_format(executor, "I don't understand switch '%c'.", *p);
       break;
     }
   }
@@ -2155,7 +2155,7 @@ FUNCTION(fun_open)
     source = match_result(executor, args[2], TYPE_ROOM,
                           MAT_HERE | MAT_ABSOLUTE | MAT_TYPE);
     if (source == NOTHING) {
-      safe_str(T("#-1 INVALID SOURCE ROOM"), buff, bp);
+      safe_str("#-1 INVALID SOURCE ROOM", buff, bp);
       return;
     }
   }
@@ -2281,7 +2281,7 @@ FUNCTION(fun_attrib_set)
   }
   s = strchr(args[0], '/');
   if (!s) {
-    safe_str(T("#-1 BAD ARGUMENT FORMAT TO ATTRIB_SET"), buff, bp);
+    safe_str("#-1 BAD ARGUMENT FORMAT TO ATTRIB_SET", buff, bp);
     return;
   }
   *s++ = '\0';
@@ -2348,11 +2348,11 @@ FUNCTION(fun_grep)
   }
   /* make sure there's an attribute and a pattern */
   if (!*args[1]) {
-    safe_str(T("#-1 NO SUCH ATTRIBUTE"), buff, bp);
+    safe_str("#-1 NO SUCH ATTRIBUTE", buff, bp);
     return;
   }
   if (!*args[2]) {
-    safe_str(T("#-1 INVALID GREP PATTERN"), buff, bp);
+    safe_str("#-1 INVALID GREP PATTERN", buff, bp);
     return;
   }
 
@@ -2432,11 +2432,11 @@ FUNCTION(fun_atrlock)
   }
 
   if (!args[0] || !*args[0]) {
-    safe_str(T("#-1 ARGUMENT MUST BE OBJ/ATTR"), buff, bp);
+    safe_str("#-1 ARGUMENT MUST BE OBJ/ATTR", buff, bp);
     return;
   }
   if (!(p = strchr(args[0], '/')) || !(*(p + 1))) {
-    safe_str(T("#-1 ARGUMENT MUST BE OBJ/ATTR"), buff, bp);
+    safe_str("#-1 ARGUMENT MUST BE OBJ/ATTR", buff, bp);
     return;
   }
   *p++ = '\0';
@@ -2464,7 +2464,7 @@ FUNCTION(fun_followers)
 
   thing = match_controlled(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T("#-1 INVALID OBJECT"), buff, bp);
+    safe_str("#-1 INVALID OBJECT", buff, bp);
     return;
   }
   a = atr_get_noparent(thing, "FOLLOWERS");
@@ -2487,7 +2487,7 @@ FUNCTION(fun_following)
 
   thing = match_controlled(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T("#-1 INVALID OBJECT"), buff, bp);
+    safe_str("#-1 INVALID OBJECT", buff, bp);
     return;
   }
   a = atr_get_noparent(thing, "FOLLOWING");
