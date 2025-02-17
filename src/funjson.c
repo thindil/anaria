@@ -96,7 +96,7 @@ FUNCTION(fun_json_query)
     } else if (strcasecmp("extract", args[1]) == 0) {
       query_type = JSON_QUERY_EXTRACT;
     } else {
-      safe_str(T("#-1 INVALID OPERATION"), buff, bp);
+      safe_str("#-1 INVALID OPERATION", buff, bp);
       return;
     }
   }
@@ -104,7 +104,7 @@ FUNCTION(fun_json_query)
   if ((query_type == JSON_QUERY_GET || query_type == JSON_QUERY_EXISTS ||
        query_type == JSON_QUERY_EXTRACT) &&
       (nargs < 3 || !args[2] || !*args[2])) {
-    safe_str(T("#-1 MISSING VALUE"), buff, bp);
+    safe_str("#-1 MISSING VALUE", buff, bp);
     return;
   }
 
@@ -114,7 +114,7 @@ FUNCTION(fun_json_query)
     json = cJSON_Parse(utf8);
     mush_free(utf8, "json.string");
     if (!json) {
-      safe_str(T("#-1 INVALID JSON"), buff, bp);
+      safe_str("#-1 INVALID JSON", buff, bp);
       return;
     }
   }
@@ -569,7 +569,7 @@ FUNCTION(fun_json)
   } else if (strcasecmp("number", args[0]) == 0) {
     type = JSON_NUMBER;
   } else {
-    safe_str(T("#-1 INVALID TYPE"), buff, bp);
+    safe_str("#-1 INVALID TYPE", buff, bp);
     return;
   }
 
@@ -577,7 +577,7 @@ FUNCTION(fun_json)
       ((type == JSON_STR || type == JSON_NUMBER || type == JSON_BOOL) &&
        nargs != 2) ||
       (type == JSON_OBJECT && (nargs % 2) != 1)) {
-    safe_str(T("#-1 WRONG NUMBER OF ARGUMENTS"), buff, bp);
+    safe_str("#-1 WRONG NUMBER OF ARGUMENTS", buff, bp);
     return;
   }
 
