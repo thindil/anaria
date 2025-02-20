@@ -30,21 +30,21 @@ void do_version(dbref player);
 void
 do_version(dbref player)
 {
-  notify_format(player, T("You are connected to %s"), MUDNAME);
+  notify_format(player, "You are connected to %s", MUDNAME);
   if (MUDURL && *MUDURL)
-    notify_format(player, T("Address: %s"), MUDURL);
-  notify_format(player, T("Last restarted: %s"),
+    notify_format(player, "Address: %s", MUDURL);
+  notify_format(player, "Last restarted: %s",
                 show_time(globals.start_time, 0));
-  notify_format(player, T("PennMUSH version %s patchlevel %s %s"), VERSION,
+  notify_format(player, "PennMUSH version %s patchlevel %s %s", VERSION,
                 PATCHLEVEL, PATCHDATE);
 #ifdef GIT_REVISION
-  notify_format(player, T("Git revision: %s"), GIT_REVISION);
+  notify_format(player, "Git revision: %s", GIT_REVISION);
 #endif
 #ifdef WIN32
-  notify_format(player, T("Build date: %s"), __DATE__);
+  notify_format(player, "Build date: %s", __DATE__);
 #else
-  notify_format(player, T("Build date: %s"), BUILDDATE);
-  notify_format(player, T("Compiler: %s"), COMPILER);
-  notify_format(player, T("Compilation flags: %s"), CCFLAGS);
+  notify_format(player, "Build date: %s", BUILDDATE);
+  notify_format(player, "Compiler: %s", COMPILER);
+  notify_format(player, "Compilation flags: %s", CCFLAGS);
 #endif
 }
