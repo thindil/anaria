@@ -435,23 +435,23 @@ can_pay_fees(dbref who, int pennies)
 {
 
   if (Guest(who)) {
-    notify(who, T("Sorry, you aren't allowed to build."));
+    notify(who, "Sorry, you aren't allowed to build.");
     return 0;
   }
 
   /* check database size -- EVERYONE is subject to this! */
   if (DBTOP_MAX && (db_top >= DBTOP_MAX + 1) && (first_free == NOTHING)) {
-    notify(who, T("Sorry, there is no more room in the database."));
+    notify(who, "Sorry, there is no more room in the database.");
     return 0;
   }
   /* Can they afford it? */
   if (!NoPay(who) && (Pennies(Owner(who)) < pennies)) {
-    notify_format(who, T("Sorry, you don't have enough %s."), MONIES);
+    notify_format(who, "Sorry, you don't have enough %s.", MONIES);
     return 0;
   }
   /* check building quota */
   if (!pay_quota(who, QUOTA_COST)) {
-    notify(who, T("Sorry, your building quota has run out."));
+    notify(who, "Sorry, your building quota has run out.");
     return 0;
   }
 
@@ -494,7 +494,7 @@ payfor(dbref who, int cost)
   owner = Owner(who);
   if ((tmp = Pennies(owner)) >= cost) {
     if (Track_Money(owner)) {
-      notify_format(owner, T("GAME: %s(%s) spent %d %s."),
+      notify_format(owner, "GAME: %s(%s) spent %d %s.",
                     AName(who, AN_SYS, NULL), unparse_dbref(who), cost,
                     (cost == 1) ? MONEY : MONIES);
     }
@@ -502,7 +502,7 @@ payfor(dbref who, int cost)
     return 1;
   } else {
     if (Track_Money(owner)) {
-      notify_format(owner, T("GAME: %s(%s) tried to spend %d %s."),
+      notify_format(owner, "GAME: %s(%s) tried to spend %d %s.",
                     AName(who, AN_SYS, NULL), unparse_dbref(who), cost,
                     (cost == 1) ? MONEY : MONIES);
     }
@@ -1201,10 +1201,10 @@ page_return(dbref player, dbref target, const char *type, const char *message,
     if (call_attrib(target, message, buff, player, pe_info, NULL)) {
       if (*buff) {
         struct tm *ptr = (struct tm *) localtime(&mudtime);
-        notify_format(player, T("%s message from %s: %s"), type,
+        notify_format(player, "%s message from %s: %s", type,
                       AName(target, AN_SYS, NULL), buff);
         if (!Haven(target))
-          notify_format(target, T("[%d:%02d] %s message sent to %s."),
+          notify_format(target, "[%d:%02d] %s message sent to %s.",
                         ptr->tm_hour, ptr->tm_min, type,
                         AName(player, AN_SYS, NULL));
       }
@@ -1291,19 +1291,19 @@ do_verb(dbref executor, dbref enactor, const char *arg1, char **argv,
   victim = match_result(executor, arg1, NOTYPE, MAT_EVERYTHING);
 
   if (!GoodObject(victim)) {
-    notify(executor, T("What was the victim of the verb?"));
+    notify(executor, "What was the victim of the verb?");
     return;
   }
   /* find the object that executes the action */
 
   if (!argv || !argv[1] || !*argv[1]) {
-    notify(executor, T("What do you want to do with the verb?"));
+    notify(executor, "What do you want to do with the verb?");
     return;
   }
   actor = match_result(executor, argv[1], NOTYPE, MAT_EVERYTHING);
 
   if (!GoodObject(actor)) {
-    notify(executor, T("What do you want to do the verb?"));
+    notify(executor, "What do you want to do the verb?");
     return;
   }
   /* Control check is fascist.
@@ -1319,7 +1319,7 @@ do_verb(dbref executor, dbref enactor, const char *arg1, char **argv,
   if (!(Wizard(executor) ||
         (controls(executor, victim) && controls(executor, actor)) ||
         ((controls(enactor, actor) && Can_Examine(executor, victim))))) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     return;
   }
   /* We're okay.  Send out messages. */
@@ -1513,9 +1513,9 @@ grep_util(dbref player, dbref thing, const char *attrs, const char *findstr, cha
 
   if (!findstr || !*findstr) {
     if (buff)
-      safe_str(T("#-1 INVALID GREP PATTERN"), buff, bp);
+      safe_str("#-1 INVALID GREP PATTERN", buff, bp);
     else
-      notify(player, T("What pattern do you want to grep for?"));
+      notify(player, "What pattern do you want to grep for?");
     return 0;
   }
 
@@ -1542,10 +1542,10 @@ grep_util(dbref player, dbref thing, const char *attrs, const char *findstr, cha
       pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errstr, sizeof errstr);
       /* Matching error. */
       if (buff) {
-        safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+        safe_str("#-1 REGEXP ERROR: ", buff, bp);
         safe_str(errstr, buff, bp);
       } else {
-        notify_format(player, T("Invalid regexp: %s"), errstr);
+        notify_format(player, "Invalid regexp: %s", errstr);
       }
       return 0;
     }
@@ -1606,7 +1606,7 @@ do_grep(dbref player, char *obj, char *lookfor, int print, int flags)
   char *pattern;
 
   if (!lookfor || !*lookfor) {
-    notify(player, T("What pattern do you want to grep for?"));
+    notify(player, "What pattern do you want to grep for?");
     return;
   }
   /* find the attribute pattern */
@@ -1623,16 +1623,16 @@ do_grep(dbref player, char *obj, char *lookfor, int print, int flags)
 
   if (print) {
     if (!grep_util(player, thing, pattern, lookfor, NULL, NULL, flags))
-      notify(player, T("No matches."));
+      notify(player, "No matches.");
   } else {
     char buff[BUFFER_LEN];
     char *bp = buff;
 
     if (grep_util(player, thing, pattern, lookfor, buff, &bp, flags)) {
       *bp = '\0';
-      notify_format(player, T("Matches of '%s' on %s(#%d): %s"), lookfor,
+      notify_format(player, "Matches of '%s' on %s(#%d): %s", lookfor,
                     AName(thing, AN_LOOK, NULL), thing, buff);
     } else
-      notify(player, T("No matches."));
+      notify(player, "No matches.");
   }
 }
