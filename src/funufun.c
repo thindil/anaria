@@ -72,9 +72,9 @@ FUNCTION(fun_fn)
     ap = tbuf;
   /* Make sure a builtin function with the name actually exists */
   if (!builtin_func_hash_lookup(ap)) {
-    safe_str(T("#-1 FUNCTION ("), buff, bp);
+    safe_str("#-1 FUNCTION (", buff, bp);
     safe_str(ap, buff, bp);
-    safe_str(T(") NOT FOUND"), buff, bp);
+    safe_str(") NOT FOUND", buff, bp);
     return;
   }
 
@@ -372,7 +372,7 @@ FUNCTION(fun_zfun)
   zone = Zone(executor);
 
   if (zone == NOTHING) {
-    safe_str(T("#-1 INVALID ZONE"), buff, bp);
+    safe_str("#-1 INVALID ZONE", buff, bp);
     return;
   }
 
