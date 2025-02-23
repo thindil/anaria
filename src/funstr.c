@@ -115,22 +115,22 @@ init_pronouns(void)
       translate = 1;
   }
 #endif
-  SET_PRONOUN(subj[0], T("pronoun:neuter,subjective"), "it");
-  SET_PRONOUN(subj[1], T("pronoun:feminine,subjective"), "she");
-  SET_PRONOUN(subj[2], T("pronoun:masculine,subjective"), "he");
-  SET_PRONOUN(subj[3], T("pronoun:plural,subjective"), "they");
-  SET_PRONOUN(poss[0], T("pronoun:neuter,possessive"), "its");
-  SET_PRONOUN(poss[1], T("pronoun:feminine,possessive"), "her");
-  SET_PRONOUN(poss[2], T("pronoun:masculine,possessive"), "his");
-  SET_PRONOUN(poss[3], T("pronoun:plural,possessive"), "their");
-  SET_PRONOUN(obj[0], T("pronoun:neuter,objective"), "it");
-  SET_PRONOUN(obj[1], T("pronoun:feminine,objective"), "her");
-  SET_PRONOUN(obj[2], T("pronoun:masculine,objective"), "him");
-  SET_PRONOUN(obj[3], T("pronoun:plural,objective"), "them");
-  SET_PRONOUN(absp[0], T("pronoun:neuter,absolute possessive"), "its");
-  SET_PRONOUN(absp[1], T("pronoun:feminine,absolute possessive"), "hers");
-  SET_PRONOUN(absp[2], T("pronoun:masculine,absolute possessive"), "his");
-  SET_PRONOUN(absp[3], T("pronoun:plural,absolute possessive "), "theirs");
+  SET_PRONOUN(subj[0], "pronoun:neuter,subjective", "it");
+  SET_PRONOUN(subj[1], "pronoun:feminine,subjective", "she");
+  SET_PRONOUN(subj[2], "pronoun:masculine,subjective", "he");
+  SET_PRONOUN(subj[3], "pronoun:plural,subjective", "they");
+  SET_PRONOUN(poss[0], "pronoun:neuter,possessive", "its");
+  SET_PRONOUN(poss[1], "pronoun:feminine,possessive", "her");
+  SET_PRONOUN(poss[2], "pronoun:masculine,possessive", "his");
+  SET_PRONOUN(poss[3], "pronoun:plural,possessive", "their");
+  SET_PRONOUN(obj[0], "pronoun:neuter,objective", "it");
+  SET_PRONOUN(obj[1], "pronoun:feminine,objective", "her");
+  SET_PRONOUN(obj[2], "pronoun:masculine,objective", "him");
+  SET_PRONOUN(obj[3], "pronoun:plural,objective", "them");
+  SET_PRONOUN(absp[0], "pronoun:neuter,absolute possessive", "its");
+  SET_PRONOUN(absp[1], "pronoun:feminine,absolute possessive", "hers");
+  SET_PRONOUN(absp[2], "pronoun:masculine,absolute possessive", "his");
+  SET_PRONOUN(absp[3], "pronoun:plural,absolute possessive ", "theirs");
 }
 
 #undef SET_PRONOUN
@@ -453,7 +453,7 @@ FUNCTION(fun_comp)
   char type = 'A';
 
   if (nargs == 3 && !(args[2] && *args[2])) {
-    safe_str(T("#-1 INVALID THIRD ARGUMENT"), buff, bp);
+    safe_str("#-1 INVALID THIRD ARGUMENT", buff, bp);
     return;
   } else if (nargs == 3) {
     type = UPCASE(*args[2]);
@@ -493,7 +493,7 @@ FUNCTION(fun_comp)
     a = parse_objid(args[0]);
     b = parse_objid(args[1]);
     if (a == NOTHING || b == NOTHING) {
-      safe_str(T("#-1 INVALID DBREF"), buff, bp);
+      safe_str("#-1 INVALID DBREF", buff, bp);
       return;
     }
     safe_integer(comp_gencomp(executor, args[0], args[1], DBREF_LIST), buff,
@@ -501,7 +501,7 @@ FUNCTION(fun_comp)
     return;
   }
   default:
-    safe_str(T("#-1 INVALID THIRD ARGUMENT"), buff, bp);
+    safe_str("#-1 INVALID THIRD ARGUMENT", buff, bp);
     return;
   }
 }
@@ -618,7 +618,7 @@ FUNCTION(fun_merge)
 
   /* do length checks first */
   if (as->len != ansi_strlen(ptr)) {
-    safe_str(T("#-1 STRING LENGTHS MUST BE EQUAL"), buff, bp);
+    safe_str("#-1 STRING LENGTHS MUST BE EQUAL", buff, bp);
     free_ansi_string(as);
     return;
   }
@@ -690,7 +690,7 @@ FUNCTION(fun_tr)
   while (*c) {
     cur = *c;
     if (!goodchr(cur)) {
-      safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
+      safe_str("#-1 TR CANNOT ACCEPT NONPRINTING CHARS", buff, bp);
       return;
     }
     /* Tack it onto the string */
@@ -698,7 +698,7 @@ FUNCTION(fun_tr)
     if (*(c + 1) == '-' && *(c + 2)) {
       dest = *(c + 2);
       if (!goodchr(dest)) {
-        safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
+        safe_str("#-1 TR CANNOT ACCEPT NONPRINTING CHARS", buff, bp);
         return;
       }
       if (dest > cur) {
@@ -728,7 +728,7 @@ FUNCTION(fun_tr)
   while (*c) {
     cur = *c;
     if (!goodchr(cur)) {
-      safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
+      safe_str("#-1 TR CANNOT ACCEPT NONPRINTING CHARS", buff, bp);
       return;
     }
     /* Tack it onto the string */
@@ -736,7 +736,7 @@ FUNCTION(fun_tr)
     if (*(c + 1) == '-' && *(c + 2)) {
       dest = *(c + 2);
       if (!goodchr(dest)) {
-        safe_str(T("#-1 TR CANNOT ACCEPT NONPRINTING CHARS"), buff, bp);
+        safe_str("#-1 TR CANNOT ACCEPT NONPRINTING CHARS", buff, bp);
         return;
       }
       if (dest > cur) {
@@ -760,7 +760,7 @@ FUNCTION(fun_tr)
 #undef goodchr
 
   if ((ip - instr) != (op - outstr)) {
-    safe_str(T("#-1 STRING LENGTHS MUST BE EQUAL"), buff, bp);
+    safe_str("#-1 STRING LENGTHS MUST BE EQUAL", buff, bp);
     return;
   }
 
@@ -845,7 +845,7 @@ FUNCTION(fun_repeat)
   }
   times = parse_integer(args[1]);
   if (times < 0) {
-    safe_str(T("#-1 ARGUMENT MUST BE NON-NEGATIVE INTEGER"), buff, bp);
+    safe_str("#-1 ARGUMENT MUST BE NON-NEGATIVE INTEGER", buff, bp);
     return;
   }
   if (!*args[0])
@@ -953,7 +953,7 @@ FUNCTION(fun_ljust)
   }
   len = ansi_strlen(args[2]);
   if (!len) {
-    safe_str(T("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH"), buff, bp);
+    safe_str("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH", buff, bp);
     return;
   }
   safe_strl(args[0], arglens[0], buff, bp);
@@ -1014,7 +1014,7 @@ FUNCTION(fun_rjust)
   }
   len = ansi_strlen(args[2]);
   if (!len) {
-    safe_str(T("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH"), buff, bp);
+    safe_str("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH", buff, bp);
     return;
   }
   as = parse_ansi_string(args[2]);
@@ -1065,7 +1065,7 @@ FUNCTION(fun_center)
   /* args[2] contains the possibly ansi, multi-char fill string */
   filllen = ansi_strlen(args[2]);
   if (!filllen) {
-    safe_str(T("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH"), buff, bp);
+    safe_str("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH", buff, bp);
     return;
   }
   as = parse_ansi_string(args[2]);
@@ -1084,7 +1084,7 @@ FUNCTION(fun_center)
     if (args[3] && *args[3]) {
       filllen = ansi_strlen(args[3]);
       if (!filllen) {
-        safe_str(T("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH"), buff, bp);
+        safe_str("#-1 FILL ARGUMENT MAY NOT BE ZERO-LENGTH", buff, bp);
         return;
       }
       as = parse_ansi_string(args[3]);
@@ -1433,7 +1433,7 @@ FUNCTION(fun_ord)
   int c;
 
   if (!args[0] || !args[0][0] || arglens[0] != 1) {
-    safe_str(T("#-1 FUNCTION (ORD) EXPECTS ONE CHARACTER"), buff, bp);
+    safe_str("#-1 FUNCTION (ORD) EXPECTS ONE CHARACTER", buff, bp);
     return;
   }
 
@@ -1442,7 +1442,7 @@ FUNCTION(fun_ord)
   if (char_isprint(c)) {
     safe_integer(c, buff, bp);
   } else {
-    safe_str(T("#-1 UNPRINTABLE CHARACTER"), buff, bp);
+    safe_str("#-1 UNPRINTABLE CHARACTER", buff, bp);
   }
 }
 
@@ -1456,17 +1456,17 @@ FUNCTION(fun_chr)
   }
   c = parse_integer(args[0]);
   if (c < 0 || c > UCHAR_MAX)
-    safe_str(T("#-1 THIS ISN'T UNICODE"), buff, bp);
+    safe_str("#-1 THIS ISN'T UNICODE", buff, bp);
   else if (char_isprint(c))
     safe_chr(c, buff, bp);
   else
-    safe_str(T("#-1 UNPRINTABLE CHARACTER"), buff, bp);
+    safe_str("#-1 UNPRINTABLE CHARACTER", buff, bp);
 }
 
 FUNCTION(fun_accent)
 {
   if (arglens[0] != arglens[1]) {
-    safe_str(T("#-1 STRING LENGTHS MUST BE EQUAL"), buff, bp);
+    safe_str("#-1 STRING LENGTHS MUST BE EQUAL", buff, bp);
     return;
   }
   safe_accent(args[0], args[1], arglens[0], buff, bp);
@@ -1664,7 +1664,7 @@ FUNCTION(fun_wrap)
     linesep = "\n";
 
   if (width < 2 || width1st < 2) {
-    safe_str(T("#-1 WIDTH TOO SMALL"), buff, bp);
+    safe_str("#-1 WIDTH TOO SMALL", buff, bp);
     return;
   }
 
@@ -2012,7 +2012,7 @@ FUNCTION(fun_align)
     } else if (isdigit(*ptr)) {
       calign[ncols] = AL_LEFT;
     } else {
-      safe_str(T("#-1 INVALID ALIGN STRING"), buff, bp);
+      safe_str("#-1 INVALID ALIGN STRING", buff, bp);
       return;
     }
     for (i = 0; *ptr && isdigit(*ptr); ptr++) {
@@ -2048,7 +2048,7 @@ FUNCTION(fun_align)
         while (*ptr && *ptr != ')')
           ptr++;
         if (*ptr != ')') {
-          safe_str(T("#-1 INVALID ALIGN STRING"), buff, bp);
+          safe_str("#-1 INVALID ALIGN STRING", buff, bp);
           return;
         }
         *ptr = '\0';
@@ -2065,11 +2065,11 @@ FUNCTION(fun_align)
 
   for (i = 0; i < ncols; i++) {
     if (cols[i] < 0) {
-      safe_str(T("#-1 CANNOT HAVE COLUMNS OF NEGATIVE SIZE"), buff, bp);
+      safe_str("#-1 CANNOT HAVE COLUMNS OF NEGATIVE SIZE", buff, bp);
       return;
     }
     if (cols[i] > BUFFER_LEN) {
-      safe_str(T("#-1 CANNOT HAVE COLUMNS THAT LARGE"), buff, bp);
+      safe_str("#-1 CANNOT HAVE COLUMNS THAT LARGE", buff, bp);
       return;
     }
     if (0 && (calign[i] & AL_REPEAT))
@@ -2078,27 +2078,27 @@ FUNCTION(fun_align)
     totallen += cols[i];
   }
   if (totallen > BUFFER_LEN) {
-    safe_str(T("#-1 CANNOT HAVE COLUMNS THAT LARGE"), buff, bp);
+    safe_str("#-1 CANNOT HAVE COLUMNS THAT LARGE", buff, bp);
     return;
   }
 
   if (ncols < 1) {
-    safe_str(T("#-1 NOT ENOUGH COLUMNS FOR ALIGN"), buff, bp);
+    safe_str("#-1 NOT ENOUGH COLUMNS FOR ALIGN", buff, bp);
     return;
   }
   if (ncols > MAX_COLS) {
-    safe_str(T("#-1 TOO MANY COLUMNS FOR ALIGN"), buff, bp);
+    safe_str("#-1 TOO MANY COLUMNS FOR ALIGN", buff, bp);
     return;
   }
   if (strcmp(called_as, "LALIGN")) {
     /* each column is a separate arg */
     if (nargs < (ncols + 1) || nargs > (ncols + 4)) {
-      safe_str(T("#-1 INVALID NUMBER OF ARGUMENTS TO ALIGN"), buff, bp);
+      safe_str("#-1 INVALID NUMBER OF ARGUMENTS TO ALIGN", buff, bp);
       return;
     }
     if (nargs >= (ncols + 2)) {
       if (!args[ncols + 1] || arglens[ncols + 1] > 1) {
-        safe_str(T("#-1 FILLER MUST BE ONE CHARACTER"), buff, bp);
+        safe_str("#-1 FILLER MUST BE ONE CHARACTER", buff, bp);
         return;
       }
       if (*args[ncols + 1]) {
@@ -2128,12 +2128,12 @@ FUNCTION(fun_align)
     if (!delim_check(buff, bp, nargs, args, 3, &delim))
       return;
     if (do_wordcount(args[1], delim) != ncols) {
-      safe_str(T("#-1 INVALID NUMBER OF ARGUMENTS TO ALIGN"), buff, bp);
+      safe_str("#-1 INVALID NUMBER OF ARGUMENTS TO ALIGN", buff, bp);
       return;
     }
     if (nargs > 3) {
       if (!args[3] || arglens[3] > 1) {
-        safe_str(T("#-1 FILLER MUST BE ONE CHARACTER"), buff, bp);
+        safe_str("#-1 FILLER MUST BE ONE CHARACTER", buff, bp);
         return;
       }
       if (*args[3])
@@ -2403,7 +2403,7 @@ FUNCTION(fun_render)
     else if (strcasecmp("html", word) == 0)
       flags |= MSG_PUEBLO;
     else {
-      safe_str(T("#-1 INVALID SECOND ARGUMENT"), buff, bp);
+      safe_str("#-1 INVALID SECOND ARGUMENT", buff, bp);
       return;
     }
   } while (list);
@@ -2424,7 +2424,7 @@ FUNCTION(fun_urlencode)
   curl_free(escaped);
   curl_easy_cleanup(handle);
 #else
-  safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+  safe_str("#-1 FUNCTION DISABLED", buff, bp);
 #endif
 }
 
@@ -2447,7 +2447,7 @@ FUNCTION(fun_urldecode)
   curl_free(decoded);
   curl_easy_cleanup(handle);
 #else
-  safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+  safe_str("#-1 FUNCTION DISABLED", buff, bp);
 #endif
 }
 
@@ -2515,6 +2515,6 @@ FUNCTION(fun_formdecode)
   }
   curl_easy_cleanup(handle);
 #else
-  safe_str(T("#-1 FUNCTION DISABLED"), buff, bp);
+  safe_str("#-1 FUNCTION DISABLED", buff, bp);
 #endif
 }
