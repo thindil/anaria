@@ -217,7 +217,7 @@ what_to_destroy(dbref player, const char *name, int confirm, NEW_PE_INFO *pe_inf
   dbref thing;
 
   if (Guest(player)) {
-    notify(player, T("I'm sorry, Dave, I'm afraid I can't do that."));
+    notify(player, "I'm sorry, Dave, I'm afraid I can't do that.");
     return NOTHING;
   }
 
@@ -226,11 +226,11 @@ what_to_destroy(dbref player, const char *name, int confirm, NEW_PE_INFO *pe_inf
     return NOTHING;
 
   if (IsGarbage(thing)) {
-    notify(player, T("Destroying that again is hardly necessary."));
+    notify(player, "Destroying that again is hardly necessary.");
     return NOTHING;
   }
   if (God(thing)) {
-    notify(player, T("Destroying God would be blasphemous."));
+    notify(player, "Destroying God would be blasphemous.");
     return NOTHING;
   }
   /* To destroy, you must either:
@@ -243,36 +243,36 @@ what_to_destroy(dbref player, const char *name, int confirm, NEW_PE_INFO *pe_inf
                           controls(player, Source(thing)))) &&
       !(DestOk(thing) &&
         eval_lock_with(player, thing, Destroy_Lock, pe_info))) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return NOTHING;
   }
   if (special_object(thing)) {
-    notify(player, T("That is too special to be destroyed."));
+    notify(player, "That is too special to be destroyed.");
     return NOTHING;
   }
   if (REALLY_SAFE) {
     if (Safe(thing) && !DestOk(thing)) {
-      notify(player, T("That object is set SAFE. You must set it !SAFE before "
-                       "destroying it."));
+      notify(player, "That object is set SAFE. You must set it !SAFE before "
+                       "destroying it.");
       return NOTHING;
     }
   } else { /* REALLY_SAFE */
     if (Safe(thing) && !DestOk(thing) && !confirm) {
-      notify(player, T("That object is marked SAFE. Use @nuke to destroy it."));
+      notify(player, "That object is marked SAFE. Use @nuke to destroy it.");
       return NOTHING;
     }
   }
   /* check to make sure there's no accidental destruction */
   if (!confirm && !Owns(player, thing) && !DestOk(thing)) {
     notify(player,
-           T("That object does not belong to you. Use @nuke to destroy it."));
+           "That object does not belong to you. Use @nuke to destroy it.");
     return NOTHING;
   }
   /* what kind of thing we are destroying? */
   switch (Typeof(thing)) {
   case TYPE_PLAYER:
     if (!IsPlayer(player)) {
-      notify(player, T("Programs don't kill people; people kill people!"));
+      notify(player, "Programs don't kill people; people kill people!");
       return NOTHING;
     }
     /* The only player a player can own() is themselves...
@@ -281,28 +281,28 @@ what_to_destroy(dbref player, const char *name, int confirm, NEW_PE_INFO *pe_inf
      * the error message is a bit confusing. -DTC
      */
     if (!Wizard(player)) {
-      notify(player, T("Sorry, no suicide allowed."));
+      notify(player, "Sorry, no suicide allowed.");
       return NOTHING;
     }
     /* Already checked for God(thing), so use Wizard() */
     if (Wizard(thing) && !God(player)) {
-      notify(player, T("Even you can't do that!"));
+      notify(player, "Even you can't do that!");
       return NOTHING;
     }
     if (Connected(thing)) {
       notify(player,
-             T("How gruesome. You may not destroy players who are connected."));
+             "How gruesome. You may not destroy players who are connected.");
       return NOTHING;
     }
     if (!confirm) {
-      notify(player, T("You must use @nuke to destroy a player."));
+      notify(player, "You must use @nuke to destroy a player.");
       return NOTHING;
     }
     break;
   case TYPE_THING:
     if (!confirm && Wizard(thing)) {
       notify(player,
-             T("That object is set WIZARD. You must use @nuke to destroy it."));
+             "That object is set WIZARD. You must use @nuke to destroy it.");
       return NOTHING;
     }
     break;
@@ -337,29 +337,29 @@ do_destroy(dbref player, char *name, int confirm, NEW_PE_INFO *pe_info)
   if (Going(thing)) {
     free_object(thing);
     purge_locks();
-    notify(player, T("Destroyed."));
+    notify(player, "Destroyed.");
     return;
   }
   /* Present informative messages. */
   if (!REALLY_SAFE && Safe(thing))
     notify(
       player,
-      T("Warning: Target is set SAFE, but scheduling for destruction anyway."));
+      "Warning: Target is set SAFE, but scheduling for destruction anyway.");
   switch (Typeof(thing)) {
   case TYPE_ROOM:
     /* wait until dbck */
     notify_except(thing, thing, NOTHING,
-                  T("The room shakes and begins to crumble."), NA_SPOOF);
+                  "The room shakes and begins to crumble.", NA_SPOOF);
     if (Owns(player, thing))
-      notify_format(player, T("You will be rewarded shortly for %s."),
+      notify_format(player, "You will be rewarded shortly for %s.",
                     unparse_object(player, thing, AN_SYS));
     else {
       notify_format(
-        player, T("The wrecking ball is on its way for %s's %s and its exits."),
+        player, "The wrecking ball is on its way for %s's %s and its exits.",
         AName(Owner(thing), AN_SYS, NULL),
         unparse_object(player, thing, AN_SYS));
       notify_format(Owner(thing),
-                    T("%s has scheduled your room %s to be destroyed."),
+                    "%s has scheduled your room %s to be destroyed.",
                     AName(player, AN_SYS, NULL),
                     unparse_object(Owner(thing), thing, AN_SYS));
     }
@@ -371,38 +371,38 @@ do_destroy(dbref player, char *name, int confirm, NEW_PE_INFO *pe_info)
       player,
       (DESTROY_POSSESSIONS
          ? (REALLY_SAFE
-              ? T("%s and all their (non-SAFE) objects are scheduled to be "
-                  "destroyed.")
-              : T("%s and all their objects are scheduled to be destroyed."))
-         : T("%s is scheduled to be destroyed.")),
+              ? "%s and all their (non-SAFE) objects are scheduled to be "
+                  "destroyed."
+              : "%s and all their objects are scheduled to be destroyed.")
+         : "%s is scheduled to be destroyed."),
       unparse_object(player, thing, AN_SYS));
     break;
   case TYPE_THING:
     if (!Owns(player, thing)) {
-      notify_format(player, T("%s's %s is scheduled to be destroyed."),
+      notify_format(player, "%s's %s is scheduled to be destroyed.",
                     AName(Owner(thing), AN_SYS, NULL),
                     unparse_object(player, thing, AN_SYS));
       if (!DestOk(thing))
         notify_format(Owner(thing),
-                      T("%s has scheduled your %s for destruction."),
+                      "%s has scheduled your %s for destruction.",
                       AName(player, AN_SYS, NULL),
                       unparse_object(Owner(thing), thing, AN_SYS));
     } else {
-      notify_format(player, T("%s is scheduled to be destroyed."),
+      notify_format(player, "%s is scheduled to be destroyed.",
                     unparse_object(player, thing, AN_SYS));
     }
     break;
   case TYPE_EXIT:
     if (!Owns(player, thing)) {
       notify_format(Owner(thing),
-                    T("%s has scheduled your %s for destruction."),
+                    "%s has scheduled your %s for destruction.",
                     AName(player, AN_SYS, NULL),
                     unparse_object(Owner(thing), thing, AN_SYS));
-      notify_format(player, T("%s's %s is scheduled to be destroyed."),
+      notify_format(player, "%s's %s is scheduled to be destroyed.",
                     AName(Owner(thing), AN_SYS, NULL),
                     unparse_object(player, thing, AN_SYS));
     } else
-      notify_format(player, T("%s is scheduled to be destroyed."),
+      notify_format(player, "%s is scheduled to be destroyed.",
                     unparse_object(player, thing, AN_SYS));
     break;
   default:
@@ -432,21 +432,21 @@ do_undestroy(dbref player, char *name)
     return;
   }
   if (!controls(player, thing)) {
-    notify(player, T("Alas, your efforts of mercy are in vain."));
+    notify(player, "Alas, your efforts of mercy are in vain.");
     return;
   }
   if (undestroy(player, thing)) {
-    notify_format(Owner(thing), T("Your %s has been spared from destruction."),
+    notify_format(Owner(thing), "Your %s has been spared from destruction.",
                   unparse_object(Owner(thing), thing, AN_SYS));
     if (player != Owner(thing)) {
-      notify_format(player, T("%s's %s has been spared from destruction."),
+      notify_format(player, "%s's %s has been spared from destruction.",
                     AName(Owner(thing), AN_SYS, NULL),
                     unparse_object(player, thing, AN_SYS));
     }
     if (IsPlayer(thing))
       do_log(LT_WIZ, player, thing, "Player spared from destruction.");
   } else {
-    notify(player, T("That can't be undestroyed."));
+    notify(player, "That can't be undestroyed.");
   }
 }
 
@@ -491,7 +491,7 @@ pre_destroy(dbref player, dbref thing)
     if ((Owner(thing) != Owner(Source(thing))) && Going(Source(thing))) {
       if (!Owns(player, thing)) {
         notify_format(Owner(thing),
-                      T("%s has scheduled your %s for destruction."),
+                      "%s has scheduled your %s for destruction.",
                       AName(player, AN_SYS, NULL),
                       unparse_object(Owner(thing), thing, AN_SYS));
       }
@@ -531,13 +531,13 @@ undestroy(dbref player, dbref thing)
   /* undestroy owner, if need be. */
   if (Going(Owner(thing))) {
     if (Owner(thing) != player) {
-      notify_format(player, T("%s has been spared from destruction."),
+      notify_format(player, "%s has been spared from destruction.",
                     unparse_object(player, Owner(thing), AN_SYS));
       notify_format(Owner(thing),
-                    T("You have been spared from destruction by %s."),
+                    "You have been spared from destruction by %s.",
                     AName(player, AN_SYS, NULL));
     } else {
-      notify(player, T("You have been spared from destruction."));
+      notify(player, "You have been spared from destruction.");
     }
     (void) undestroy(player, Owner(thing));
   }
@@ -561,12 +561,12 @@ undestroy(dbref player, dbref thing)
     /* undestroy containing room. */
     if (Going(Source(thing))) {
       (void) undestroy(player, Source(thing));
-      notify_format(player, T("The room %s has been spared from destruction."),
+      notify_format(player, "The room %s has been spared from destruction.",
                     unparse_object(player, Source(thing), AN_SYS));
       if (Owner(Source(thing)) != player) {
         notify_format(
           Owner(Source(thing)),
-          T("The room %s has been spared from destruction by %s."),
+          "The room %s has been spared from destruction by %s.",
           unparse_object(Owner(Source(thing)), Source(thing), AN_SYS),
           AName(player, AN_SYS, NULL));
       }
@@ -789,8 +789,8 @@ empty_contents(dbref thing)
   dbref first, rest, target;
 
   notify_except(thing, thing, NOTHING,
-                T("The floor disappears under your feet, you fall through "
-                  "NOTHINGness and then:"),
+                "The floor disappears under your feet, you fall through "
+                  "NOTHINGness and then:",
                 NA_SPOOF);
   first = Contents(thing);
   Contents(thing) = NOTHING;
@@ -845,7 +845,7 @@ clear_thing(dbref thing)
   empty_contents(thing);
   clear_flag_internal(thing, "PUPPET");
   if (!Quiet(thing) && !Quiet(Owner(thing)))
-    notify_format(Owner(thing), T("You get your %d %s deposit back for %s."), a,
+    notify_format(Owner(thing), "You get your %d %s deposit back for %s.", a,
                   ((a == 1) ? MONEY : MONIES),
                   unparse_object(Owner(thing), thing, AN_SYS));
 }
@@ -933,17 +933,17 @@ make_first_free_wrapper(dbref player, const char *newdbref)
     return 1;
 
   if (!(Wizard(player) || has_power_by_name(player, "Pick_Dbref", NOTYPE))) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return 0;
   }
   thing = parse_dbref(newdbref);
   if (thing == NOTHING || !GoodObject(thing) || !IsGarbage(thing)) {
-    notify(player, T("That is not a valid dbref."));
+    notify(player, "That is not a valid dbref.");
     return 0;
   }
 
   if (!make_first_free(thing)) {
-    notify(player, T("Unable to create object with that dbref."));
+    notify(player, "Unable to create object with that dbref.");
     return 0;
   }
 
@@ -1067,9 +1067,9 @@ do_purge(dbref player)
 {
   if (Wizard(player)) {
     purge();
-    notify(player, T("Purge complete."));
+    notify(player, "Purge complete.");
   } else
-    notify(player, T("Sorry, you are a mortal."));
+    notify(player, "Sorry, you are a mortal.");
 }
 
 /* Section III: dbck() and related functions. */
@@ -1252,7 +1252,7 @@ check_connected_marks(void)
       }
       if (!Going(loc) && !Floating(loc) && !NoWarnable(loc) &&
           (!EXITS_CONNECT_ROOMS || (Exits(loc) == NOTHING))) {
-        notify_format(Owner(loc), T("You own a disconnected room, %s"),
+        notify_format(Owner(loc), "You own a disconnected room, %s",
                       unparse_object(Owner(loc), loc, AN_SYS));
       }
     }
@@ -1278,7 +1278,7 @@ check_zones(void)
            zone_depth-- && GoodObject(tmp); tmp = Zone(tmp)) {
         if (tmp == n) {
           notify_format(Owner(n),
-                        T("You own an object in a circular zone chain: %s"),
+                        "You own an object in a circular zone chain: %s",
                         unparse_object(Owner(n), n, AN_SYS));
           break;
         }
@@ -1297,7 +1297,7 @@ check_zones(void)
       ClearMarked(n);
       notify_format(
         Owner(n),
-        T("You own an object without a @lock/zone being used as a zone: %s"),
+        "You own an object without a @lock/zone being used as a zone: %s",
         unparse_object(Owner(n), n, AN_SYS));
     }
   }
@@ -1376,7 +1376,7 @@ check_contents(void)
       do_rawlog(LT_ERR, "Object %s not pointed to by anything.",
                 unparse_object(GOD, thing, 0));
       notify_format(Owner(thing),
-                    T("You own an object %s that was \'orphaned\'."),
+                    "You own an object %s that was \'orphaned\'.",
                     unparse_object(Owner(thing), thing, AN_SYS));
       /* We try to fix this by trying to send players and things to
        * their current location, to their home, or to DEFAULT_HOME, in
@@ -1405,7 +1405,7 @@ check_contents(void)
         /* If we've managed to reconnect it, then we've reconnected
          * its contents. */
         mark_contents(Contents(thing));
-        notify_format(Owner(thing), T("It was moved to %s."),
+        notify_format(Owner(thing), "It was moved to %s.",
                       unparse_object(Owner(thing), Location(thing), AN_SYS));
         do_rawlog(LT_ERR, "Moved to %s.",
                   unparse_object(GOD, Location(thing), 0));
@@ -1413,14 +1413,14 @@ check_contents(void)
       case TYPE_EXIT:
         if (GoodObject(Source(thing)) && IsRoom(Source(thing))) {
           PUSH(thing, Exits(Source(thing)));
-          notify_format(Owner(thing), T("It was moved to %s."),
+          notify_format(Owner(thing), "It was moved to %s.",
                         unparse_object(Owner(thing), Source(thing), AN_SYS));
           do_rawlog(LT_ERR, "Moved to %s.",
                     unparse_object(GOD, Source(thing), 0));
         } else {
           /* Just destroy the exit. */
           Source(thing) = NOTHING;
-          notify(Owner(thing), T("It was destroyed."));
+          notify(Owner(thing), "It was destroyed.");
           do_rawlog(LT_ERR, "Orphaned exit destroyed.");
           free_object(thing);
         }
@@ -1516,11 +1516,11 @@ void
 do_dbck(dbref player)
 {
   if (!Wizard(player)) {
-    notify(player, T("Silly mortal, chicks are for kids!"));
+    notify(player, "Silly mortal, chicks are for kids!");
     return;
   }
-  notify(player, T("GAME: Performing database consistency check."));
+  notify(player, "GAME: Performing database consistency check.");
   do_log(LT_WIZ, player, NOTHING, "DBCK done.");
   dbck();
-  notify(player, T("GAME: Database consistency check complete."));
+  notify(player, "GAME: Database consistency check complete.");
 }
