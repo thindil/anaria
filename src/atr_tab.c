@@ -552,7 +552,7 @@ check_attr_value(dbref player, const char *name, const char *value)
       return value;
     } else {
       if (player != NOTHING)
-        notify(player, T("Attribute value does not match the /limit regexp."));
+        notify(player, "Attribute value does not match the /limit regexp.");
       return NULL;
     }
   } else if (ap->flags & AF_ENUM) {
@@ -562,7 +562,7 @@ check_attr_value(dbref player, const char *name, const char *value)
     delim = *attrval;
     if (!*value || strchr(value, delim)) {
       if (player != NOTHING)
-        notify_format(player, T("Value for %s needs to be one of: %s"),
+        notify_format(player, "Value for %s needs to be one of: %s",
                       ap->name, display_attr_limit(ap));
       return NULL;
     }
@@ -598,7 +598,7 @@ check_attr_value(dbref player, const char *name, const char *value)
       return buff;
     } else {
       if (player != NOTHING)
-        notify_format(player, T("Value for %s needs to be one of: %s"),
+        notify_format(player, "Value for %s needs to be one of: %s",
                       ap->name, display_attr_limit(ap));
       return NULL;
     }
@@ -645,7 +645,7 @@ do_attribute_limit(dbref player, const char *name, int type,
                       PCRE2_ZERO_TERMINATED, re_compile_flags | PCRE2_CASELESS,
                       &errcode, &erroffset, re_compile_ctx);
       if (!re) {
-        notify(player, T("Invalid Regular Expression."));
+        notify(player, "Invalid Regular Expression.");
         return;
       }
       /* We only care if it's valid, we're not using it. */
@@ -660,7 +660,7 @@ do_attribute_limit(dbref player, const char *name, int type,
       /* Check for a delimiter: @attr/enum | attrname=foo */
       if ((ptr = strchr(name, ' ')) != NULL) {
         if (ptr != (name + 1)) {
-          notify(player, T("Delimiter must be one character."));
+          notify(player, "Delimiter must be one character.");
           return;
         }
         delim = *name;
@@ -686,7 +686,7 @@ do_attribute_limit(dbref player, const char *name, int type,
       *bp = '\0';
     } else {
       /* Err, we got called with the wrong limit type? */
-      notify(player, T("Unknown limit type?"));
+      notify(player, "Unknown limit type?");
       return;
     }
   } else {
@@ -695,7 +695,7 @@ do_attribute_limit(dbref player, const char *name, int type,
 
   /* Parse name and perms */
   if (!name || !*name) {
-    notify(player, T("Which attribute do you mean?"));
+    notify(player, "Which attribute do you mean?");
     return;
   }
   name = strupper_r(name, ucname, sizeof ucname);
@@ -706,14 +706,14 @@ do_attribute_limit(dbref player, const char *name, int type,
   ap = (ATTR *) ptab_find_exact(&ptab_attrib, name);
 
   if (!ap) {
-    notify(player, T("I don't know that attribute. Please use "
-                     "@attribute/access to create it, first."));
+    notify(player, "I don't know that attribute. Please use "
+                     "@attribute/access to create it, first.");
     return;
   }
 
   if (AF_Internal(ap)) {
     /* Don't muck with internal attributes */
-    notify(player, T("That attribute's permissions cannot be changed."));
+    notify(player, "That attribute's permissions cannot be changed.");
     return;
   }
 
@@ -726,9 +726,9 @@ do_attribute_limit(dbref player, const char *name, int type,
   if (unset) {
     if (ap->data != NULL_CHUNK_REFERENCE) {
       ap->data = NULL_CHUNK_REFERENCE;
-      notify_format(player, T("%s -- Attribute limit or enum unset."), name);
+      notify_format(player, "%s -- Attribute limit or enum unset.", name);
     } else {
-      notify_format(player, T("%s -- Attribute limit or enum already unset."),
+      notify_format(player, "%s -- Attribute limit or enum already unset.",
                     name);
     }
   } else {
@@ -736,7 +736,7 @@ do_attribute_limit(dbref player, const char *name, int type,
     ap->data = chunk_create(t, strlen(t), 0);
     free(t);
     ap->flags |= type;
-    notify_format(player, T("%s -- Attribute %s set to: %s"), name,
+    notify_format(player, "%s -- Attribute %s set to: %s", name,
                   type == AF_RLIMIT ? "limit" : "enum", display_attr_limit(ap));
   }
 }
@@ -763,13 +763,13 @@ do_attribute_access(dbref player, char *name, const char *perms, int retroactive
 
   /* Parse name and perms */
   if (!name || !*name) {
-    notify(player, T("Which attribute do you mean?"));
+    notify(player, "Which attribute do you mean?");
     return;
   }
   if (strcasecmp(perms, "none")) {
     flags = list_to_privs(attr_privs_set, perms, 0);
     if (!flags) {
-      notify(player, T("I don't understand those permissions."));
+      notify(player, "I don't understand those permissions.");
       return;
     }
   }
@@ -779,7 +779,7 @@ do_attribute_access(dbref player, char *name, const char *perms, int retroactive
   if (ap) {
     if (AF_Internal(ap)) {
       /* Don't muck with internal attributes */
-      notify(player, T("That attribute's permissions can not be changed."));
+      notify(player, "That attribute's permissions can not be changed.");
       return;
     }
     /* Preserve any existing @attribute/limit */
@@ -787,13 +787,13 @@ do_attribute_access(dbref player, char *name, const char *perms, int retroactive
   } else {
     /* Create fresh if the name is ok */
     if (!good_atr_name(name)) {
-      notify(player, T("Invalid attribute name."));
+      notify(player, "Invalid attribute name.");
       return;
     }
     insert = 1;
     ap = (ATTR *) mush_malloc(sizeof(ATTR), "ATTR");
     if (!ap) {
-      notify(player, T("Critical memory failure - Alert God!"));
+      notify(player, "Critical memory failure - Alert God!");
       do_log(LT_ERR, 0, 0, "do_attribute_access: unable to malloc ATTR");
       return;
     }
@@ -826,7 +826,7 @@ do_attribute_access(dbref player, char *name, const char *perms, int retroactive
     }
   }
 
-  notify_format(player, T("%s -- Attribute permissions now: %s"), name,
+  notify_format(player, "%s -- Attribute permissions now: %s", name,
                 privs_to_string(attr_privs_view, flags));
 }
 
@@ -869,14 +869,14 @@ do_attribute_delete(dbref player, char *name)
   int count;
 
   if (!name || !*name) {
-    notify(player, T("Which attribute do you mean?"));
+    notify(player, "Which attribute do you mean?");
     return;
   }
 
   /* Is this attribute in the table? */
   ap = (ATTR *) ptab_find_exact(&ptab_attrib, name);
   if (!ap) {
-    notify(player, T("That attribute isn't in the attribute table"));
+    notify(player, "That attribute isn't in the attribute table");
     return;
   }
 
@@ -888,14 +888,14 @@ do_attribute_delete(dbref player, char *name)
 
   switch (count) {
   case 0:
-    notify_format(player, T("Failed to remove %s from attribute table."), name);
+    notify_format(player, "Failed to remove %s from attribute table.", name);
     break;
   case 1:
-    notify_format(player, T("Removed %s from attribute table."), name);
+    notify_format(player, "Removed %s from attribute table.", name);
     break;
   default:
     notify_format(player,
-                  T("Removed %s and %d alias(es) from attribute table."), name,
+                  "Removed %s and %d alias(es) from attribute table.", name,
                   count - 1);
     break;
   }
@@ -916,28 +916,28 @@ do_attribute_rename(dbref player, char *old, char *newname)
 {
   ATTR *ap;
   if (!old || !*old || !newname || !*newname) {
-    notify(player, T("Which attributes do you mean?"));
+    notify(player, "Which attributes do you mean?");
     return;
   }
   upcasestr(old);
   upcasestr(newname);
   /* Is the new name valid? */
   if (!good_atr_name(newname)) {
-    notify(player, T("Invalid attribute name."));
+    notify(player, "Invalid attribute name.");
     return;
   }
   /* Is the new name already in use? */
   ap = (ATTR *) ptab_find_exact(&ptab_attrib, newname);
   if (ap) {
     notify_format(player,
-                  T("The name %s is already used in the attribute table."),
+                  "The name %s is already used in the attribute table.",
                   newname);
     return;
   }
   /* Is the old name a real attribute? */
   ap = (ATTR *) ptab_find_exact(&ptab_attrib, old);
   if (!ap) {
-    notify(player, T("That attribute isn't in the attribute table"));
+    notify(player, "That attribute isn't in the attribute table");
     return;
   }
   /* Ok, take it out and put it back under the new name */
@@ -947,7 +947,7 @@ do_attribute_rename(dbref player, char *old, char *newname)
      someday.  */
   AL_NAME(ap) = strdup(newname);
   ptab_insert_one(&ptab_attrib, newname, ap);
-  notify_format(player, T("Renamed %s to %s in attribute table."), old,
+  notify_format(player, "Renamed %s to %s in attribute table.", old,
                 newname);
   return;
 }
@@ -964,7 +964,7 @@ do_attribute_info(dbref player, char *name)
 {
   ATTR *ap;
   if (!name || !*name) {
-    notify(player, T("Which attribute do you mean?"));
+    notify(player, "Which attribute do you mean?");
     return;
   }
 
@@ -975,7 +975,7 @@ do_attribute_info(dbref player, char *name)
 
   ap = aname_hash_lookup(name);
   if (!ap) {
-    notify(player, T("That attribute isn't in the attribute table"));
+    notify(player, "That attribute isn't in the attribute table");
     return;
   }
 
@@ -987,15 +987,15 @@ static void
 display_attr_info(dbref player, ATTR *ap)
 {
 
-  notify_format(player, "%9s: %s", T("Attribute"), AL_NAME(ap));
+  notify_format(player, "%9s: %s", "Attribute", AL_NAME(ap));
   if (ap->flags & AF_RLIMIT) {
-    notify_format(player, "%9s: %s", T("Limit"), display_attr_limit(ap));
+    notify_format(player, "%9s: %s", "Limit", display_attr_limit(ap));
   } else if (ap->flags & AF_ENUM) {
-    notify_format(player, "%9s: %s", T("Enum"), display_attr_limit(ap));
+    notify_format(player, "%9s: %s", "Enum", display_attr_limit(ap));
   }
-  notify_format(player, "%9s: %s", T("Flags"),
+  notify_format(player, "%9s: %s", "Flags",
                 privs_to_string(attr_privs_view, AL_FLAGS(ap)));
-  notify_format(player, "%9s: %s", T("Creator"), unparse_dbref(AL_CREATOR(ap)));
+  notify_format(player, "%9s: %s", "Creator", unparse_dbref(AL_CREATOR(ap)));
   return;
 }
 
@@ -1010,7 +1010,7 @@ do_decompile_attribs(dbref player, const char *pattern, int retroactive)
   ATTR *ap;
   const char *name;
 
-  notify(player, T("@@ Standard Attributes:"));
+  notify(player, "@@ Standard Attributes:");
   for (ap = ptab_firstentry_new(&ptab_attrib, &name); ap;
        ap = ptab_nextentry_new(&ptab_attrib, &name)) {
     if (strcmp(name, AL_NAME(ap)))
@@ -1042,7 +1042,7 @@ do_list_attribs(dbref player, int lc)
 {
   char tmp[BUFFER_LEN];
   char *b = list_attribs();
-  notify_format(player, T("Attribs: %s"),
+  notify_format(player, "Attribs: %s",
                 lc ? strlower_r(b, tmp, sizeof tmp) : b);
 }
 
