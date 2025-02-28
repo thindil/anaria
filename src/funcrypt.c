@@ -56,7 +56,7 @@ encode_base64(const char *input, int len, char *buff, char **bp)
   if (!CryptBinaryToString((const BYTE *) input, len,
                            CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, NULL,
                            &encodedlen)) {
-    safe_str(T("#-1 ENCODING ERROR"), buff, bp);
+    safe_str("#-1 ENCODING ERROR", buff, bp);
     return false;
   }
 
@@ -65,7 +65,7 @@ encode_base64(const char *input, int len, char *buff, char **bp)
                            CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF, encoded,
                            &encodedlen)) {
     mush_free(encoded, "string");
-    safe_str(T("#-1 ENCODING ERROR"), buff, bp);
+    safe_str("#-1 ENCODING ERROR", buff, bp);
     return false;
   }
 
@@ -79,7 +79,7 @@ encode_base64(const char *input, int len, char *buff, char **bp)
 
   b64 = BIO_new(BIO_f_base64());
   if (!b64) {
-    safe_str(T("#-1 ALLOCATION ERROR"), buff, bp);
+    safe_str("#-1 ALLOCATION ERROR", buff, bp);
     return false;
   }
 
@@ -87,7 +87,7 @@ encode_base64(const char *input, int len, char *buff, char **bp)
 
   bmem = BIO_new(BIO_s_mem());
   if (!bmem) {
-    safe_str(T("#-1 ALLOCATION ERROR"), buff, bp);
+    safe_str("#-1 ALLOCATION ERROR", buff, bp);
     BIO_free(b64);
     return false;
   }
@@ -95,7 +95,7 @@ encode_base64(const char *input, int len, char *buff, char **bp)
   bio = BIO_push(b64, bmem);
 
   if (BIO_write(bio, input, len) < 0) {
-    safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+    safe_str("#-1 CONVERSION ERROR", buff, bp);
     BIO_free_all(bio);
     return false;
   }
@@ -124,7 +124,7 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
 
   if (!CryptStringToBinary((LPCTSTR) encoded, len, CRYPT_STRING_BASE64, NULL,
                            &dlen, NULL, NULL)) {
-    safe_str(T("#-1 DECODING ERROR"), buff, bp);
+    safe_str("#-1 DECODING ERROR", buff, bp);
     return false;
   }
 
@@ -132,7 +132,7 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
   if (!CryptStringToBinary((LPCTSTR) encoded, len, CRYPT_STRING_BASE64, decoded,
                            &dlen, NULL, NULL)) {
     mush_free(decoded, "string");
-    safe_str(T("#-1 DECODING ERROR"), buff, bp);
+    safe_str("#-1 DECODING ERROR", buff, bp);
     return false;
   }
   decoded[dlen] = '\0';
@@ -148,14 +148,14 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
       if (end == dlen || decoded[n] != MARKUP_COLOR) {
         mush_free(decoded, "string");
         *bp = sbp;
-        safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+        safe_str("#-1 CONVERSION ERROR", buff, bp);
         return false;
       }
       for (; n < end; n++) {
         if (!valid_ansi_codes[decoded[n]]) {
           mush_free(decoded, "string");
           *bp = sbp;
-          safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+          safe_str("#-1 CONVERSION ERROR", buff, bp);
           return false;
         }
       }
@@ -172,14 +172,14 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
 
   b64 = BIO_new(BIO_f_base64());
   if (!b64) {
-    safe_str(T("#-1 ALLOCATION ERROR"), buff, bp);
+    safe_str("#-1 ALLOCATION ERROR", buff, bp);
     return false;
   }
   BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 
   bmem = BIO_new_mem_buf(encoded, len);
   if (!bmem) {
-    safe_str(T("#-1 ALLOCATION ERROR"), buff, bp);
+    safe_str("#-1 ALLOCATION ERROR", buff, bp);
     BIO_free(b64);
     return false;
   }
@@ -207,14 +207,14 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
           if (end == dlen || decoded[n] != MARKUP_COLOR) {
             BIO_free_all(bio);
             *bp = sbp;
-            safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+            safe_str("#-1 CONVERSION ERROR", buff, bp);
             return false;
           }
           for (; n < end; n++) {
             if (!valid_ansi_codes[decoded[n]]) {
               BIO_free_all(bio);
               *bp = sbp;
-              safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+              safe_str("#-1 CONVERSION ERROR", buff, bp);
               return false;
             }
           }
@@ -228,7 +228,7 @@ decode_base64(char *encoded, int len, bool printonly, char *buff, char **bp)
     else {
       BIO_free_all(bio);
       *bp = sbp;
-      safe_str(T("#-1 CONVERSION ERROR"), buff, bp);
+      safe_str("#-1 CONVERSION ERROR", buff, bp);
       return false;
     }
   }
@@ -368,7 +368,7 @@ FUNCTION(fun_checkpass)
 {
   dbref it = match_thing(executor, args[0]);
   if (!(GoodObject(it) && IsPlayer(it))) {
-    safe_str(T("#-1 NO SUCH PLAYER"), buff, bp);
+    safe_str("#-1 NO SUCH PLAYER", buff, bp);
     return;
   }
   safe_boolean(password_check(it, args[1]), buff, bp);
@@ -383,7 +383,7 @@ FUNCTION(fun_sha0)
 
   safe_hexstr(hash, SHA_DIGEST_LENGTH, buff, bp);
 #else
-  safe_str(T("#-1 NOT SUPPORTED"), buff, bp);
+  safe_str("#-1 NOT SUPPORTED", buff, bp);
 #endif
 }
 
@@ -439,12 +439,12 @@ FUNCTION(fun_digest)
     mush_free(digests, "digest.list");
     hashfree(&digests_tab);
 #else
-    safe_str(T("#-1 LISTING NOT SUPPORTED"), buff, bp);
+    safe_str("#-1 LISTING NOT SUPPORTED", buff, bp);
 #endif
   } else if (nargs == 2)
     safe_hash_byname(args[0], args[1], arglens[1], buff, bp, 1);
   else
-    safe_str(T("#-1 INVALID ARGUMENT"), buff, bp);
+    safe_str("#-1 INVALID ARGUMENT", buff, bp);
 }
 
 FUNCTION(fun_hmac)
@@ -460,7 +460,7 @@ FUNCTION(fun_hmac)
     } else if (sqlite3_stricmp(args[3], "base64") == 0) {
       base16 = 0;
     } else {
-      safe_str(T("#-1 INVALID ARGUMENT"), buff, bp);
+      safe_str("#-1 INVALID ARGUMENT", buff, bp);
       return;
     }
   }
@@ -468,7 +468,7 @@ FUNCTION(fun_hmac)
   /* TODO: Windows BCrypt version */
   hash = EVP_get_digestbyname(args[0]);
   if (!hash) {
-    safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+    safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     return;
   }
   HMAC(hash, args[1], arglens[1], (unsigned char *) args[2], arglens[2], md,
