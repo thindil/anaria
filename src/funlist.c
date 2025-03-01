@@ -285,7 +285,7 @@ FUNCTION(fun_munge)
   memcpy(ptrs3, ptrs2, MAX_SORTSIZE * sizeof(char *));
 
   if (nptrs1 != nptrs2) {
-    safe_str(T("#-1 LISTS MUST BE OF EQUAL SIZE"), buff, bp);
+    safe_str("#-1 LISTS MUST BE OF EQUAL SIZE", buff, bp);
     freearr(ptrs1, nptrs1);
     freearr(ptrs2, nptrs2);
     mush_free(ptrs1, "ptrarray");
@@ -1058,7 +1058,7 @@ FUNCTION(fun_lnum)
     }
     end--;
     if (end < 0.0) {
-      safe_str(T("#-1 NUMBER OUT OF RANGE"), buff, bp);
+      safe_str("#-1 NUMBER OUT OF RANGE", buff, bp);
       return;
     }
     start = 0.0;
@@ -1198,7 +1198,7 @@ FUNCTION(fun_randword)
     } else if (*args[3] == 'd' || *args[3] == 'D') {
       randtype = RAND_DUPLICATES;
     } else {
-      safe_str(T("#-1 INVALID TYPE"), buff, bp);
+      safe_str("#-1 INVALID TYPE", buff, bp);
       return;
     }
   }
@@ -1887,7 +1887,7 @@ FUNCTION(fun_member)
     return;
 
   if (strchr(args[1], sep)) {
-    safe_str(T("#-1 CAN ONLY TEST ONE ELEMENT"), buff, bp);
+    safe_str("#-1 CAN ONLY TEST ONE ELEMENT", buff, bp);
     return;
   }
 
@@ -2018,11 +2018,11 @@ FUNCTION(fun_splice)
 
   mush_strncpy(haystack, remove_markup(args[2], NULL), sizeof haystack);
   if (!*haystack) {
-    safe_str(T("#-1 NEED A WORD"), buff, bp);
+    safe_str("#-1 NEED A WORD", buff, bp);
     return;
   }
   if (do_wordcount(haystack, sep) != 1) {
-    safe_str(T("#-1 TOO MANY WORDS"), buff, bp);
+    safe_str("#-1 TOO MANY WORDS", buff, bp);
     return;
   }
 
@@ -2031,7 +2031,7 @@ FUNCTION(fun_splice)
   rcount = list2arr_ansi(repl, MAX_SORTSIZE, args[1], sep, 1);
 
   if (ocount != rcount) {
-    safe_str(T("#-1 NUMBER OF WORDS MUST BE EQUAL"), buff, bp);
+    safe_str("#-1 NUMBER OF WORDS MUST BE EQUAL", buff, bp);
     freearr(orig, ocount);
     freearr(repl, rcount);
     return;
@@ -2270,7 +2270,7 @@ FUNCTION(fun_step)
   step = parse_integer(args[2]);
 
   if (step < 1 || step > MAX_STACK_ARGS) {
-    safe_str(T("#-1 STEP OUT OF RANGE"), buff, bp);
+    safe_str("#-1 STEP OUT OF RANGE", buff, bp);
     return;
   }
 
@@ -2680,7 +2680,7 @@ FUNCTION(fun_regreplace)
       /* Matching error. */
       char errstr[120];
       pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errstr, sizeof errstr);
-      safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+      safe_str("#-1 REGEXP ERROR: ", buff, bp);
       safe_str(errstr, buff, bp);
       goto exit_sequence;
     }
@@ -2786,7 +2786,7 @@ FUNCTION(fun_regreplace)
         /* Matching error. */
         char errstr[120];
         pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errstr, sizeof errstr);
-        safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+        safe_str("#-1 REGEXP ERROR: ", buff, bp);
         safe_str(errstr, buff, bp);
         goto exit_sequence;
       }
@@ -2905,7 +2905,7 @@ FUNCTION(fun_regmatch)
     if (errptr == NULL) {
       safe_boolean(match, buff, bp);
     } else {
-      safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+      safe_str("#-1 REGEXP ERROR: ", buff, bp);
       safe_str(errptr, buff, bp);
     }
     free_ansi_string(as);
@@ -2917,7 +2917,7 @@ FUNCTION(fun_regmatch)
     char errstr[120];
     /* Matching error. */
     pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errstr, sizeof errstr);
-    safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+    safe_str("#-1 REGEXP ERROR: ", buff, bp);
     safe_str(errstr, buff, bp);
     free_ansi_string(as);
     return;
@@ -3051,7 +3051,7 @@ FUNCTION(fun_regrab)
     /* Matching error. */
     char errstr[120];
     pcre2_get_error_message(errcode, (PCRE2_UCHAR *) errstr, sizeof errstr);
-    safe_str(T("#-1 REGEXP ERROR: "), buff, bp);
+    safe_str("#-1 REGEXP ERROR: ", buff, bp);
     safe_str(errstr, buff, bp);
     return;
   }
