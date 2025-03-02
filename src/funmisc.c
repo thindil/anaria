@@ -325,7 +325,7 @@ FUNCTION(fun_setq)
 
   if ((nargs % 2) != 0) {
     safe_format(buff, bp,
-                T("#-1 FUNCTION (%s) EXPECTS AN EVEN NUMBER OF ARGUMENTS"),
+                "#-1 FUNCTION (%s) EXPECTS AN EVEN NUMBER OF ARGUMENTS",
                 called_as);
     return;
   }
@@ -361,7 +361,7 @@ FUNCTION(fun_letq)
   PE_REGS *pe_regs;
 
   if ((nargs % 2) != 1) {
-    safe_str(T("#-1 FUNCTION (LETQ) EXPECTS AN ODD NUMBER OF ARGUMENTS"), buff,
+    safe_str("#-1 FUNCTION (LETQ) EXPECTS AN ODD NUMBER OF ARGUMENTS", buff,
              bp);
     return;
   }
@@ -847,7 +847,7 @@ FUNCTION(fun_die)
     show_all = parse_boolean(args[2]);
 
   if (n == 0 || n > 700) {
-    safe_str(T("#-1 NUMBER OUT OF RANGE"), buff, bp);
+    safe_str("#-1 NUMBER OUT OF RANGE", buff, bp);
     return;
   }
   if (show_all) {
@@ -1351,7 +1351,7 @@ FUNCTION(fun_scan)
   }
 
   if (!See_All(executor) && !controls(executor, thing)) {
-    notify(executor, T("Permission denied."));
+    notify(executor, "Permission denied.");
     safe_str("#-1", buff, bp);
     return;
   }
@@ -1377,7 +1377,7 @@ FUNCTION(fun_scan)
       else if (strcasecmp("all", thispref) == 0) {
         scan_type |= CHECK_ALL;
       } else {
-        notify(executor, T("Invalid type."));
+        notify(executor, "Invalid type.");
         safe_str("#-1", buff, bp);
         return;
       }
@@ -1548,17 +1548,17 @@ FUNCTION(fun_benchmark)
     safe_str(tbuf, buff, bp);
     if (pe_info->fun_invocations >= FUNCTION_LIMIT ||
         (global_fun_invocations >= FUNCTION_LIMIT * 5))
-      notify(thing, T("Function invocation limit reached. Benchmark timings "
-                      "may not be reliable."));
-    notify_format(thing, T("Average: %.2f   Min: %u   Max: %u"),
+      notify(thing, "Function invocation limit reached. Benchmark timings "
+                      "may not be reliable.");
+    notify_format(thing, "Average: %.2f   Min: %u   Max: %u",
                   ((double) total) / i, min, max);
   } else {
-    safe_format(buff, bp, T("Average: %.2f   Min: %u   Max: %u"),
+    safe_format(buff, bp, "Average: %.2f   Min: %u   Max: %u",
                 ((double) total) / i, min, max);
     if (pe_info->fun_invocations >= FUNCTION_LIMIT ||
         (global_fun_invocations >= FUNCTION_LIMIT * 5))
-      safe_str(T(" Note: Function invocation limit reached. Benchmark timings "
-                 "may not be reliable."),
+      safe_str(" Note: Function invocation limit reached. Benchmark timings "
+                 "may not be reliable.",
                buff, bp);
   }
 
