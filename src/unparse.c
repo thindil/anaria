@@ -99,14 +99,14 @@ real_unparse(dbref player, dbref loc, int obey_myopic, int use_nameformat,
 
   if (!(GoodObject(loc) || (loc == NOTHING) || (loc == AMBIGUOUS) ||
         (loc == HOME)))
-    return T("*NOTHING*");
+    return "*NOTHING*";
   switch (loc) {
   case NOTHING:
-    return T("*NOTHING*");
+    return "*NOTHING*";
   case AMBIGUOUS:
-    return T("*VARIABLE*");
+    return "*VARIABLE*";
   case HOME:
-    return T("*HOME*");
+    return "*HOME*";
   default:
     if (use_nameaccent)
       strcpy(tbuf1, AaName(loc, an_flags, &monikered));
