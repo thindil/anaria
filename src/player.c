@@ -232,7 +232,7 @@ connect_player(DESC *d, const char *name, const char *password,
 
   /* Default error */
   strcpy(errbuf,
-         T("Either that player does not exist, or has a different password."));
+         "Either that player does not exist, or has a different password.");
 
   if (!name || !*name) {
     /* Missing player names are failures, but don't count them. */
@@ -245,7 +245,7 @@ connect_player(DESC *d, const char *name, const char *password,
   if ((player = lookup_player(name)) == NOTHING) {
     /* Invalid player names are failures, too. */
     count = mark_failed(ip);
-    strcpy(errbuf, T("There is no player with that name."));
+    strcpy(errbuf, "There is no player with that name.");
     queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d,%s",
                 d->descriptor, ip, count, "invalid player", -1, name);
     return NOTHING;
@@ -258,7 +258,7 @@ connect_player(DESC *d, const char *name, const char *password,
            Name(player), host, ip);
     queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d", d->descriptor,
                 ip, count_failed(ip), "player is going", player);
-    strcpy(errbuf, T("You cannot connect to that player at this time."));
+    strcpy(errbuf, "You cannot connect to that player at this time.");
     return NOTHING;
   }
   /* Check sitelock patterns */
@@ -268,7 +268,7 @@ connect_player(DESC *d, const char *name, const char *password,
         !Deny_Silent_Site(ip, AMBIGUOUS)) {
       do_log(LT_CONN, 0, 0, "Connection to %s (GUEST) not allowed from %s (%s)",
              name, host, ip);
-      strcpy(errbuf, T("Guest connections not allowed."));
+      strcpy(errbuf, "Guest connections not allowed.");
       count = mark_failed(ip);
       queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d",
                   d->descriptor, ip, count, "failed sitelock", player);
@@ -280,7 +280,7 @@ connect_player(DESC *d, const char *name, const char *password,
       do_log(LT_CONN, 0, 0,
              "Connection to %s (Non-GUEST) not allowed from %s (%s)", name,
              host, ip);
-      strcpy(errbuf, T("Player connections not allowed."));
+      strcpy(errbuf, "Player connections not allowed.");
       count = mark_failed(ip);
       queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d",
                   d->descriptor, ip, count, "failed sitelock", player);
@@ -296,7 +296,7 @@ connect_player(DESC *d, const char *name, const char *password,
       count = mark_failed(ip);
       queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d",
                   d->descriptor, ip, count, "invalid password", player);
-      strcpy(errbuf, T("That is not the correct password."));
+      strcpy(errbuf, "That is not the correct password.");
       return NOTHING;
     }
 
@@ -307,7 +307,7 @@ connect_player(DESC *d, const char *name, const char *password,
     player = guest_to_connect(player);
     if (!GoodObject(player)) {
       do_log(LT_CONN, 0, 0, "Can't connect to a guest (too many connected)");
-      strcpy(errbuf, T("Too many guests are connected now."));
+      strcpy(errbuf, "Too many guests are connected now.");
       queue_event(SYSEVENT, "SOCKET`LOGINFAIL", "%d,%s,%d,%s,#%d",
                   d->descriptor, ip, count_failed(ip), "too many guests",
                   player);
@@ -490,16 +490,16 @@ email_register_player(DESC *d, const char *name, const char *email,
     return NOTHING;
   }
   fprintf(fp, "Subject: ");
-  fprintf(fp, T("[%s] Registration of %s\n"), MUDNAME, name);
+  fprintf(fp, "[%s] Registration of %s\n", MUDNAME, name);
   fprintf(fp, "To: %s\n", email);
   fprintf(fp, "Precedence: junk\n");
   fprintf(fp, "\n");
-  fprintf(fp, T("This is an automated message.\n"));
+  fprintf(fp, "This is an automated message.\n");
   fprintf(fp, "\n");
-  fprintf(fp, T("Your requested player, %s, has been created.\n"), name);
-  fprintf(fp, T("The password is %s\n"), passwd);
+  fprintf(fp, "Your requested player, %s, has been created.\n", name);
+  fprintf(fp, "The password is %s\n", passwd);
   fprintf(fp, "\n");
-  fprintf(fp, T("To access this character, connect to %s and type:\n"),
+  fprintf(fp, "To access this character, connect to %s and type:\n",
           MUDNAME);
   fprintf(fp, "\tconnect \"%s\" %s\n", name, passwd);
   fprintf(fp, "\n");
@@ -632,12 +632,12 @@ do_password(dbref executor, dbref enactor, const char *old, const char *newobj,
   }
 
   if (!password_check(executor, old)) {
-    notify(executor, T("The old password that you entered was incorrect."));
+    notify(executor, "The old password that you entered was incorrect.");
   } else if (!ok_password(newobj)) {
-    notify(executor, T("Bad new password."));
+    notify(executor, "Bad new password.");
   } else {
     (void) atr_add(executor, pword_attr, password_hash(newobj, NULL), GOD, 0);
-    notify(executor, T("You have changed your password."));
+    notify(executor, "You have changed your password.");
   }
 }
 
@@ -668,7 +668,7 @@ check_last(dbref player, const char *host, const char *ip)
     if (h && a) {
       strcpy(last_place, atr_value(h));
       strcpy(last_time, atr_value(a));
-      notify_format(player, T("Last connect was from %s on %s."), last_place,
+      notify_format(player, "Last connect was from %s on %s.", last_place,
                     last_time);
     }
     /* How about last failed connection */
@@ -676,7 +676,7 @@ check_last(dbref player, const char *host, const char *ip)
     if (h && a) {
       strcpy(last_place, atr_value(h));
       if (strlen(last_place) > 2)
-        notify_format(player, T("Last FAILED connect was from %s."),
+        notify_format(player, "Last FAILED connect was from %s.",
                       last_place);
     }
   }
@@ -702,7 +702,7 @@ check_lastfailed(dbref player, const char *host)
   char last_place[BUFFER_LEN], *bp;
 
   bp = last_place;
-  safe_format(last_place, &bp, T("%s on %s"), host, show_time(mudtime, 0));
+  safe_format(last_place, &bp, "%s on %s", host, show_time(mudtime, 0));
   *bp = '\0';
   (void) atr_add(player, "LASTFAILED", last_place, GOD, 0);
 }
