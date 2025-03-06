@@ -233,7 +233,7 @@ dbsave_event(void *data __attribute__((__unused__)))
   options.dump_counter = options.dump_interval + mudtime;
   fork_and_dump(1);
   flag_broadcast(0, "ON-VACATION", "%s",
-                 T("Your ON-VACATION flag is set! If you're back, clear it."));
+                 "Your ON-VACATION flag is set! If you're back, clear it.");
   reg_dbsave_warnings();
   sq_register_in(DUMP_INTERVAL, dbsave_event, NULL, NULL);
   return false;
