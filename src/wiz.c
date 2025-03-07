@@ -111,7 +111,7 @@ do_pcreate(dbref creator, const char *player_name, const char *player_password,
   dbref player;
 
   if (!Create_Player(creator)) {
-    notify(creator, T("You do not have the power over body and mind!"));
+    notify(creator, "You do not have the power over body and mind!");
     return NOTHING;
   }
   if (!can_pay_fees(creator, 0))
@@ -125,19 +125,19 @@ do_pcreate(dbref creator, const char *player_name, const char *player_password,
     create_player(NULL, creator, player_name, player_password, "None", "None");
   switch (player) {
   case NOTHING:
-    notify_format(creator, T("Failure creating '%s' (bad name)"), player_name);
+    notify_format(creator, "Failure creating '%s' (bad name)", player_name);
     return NOTHING;
   case AMBIGUOUS:
-    notify_format(creator, T("Failure creating '%s' (name in use)"),
+    notify_format(creator, "Failure creating '%s' (name in use)",
                   player_name);
     return NOTHING;
   case HOME:
-    notify_format(creator, T("Failure creating '%s' (bad password)"),
+    notify_format(creator, "Failure creating '%s' (bad password)",
                   player_name);
     return NOTHING;
   }
 
-  notify_format(creator, T("New player '%s' (#%d) created with password '%s'"),
+  notify_format(creator, "New player '%s' (#%d) created with password '%s'",
                 player_name, player, player_password);
   do_log(LT_WIZ, creator, player, "Player creation");
   queue_event(creator, "PLAYER`CREATE", "%s,%s,%s", unparse_objid(player),
@@ -167,18 +167,18 @@ do_quota(dbref player, const char *arg1, const char *arg2, int set_q)
   else {
     who = lookup_player(arg1);
     if (who == NOTHING) {
-      notify(player, T("No such player."));
+      notify(player, "No such player.");
       return;
     }
   }
 
   /* check permissions */
   if (!Wizard(player) && set_q) {
-    notify(player, T("Only wizards may change a quota."));
+    notify(player, "Only wizards may change a quota.");
     return;
   }
   if (!Do_Quotas(player) && !See_All(player) && !controls(player, who)) {
-    notify(player, T("You can't look at someone else's quota."));
+    notify(player, "You can't look at someone else's quota.");
     return;
   }
   /* count up all owned objects */
@@ -192,7 +192,7 @@ do_quota(dbref player, const char *arg1, const char *arg2, int set_q)
 
   /* the quotas of priv'ed players are unlimited and cannot be set. */
   if (NoQuota(who) || !USE_QUOTA) {
-    notify_format(player, T("Objects: %d   Limit: UNLIMITED"), owned);
+    notify_format(player, "Objects: %d   Limit: UNLIMITED", owned);
     return;
   }
   /* if we're not doing a change, determine the mortal's quota limit.
@@ -201,14 +201,14 @@ do_quota(dbref player, const char *arg1, const char *arg2, int set_q)
 
   if (!set_q) {
     limit = get_current_quota(who);
-    notify_format(player, T("Objects: %d   Limit: %d"), owned, owned + limit);
+    notify_format(player, "Objects: %d   Limit: %d", owned, owned + limit);
     return;
   }
   /* set a new quota */
   if (!arg2 || !*arg2) {
     limit = get_current_quota(who);
-    notify_format(player, T("Objects: %d   Limit: %d"), owned, owned + limit);
-    notify(player, T("What do you want to set the quota to?"));
+    notify_format(player, "Objects: %d   Limit: %d", owned, owned + limit);
+    notify(player, "What do you want to set the quota to?");
     return;
   }
   adjust = ((*arg2 == '+') || (*arg2 == '-'));
@@ -224,7 +224,7 @@ do_quota(dbref player, const char *arg1, const char *arg2, int set_q)
   snprintf(tmp, sizeof tmp, "%d", limit - owned);
   (void) atr_add(Owner(who), "RQUOTA", tmp, GOD, 0);
 
-  notify_format(player, T("Objects: %d   Limit: %d"), owned, limit);
+  notify_format(player, "Objects: %d   Limit: %d", owned, limit);
 }
 
 /** Check or set quota globally.
@@ -242,18 +242,18 @@ do_allquota(dbref player, const char *arg1, int quiet)
   dbref who, thing;
 
   if (!God(player)) {
-    notify(player, T("Who do you think you are, GOD?"));
+    notify(player, "Who do you think you are, GOD?");
     return;
   }
   if (!arg1 || !*arg1) {
     limit = -1;
   } else if (!is_strict_integer(arg1)) {
-    notify(player, T("You can only set quotas to a number."));
+    notify(player, "You can only set quotas to a number.");
     return;
   } else {
     limit = parse_integer(arg1);
     if (limit < 0) {
-      notify(player, T("You can only set quotas to a positive number."));
+      notify(player, "You can only set quotas to a positive number.");
       return;
     }
   }
@@ -273,13 +273,13 @@ do_allquota(dbref player, const char *arg1, int quiet)
 
     if (NoQuota(who)) {
       if (!quiet)
-        notify_format(player, T("%s: Objects: %d   Limit: UNLIMITED"),
+        notify_format(player, "%s: Objects: %d   Limit: UNLIMITED",
                       Name(who), owned);
       continue;
     }
     if (!quiet) {
       oldlimit = get_current_quota(who);
-      notify_format(player, T("%s: Objects: %d   Limit: %d"), Name(who), owned,
+      notify_format(player, "%s: Objects: %d   Limit: %d", Name(who), owned,
                     oldlimit);
     }
     if (limit != -1) {
@@ -293,9 +293,9 @@ do_allquota(dbref player, const char *arg1, int quiet)
     }
   }
   if (limit == -1)
-    notify(player, T("Quotas not changed."));
+    notify(player, "Quotas not changed.");
   else
-    notify_format(player, T("All quotas changed to %d."), limit);
+    notify_format(player, "All quotas changed to %d.", limit);
 }
 
 static int
@@ -368,10 +368,10 @@ do_teleport(dbref player, const char *what, const char *where, int flags,
     destination = match_result(player, where, NOTYPE, MAT_EVERYTHING);
     switch (destination) {
     case NOTHING:
-      notify(player, T("No match."));
+      notify(player, "No match.");
       return;
     case AMBIGUOUS:
-      notify(player, T("I don't know which destination you mean!"));
+      notify(player, "I don't know which destination you mean!");
       return;
     }
   }
@@ -418,11 +418,11 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     return;
 
   if (IsRoom(victim)) {
-    notify(player, T("You can't teleport rooms."));
+    notify(player, "You can't teleport rooms.");
     return;
   }
   if (IsGarbage(victim)) {
-    notify(player, T("Garbage belongs in the garbage dump."));
+    notify(player, "Garbage belongs in the garbage dump.");
     return;
   }
 
@@ -440,22 +440,22 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
   }
 
   if (recursive_member(destination, victim, 0) || (victim == destination)) {
-    notify(player, T("Bad destination."));
+    notify(player, "Bad destination.");
     return;
   }
   if (!Tel_Anywhere(player) && IsPlayer(victim) && IsPlayer(destination)) {
-    notify(player, T("Bad destination."));
+    notify(player, "Bad destination.");
     return;
   }
   if (IsExit(victim)) {
     /* Teleporting an exit means moving its source */
     if (!IsRoom(destination)) {
-      notify(player, T("Exits can only be teleported to other rooms."));
+      notify(player, "Exits can only be teleported to other rooms.");
       return;
     }
     if (Going(destination)) {
       notify(player,
-             T("You can't move an exit to someplace that's crumbling."));
+             "You can't move an exit to someplace that's crumbling.");
       return;
     }
     if (!GoodObject(Home(victim)))
@@ -467,7 +467,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
      */
     if (!tport_control_ok(player, victim, loc) ||
         !can_open_from(player, destination, pe_info)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     /* Remove it from its old room */
@@ -476,7 +476,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     Source(victim) = destination;
     PUSH(victim, Exits(destination));
     if (!Quiet(player) && !(Quiet(victim) && (Owner(victim) == player)))
-      notify(player, T("Teleported."));
+      notify(player, "Teleported.");
     return;
   }
   loc = Location(victim);
@@ -497,7 +497,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
   }
   /* check needed for NOTHING. Especially important for unlinked exits */
   if ((absroom = Location(victim)) == NOTHING) {
-    notify(victim, T("You're in the Void. This is not a good thing."));
+    notify(victim, "You're in the Void. This is not a good thing.");
     /* At this point, they're in a bad location, so let's check
      * if home is valid before sending them there. */
     if (!GoodObject(Home(victim)))
@@ -509,7 +509,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
 
     /* if player is inside himself, send him home */
     if (absroom == victim) {
-      notify(player, T("What are you doing inside of yourself?"));
+      notify(player, "What are you doing inside of yourself?");
       if (Home(victim) == absroom)
         Home(victim) = PLAYER_START;
       do_move(victim, "home", MOVE_NORMAL, pe_info);
@@ -519,7 +519,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     absroom = absolute_room(victim);
 
     if (absroom == NOTHING) {
-      notify(victim, T("You're in the void - sending you home."));
+      notify(victim, "You're in the void - sending you home.");
       if (Home(victim) == Location(victim))
         Home(victim) = PLAYER_START;
       do_move(victim, "home", MOVE_NORMAL, pe_info);
@@ -527,7 +527,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     }
     /* if there are a lot of containers, send him home */
     if (absroom == AMBIGUOUS) {
-      notify(victim, T("You're in too many containers."));
+      notify(victim, "You're in too many containers.");
       if (Home(victim) == Location(victim))
         Home(victim) = PLAYER_START;
       do_move(victim, "home", MOVE_NORMAL, pe_info);
@@ -541,7 +541,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
 
     /* now check to see if the absolute room is set NO_TEL */
     if (NoTel(absroom) && !controls(player, absroom) && !Tel_Anywhere(player)) {
-      notify(player, T("Teleports are not allowed in this room."));
+      notify(player, "Teleports are not allowed in this room.");
       return;
     }
 
@@ -549,7 +549,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     if (!controls(player, absroom) && !Tel_Anywhere(player) &&
         !eval_lock_with(player, absroom, Leave_Lock, pe_info)) {
       fail_lock(player, absroom, Leave_Lock,
-                T("Teleports are not allowed in this room."), NOTHING);
+                "Teleports are not allowed in this room.", NOTHING);
       return;
     }
 
@@ -561,7 +561,7 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
     if (GoodObject(Zone(absroom)) && (ZTel(absroom) || ZTel(Zone(absroom))) &&
         !controls(player, absroom) && !Tel_Anywhere(player) &&
         (Zone(absroom) != Zone(destination))) {
-      notify(player, T("You may not teleport out of the zone from this room."));
+      notify(player, "You may not teleport out of the zone from this room.");
       return;
     }
   }
@@ -582,31 +582,31 @@ do_teleport_one(dbref player, const char *what, dbref destination, int flags,
       if ((victim != player) &&
           !(Puppet(victim) && (Owner(victim) == Owner(player)))) {
         if (!Quiet(player) && !(Quiet(victim) && (Owner(victim) == player)))
-          notify(player, T("Teleported."));
+          notify(player, "Teleported.");
       }
       return;
     }
     /* we can't do it */
-    fail_lock(player, destination, Enter_Lock, T("Permission denied."),
+    fail_lock(player, destination, Enter_Lock, "Permission denied.",
               Location(player));
     return;
   } else {
     /* attempted teleport to an exit */
     if (!tport_control_ok(player, victim, Location(victim))) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       if (victim != player)
         notify_format(victim,
-                      T("%s tries to impose his will on you and fails."),
+                      "%s tries to impose his will on you and fails.",
                       AName(player, AN_SYS, NULL));
       return;
     }
     if (Fixed(Owner(victim)) || Fixed(player)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     }
     if (!Tel_Anywhere(player) && !controls(player, destination) &&
         !nearby(player, destination) && !nearby(victim, destination)) {
-      notify(player, T("Permission denied."));
+      notify(player, "Permission denied.");
       return;
     } else {
       char absdest[SBUF_LEN];
@@ -634,7 +634,7 @@ do_force(dbref player, dbref caller, const char *what, char *command,
   dbref victim;
 
   if ((victim = match_controlled(player, what)) == NOTHING) {
-    notify(player, T("Sorry."));
+    notify(player, "Sorry.");
     return;
   }
   if (options.log_forces) {
@@ -650,7 +650,7 @@ do_force(dbref player, dbref caller, const char *what, char *command,
     }
   }
   if (God(victim) && !God(player)) {
-    notify(player, T("You can't force God!"));
+    notify(player, "You can't force God!");
     return;
   }
 
@@ -763,12 +763,12 @@ do_stats(dbref player, const char *name)
   else
     owner = lookup_player(name);
   if (owner == NOTHING) {
-    notify_format(player, T("%s: No such player."), name);
+    notify_format(player, "%s: No such player.", name);
     return;
   }
   if (!Search_All(player)) {
     if (owner != ANY_OWNER && owner != player) {
-      notify(player, T("You need a search warrant to do that!"));
+      notify(player, "You need a search warrant to do that!");
       return;
     }
   }
@@ -776,14 +776,14 @@ do_stats(dbref player, const char *name)
   if (owner == ANY_OWNER) {
     notify_format(
       player,
-      T("%d objects = %d rooms, %d exits, %d things, %d players, %d garbage."),
+      "%d objects = %d rooms, %d exits, %d things, %d players, %d garbage.",
       si->total, si->rooms, si->exits, si->things, si->players, si->garbage);
     if (first_free != NOTHING)
-      notify_format(player, T("The next object to be created will be #%d."),
+      notify_format(player, "The next object to be created will be #%d.",
                     first_free);
   } else {
     notify_format(
-      player, T("%d objects = %d rooms, %d exits, %d things, %d players."),
+      player, "%d objects = %d rooms, %d exits, %d things, %d players.",
       si->total - si->garbage, si->rooms, si->exits, si->things, si->players);
   }
 }
@@ -830,22 +830,22 @@ do_newpassword(dbref executor, dbref enactor, const char *name,
     }
   }
   if ((victim = lookup_player(name)) == NOTHING) {
-    notify(executor, T("No such player."));
+    notify(executor, "No such player.");
   } else if (*password != '\0' && !ok_password(password)) {
     /* Wiz can set null passwords, but not bad passwords */
-    notify(executor, T("Bad password."));
+    notify(executor, "Bad password.");
   } else if (God(victim) && !God(executor)) {
-    notify(executor, T("You cannot change that player's password."));
+    notify(executor, "You cannot change that player's password.");
   } else {
     /* it's ok, do it */
     (void) atr_add(victim, "XYXXY", password_hash(password, NULL), GOD, 0);
     if (generate) // If we generate a PW, tell the executor what it is.
-      notify_format(executor, T("Password for %s changed to %s."),
+      notify_format(executor, "Password for %s changed to %s.",
                     AName(victim, AN_SYS, NULL), password);
     else
-      notify_format(executor, T("Password for %s changed."),
+      notify_format(executor, "Password for %s changed.",
                     AName(victim, AN_SYS, NULL));
-    notify_format(victim, T("Your password has been changed by %s."),
+    notify_format(victim, "Your password has been changed by %s.",
                   AName(executor, AN_SYS, NULL));
     do_log(LT_WIZ, executor, victim, "*** NEWPASSWORD ***");
   }
@@ -875,7 +875,7 @@ do_boot(dbref player, const char *name, enum boot_type flag, int silent,
     victim = noisy_match_result(player, name, TYPE_PLAYER,
                                 MAT_PMATCH | MAT_TYPE | MAT_ME);
     if (victim == NOTHING) {
-      notify(player, T("No such connected player."));
+      notify(player, "No such connected player.");
       return;
     } else if (victim == player) {
       flag = BOOT_SELF;
@@ -886,15 +886,15 @@ do_boot(dbref player, const char *name, enum boot_type flag, int silent,
     break;
   case BOOT_DESC:
     if (!is_strict_integer(name)) {
-      notify(player, T("Invalid port."));
+      notify(player, "Invalid port.");
       return;
     }
     d = port_desc(parse_integer(name));
     if (!d || (!priv && (!d->connected || d->player != player))) {
       if (priv)
-        notify(player, T("There is noone connected on that descriptor."));
+        notify(player, "There is noone connected on that descriptor.");
       else
-        notify(player, T("You can't boot other people!"));
+        notify(player, "You can't boot other people!");
       return;
     }
     victim = (d->connected ? d->player : AMBIGUOUS);
