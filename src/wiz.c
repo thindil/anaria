@@ -899,33 +899,33 @@ do_boot(dbref player, const char *name, enum boot_type flag, int silent,
     }
     victim = (d->connected ? d->player : AMBIGUOUS);
     if (d->descriptor == queue_entry->port) {
-      notify(player, T("If you want to quit, use QUIT."));
+      notify(player, "If you want to quit, use QUIT.");
       return;
     }
     break;
   }
 
   if (God(victim) && !God(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   if (victim != player && !priv) {
-    notify(player, T("You can't boot other people!"));
+    notify(player, "You can't boot other people!");
     return;
   }
 
   if (flag == BOOT_DESC) {
     if (GoodObject(victim)) {
       if (!silent)
-        notify(victim, T("You are politely shown to the door."));
+        notify(victim, "You are politely shown to the door.");
       if (player == victim)
-        notify(player, T("You boot a duplicate self."));
+        notify(player, "You boot a duplicate self.");
       else
-        notify_format(player, T("You booted %s off!"),
+        notify_format(player, "You booted %s off!",
                       AName(victim, AN_SYS, NULL));
     } else {
-      notify_format(player, T("You booted unconnected port %s!"), name);
+      notify_format(player, "You booted unconnected port %s!", name);
     }
     do_log(LT_WIZ, player, victim, "*** BOOT ***");
     boot_desc(d, "boot", player);
@@ -937,16 +937,16 @@ do_boot(dbref player, const char *name, enum boot_type flag, int silent,
   if (count) {
     if (flag != BOOT_SELF) {
       do_log(LT_WIZ, player, victim, "*** BOOT ***");
-      notify_format(player, T("You booted %s off!"),
+      notify_format(player, "You booted %s off!",
                     AName(victim, AN_SYS, NULL));
     }
   } else {
     if (flag == BOOT_SELF)
       notify(
         player,
-        T("None of your connections are idle. If you want to quit, use QUIT."));
+        "None of your connections are idle. If you want to quit, use QUIT.");
     else
-      notify(player, T("That player is not online."));
+      notify(player, "That player is not online.");
   }
 }
 
@@ -970,7 +970,7 @@ do_chownall(dbref player, const char *name, const char *target, int preserve,
   int count = 0;
 
   if (!Wizard(player)) {
-    notify(player, T("Try asking them first!"));
+    notify(player, "Try asking them first!");
     return;
   }
   if ((victim = noisy_match_result(player, name, TYPE_PLAYER,
@@ -999,7 +999,7 @@ do_chownall(dbref player, const char *name, const char *target, int preserve,
   change_quota(victim, count);
   change_quota(n_target, -count);
 
-  notify_format(player, T("Ownership changed for %d objects."), count);
+  notify_format(player, "Ownership changed for %d objects.", count);
 }
 
 /** Change the zone of all of a player's objects.
@@ -1020,7 +1020,7 @@ do_chzoneall(dbref player, const char *name, const char *target, bool preserve)
   int count = 0;
 
   if (!Wizard(player)) {
-    notify(player, T("You do not have the power to change reality."));
+    notify(player, "You do not have the power to change reality.");
     return;
   }
   if ((victim = noisy_match_result(player, name, TYPE_PLAYER,
@@ -1028,7 +1028,7 @@ do_chzoneall(dbref player, const char *name, const char *target, bool preserve)
     return;
 
   if (!target || !*target) {
-    notify(player, T("No zone specified."));
+    notify(player, "No zone specified.");
     return;
   }
   if (!strcasecmp(target, "none"))
@@ -1036,10 +1036,10 @@ do_chzoneall(dbref player, const char *name, const char *target, bool preserve)
   else {
     switch (zone = match_result(player, target, NOTYPE, MAT_EVERYTHING)) {
     case NOTHING:
-      notify(player, T("I can't seem to find that."));
+      notify(player, "I can't seem to find that.");
       return;
     case AMBIGUOUS:
-      notify(player, T("I don't know which one you mean!"));
+      notify(player, "I don't know which one you mean!");
       return;
     }
   }
@@ -1052,7 +1052,7 @@ do_chzoneall(dbref player, const char *name, const char *target, bool preserve)
       count += do_chzone(player, unparse_dbref(i), target, 0, preserve, NULL);
     }
   }
-  notify_format(player, T("Zone changed for %d objects."), count);
+  notify_format(player, "Zone changed for %d objects.", count);
 }
 
 /*-----------------------------------------------------------------------
@@ -1072,22 +1072,22 @@ do_kick(dbref player, const char *num)
   int n;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   if (!num || !*num) {
-    notify(player, T("How many commands do you want to execute?"));
+    notify(player, "How many commands do you want to execute?");
     return;
   }
   n = atoi(num);
 
   if (n <= 0) {
-    notify(player, T("Number out of range."));
+    notify(player, "Number out of range.");
     return;
   }
   n = do_top(n);
 
-  notify_format(player, T("%d commands executed."), n);
+  notify_format(player, "%d commands executed.", n);
 }
 
 /** examine/debug.
@@ -1102,7 +1102,7 @@ do_debug_examine(dbref player, const char *name)
   dbref thing;
 
   if (!Hasprivs(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   /* find it */
@@ -1111,34 +1111,34 @@ do_debug_examine(dbref player, const char *name)
     return;
 
   notify(player, object_header(player, thing));
-  notify_format(player, T("Flags value: %s"),
+  notify_format(player, "Flags value: %s",
                 bits_to_string("FLAG", Flags(thing), GOD, NOTHING));
-  notify_format(player, T("Powers value: %s"),
+  notify_format(player, "Powers value: %s",
                 bits_to_string("POWER", Powers(thing), GOD, NOTHING));
 
-  notify_format(player, T("Next: %d"), Next(thing));
-  notify_format(player, T("Contents: %d"), Contents(thing));
-  notify_format(player, T("Pennies: %d"), Pennies(thing));
+  notify_format(player, "Next: %d", Next(thing));
+  notify_format(player, "Contents: %d", Contents(thing));
+  notify_format(player, "Pennies: %d", Pennies(thing));
 
   switch (Typeof(thing)) {
   case TYPE_PLAYER:
     break;
   case TYPE_THING:
-    notify_format(player, T("Location: %d"), Location(thing));
-    notify_format(player, T("Home: %d"), Home(thing));
+    notify_format(player, "Location: %d", Location(thing));
+    notify_format(player, "Home: %d", Home(thing));
     break;
   case TYPE_EXIT:
-    notify_format(player, T("Destination: %d"), Location(thing));
-    notify_format(player, T("Source: %d"), Source(thing));
+    notify_format(player, "Destination: %d", Location(thing));
+    notify_format(player, "Source: %d", Source(thing));
     break;
   case TYPE_ROOM:
-    notify_format(player, T("Drop-to: %d"), Location(thing));
-    notify_format(player, T("Exits: %d"), Exits(thing));
+    notify_format(player, "Drop-to: %d", Location(thing));
+    notify_format(player, "Exits: %d", Exits(thing));
     break;
   case TYPE_GARBAGE:
     break;
   default:
-    notify(player, T("Bad object type."));
+    notify(player, "Bad object type.");
   }
 }
 
@@ -1167,25 +1167,25 @@ do_power(dbref player, const char *name, const char *power)
     return;
   }
   if (!Wizard(player)) {
-    notify(player, T("Only wizards may grant powers."));
+    notify(player, "Only wizards may grant powers.");
     return;
   }
   if ((thing = noisy_match_result(player, name, NOTYPE, MAT_EVERYTHING)) ==
       NOTHING)
     return;
   if (Unregistered(thing)) {
-    notify(player, T("You can't grant powers to unregistered players."));
+    notify(player, "You can't grant powers to unregistered players.");
     return;
   }
   if (God(thing) && !God(player)) {
-    notify(player, T("God is already all-powerful."));
+    notify(player, "God is already all-powerful.");
     return;
   }
 
   strcpy(powerbuff, power);
   p = trim_space_sep(powerbuff, ' ');
   if (*p == '\0') {
-    notify(player, T("You must specify a power to set."));
+    notify(player, "You must specify a power to set.");
     return;
   }
   do {
@@ -1287,7 +1287,7 @@ do_search(dbref player, const char *arg1, char **arg3)
   }
 
   if (nresults == 0) {
-    notify(player, T("Nothing found."));
+    notify(player, "Nothing found.");
   } else if (nresults > 0) {
     /* Split the results up by type and report. */
     int n;
@@ -1324,10 +1324,10 @@ do_search(dbref player, const char *arg1, char **arg3)
     }
 
     if (nrooms) {
-      notify(player, T("\nROOMS:"));
+      notify(player, "\nROOMS:");
       for (n = 0; n < nrooms; n++) {
         tbp = tbuf;
-        safe_format(tbuf, &tbp, T("%s [owner: "),
+        safe_format(tbuf, &tbp, "%s [owner: ",
                     object_header(player, rooms[n]));
         safe_str(object_header(player, Owner(rooms[n])), tbuf, &tbp);
         safe_chr(']', tbuf, &tbp);
@@ -1339,7 +1339,7 @@ do_search(dbref player, const char *arg1, char **arg3)
     if (nexits) {
       dbref from, to;
 
-      notify(player, T("\nEXITS:"));
+      notify(player, "\nEXITS:");
       for (n = 0; n < nexits; n++) {
         tbp = tbuf;
         if (Source(exits[n]) == NOTHING)
@@ -1347,12 +1347,12 @@ do_search(dbref player, const char *arg1, char **arg3)
         else
           from = Source(exits[n]);
         to = Destination(exits[n]);
-        safe_format(tbuf, &tbp, T("%s [from "),
+        safe_format(tbuf, &tbp, "%s [from ",
                     object_header(player, exits[n]));
-        safe_str((from == NOTHING) ? T("NOWHERE") : object_header(player, from),
+        safe_str((from == NOTHING) ? "NOWHERE" : object_header(player, from),
                  tbuf, &tbp);
-        safe_str(T(" to "), tbuf, &tbp);
-        safe_str((to == NOTHING) ? T("NOWHERE") : object_header(player, to),
+        safe_str(" to ", tbuf, &tbp);
+        safe_str((to == NOTHING) ? "NOWHERE" : object_header(player, to),
                  tbuf, &tbp);
         safe_chr(']', tbuf, &tbp);
         *tbp = '\0';
@@ -1361,10 +1361,10 @@ do_search(dbref player, const char *arg1, char **arg3)
     }
 
     if (nthings) {
-      notify(player, T("\nTHINGS:"));
+      notify(player, "\nTHINGS:");
       for (n = 0; n < nthings; n++) {
         tbp = tbuf;
-        safe_format(tbuf, &tbp, T("%s [owner: "),
+        safe_format(tbuf, &tbp, "%s [owner: ",
                     object_header(player, things[n]));
         safe_str(object_header(player, Owner(things[n])), tbuf, &tbp);
         safe_chr(']', tbuf, &tbp);
@@ -1375,12 +1375,12 @@ do_search(dbref player, const char *arg1, char **arg3)
 
     if (nplayers) {
       int is_wizard = Search_All(player) || See_All(player);
-      notify(player, T("\nPLAYERS:"));
+      notify(player, "\nPLAYERS:");
       for (n = 0; n < nplayers; n++) {
         tbp = tbuf;
         safe_str(object_header(player, players[n]), tbuf, &tbp);
         if (is_wizard)
-          safe_format(tbuf, &tbp, T(" [location: %s]"),
+          safe_format(tbuf, &tbp, " [location: %s]",
                       object_header(player, Location(players[n])));
         *tbp = '\0';
         notify(player, tbuf);
@@ -1388,14 +1388,14 @@ do_search(dbref player, const char *arg1, char **arg3)
     }
 
     if (ngarbage) {
-      notify(player, T("\nGARBAGE:"));
+      notify(player, "\nGARBAGE:");
       for (n = 0; n < ngarbage; n++) {
         tbp = tbuf;
         if (ANSI_NAMES)
-          notify_format(player, T("%sGarbage%s(#%d)"), ANSI_HILITE, ANSI_END,
+          notify_format(player, "%sGarbage%s(#%d)", ANSI_HILITE, ANSI_END,
                         garbage[n]);
         else
-          notify_format(player, T("Garbage(#%d)"), garbage[n]);
+          notify_format(player, "Garbage(#%d)", garbage[n]);
       }
     }
 
