@@ -1399,15 +1399,15 @@ do_search(dbref player, const char *arg1, char **arg3)
       }
     }
 
-    notify(player, T("----------  Search Done  ----------"));
+    notify(player, "----------  Search Done  ----------");
     if (ngarbage)
       notify_format(player,
-                    T("Totals: Rooms...%d  Exits...%d  Things...%d  "
-                      "Players...%d  Garbage...%d"),
+                    "Totals: Rooms...%d  Exits...%d  Things...%d  "
+                      "Players...%d  Garbage...%d",
                     nrooms, nexits, nthings, nplayers, ngarbage);
     else
       notify_format(
-        player, T("Totals: Rooms...%d  Exits...%d  Things...%d  Players...%d"),
+        player, "Totals: Rooms...%d  Exits...%d  Things...%d  Players...%d",
         nrooms, nexits, nthings, nplayers);
     mush_free(rooms, "dbref_list");
     mush_free(exits, "dbref_list");
@@ -1464,7 +1464,7 @@ FUNCTION(fun_lsearch)
   if (return_count) {
     safe_integer(nresults, buff, bp);
   } else if (nresults == 0) {
-    notify(executor, T("Nothing found."));
+    notify(executor, "Nothing found.");
   } else {
     int first = 1, n;
     if (!rev) {
@@ -1701,17 +1701,17 @@ do_entrances(dbref player, const char *where, char *argv[], int types)
         switch (Typeof(obj)) {
         case TYPE_EXIT:
           strcpy(exit_source, object_header(player, Source(obj)));
-          notify_format(player, T("%s [from: %s]"), object_header(player, obj),
+          notify_format(player, "%s [from: %s]", object_header(player, obj),
                         exit_source);
           exits++;
           break;
         case TYPE_ROOM:
-          notify_format(player, T("%s [dropto]"), object_header(player, obj));
+          notify_format(player, "%s [dropto]", object_header(player, obj));
           rooms++;
           break;
         case TYPE_THING:
         case TYPE_PLAYER:
-          notify_format(player, T("%s [home]"), object_header(player, obj));
+          notify_format(player, "%s [home]", object_header(player, obj));
           if (IsThing(obj)) {
             things++;
           } else {
@@ -1725,11 +1725,11 @@ do_entrances(dbref player, const char *where, char *argv[], int types)
   }
 
   if (!nresults)
-    notify(player, T("Nothing found."));
+    notify(player, "Nothing found.");
   else {
-    notify(player, T("----------  Entrances Done  ----------"));
+    notify(player, "----------  Entrances Done  ----------");
     notify_format(
-      player, T("Totals: Rooms...%d  Exits...%d  Things...%d  Players...%d"),
+      player, "Totals: Rooms...%d  Exits...%d  Things...%d  Players...%d",
       rooms, exits, things, players);
   }
 }
@@ -1762,7 +1762,7 @@ FUNCTION(fun_entrances)
   else
     where = speech_loc(executor);
   if (!GoodObject(where)) {
-    safe_str(T("#-1 INVALID LOCATION"), buff, bp);
+    safe_str("#-1 INVALID LOCATION", buff, bp);
     return;
   }
 
@@ -1796,7 +1796,7 @@ FUNCTION(fun_entrances)
         spec.type |= TYPE_ROOM;
         break;
       default:
-        safe_str(T("#-1 INVALID SECOND ARGUMENT"), buff, bp);
+        safe_str("#-1 INVALID SECOND ARGUMENT", buff, bp);
         return;
       }
       p++;
@@ -1874,7 +1874,7 @@ FUNCTION(fun_quota)
     return;
   }
   if (!(Do_Quotas(executor) || See_All(executor) || controls(executor, who))) {
-    notify(executor, T("You can't see someone else's quota!"));
+    notify(executor, "You can't see someone else's quota!");
     safe_str("#-1", buff, bp);
     return;
   }
@@ -1921,10 +1921,10 @@ sitelock_player(dbref player, const char *name, dbref who, uint32_t can,
   }
   if (attrcount) {
     write_access_file();
-    notify_format(player, T("Sitelocked %d known addresses for %s"), attrcount,
+    notify_format(player, "Sitelocked %d known addresses for %s", attrcount,
                   AName(target, AN_SYS, NULL));
   } else {
-    notify_format(player, T("Unable to sitelock %s: No known ip/host to ban."),
+    notify_format(player, "Unable to sitelock %s: No known ip/host to ban.",
                   AName(target, AN_SYS, NULL));
   }
 }
@@ -1945,7 +1945,7 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
             enum sitelock_type type, int psw)
 {
   if (!Wizard(player)) {
-    notify(player, T("Your delusions of grandeur have been noted."));
+    notify(player, "Your delusions of grandeur have been noted.");
     return;
   }
   if (opts && *opts) {
@@ -1953,18 +1953,18 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
     dbref whod = AMBIGUOUS;
     /* Options form of the command. */
     if (!site || !*site) {
-      notify(player, T("What site did you want to lock?"));
+      notify(player, "What site did you want to lock?");
       return;
     }
     can = cant = 0;
     if (!parse_access_options(opts, NULL, &can, &cant, player)) {
-      notify(player, T("No valid options found."));
+      notify(player, "No valid options found.");
       return;
     }
     if (who && *who) { /* Specify a character */
       whod = lookup_player(who);
       if (!GoodObject(whod)) {
-        notify(player, T("Who do you want to lock?"));
+        notify(player, "Who do you want to lock?");
         return;
       }
     }
@@ -1975,13 +1975,13 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
     if (add_access_sitelock(player, site, whod, can, cant)) {
       write_access_file();
       if (whod != AMBIGUOUS) {
-        notify_format(player, T("Site %s access options for %s(%s) set to %s"),
+        notify_format(player, "Site %s access options for %s(%s) set to %s",
                       site, AName(whod, AN_SYS, NULL), unparse_dbref(whod),
                       opts);
         do_log(LT_WIZ, player, NOTHING, "*** SITELOCK *** %s for %s(%s) --> %s",
                site, Name(whod), unparse_dbref(whod), opts);
       } else {
-        notify_format(player, T("Site %s access options set to %s"), site,
+        notify_format(player, "Site %s access options set to %s", site,
                       opts);
         do_log(LT_WIZ, player, NOTHING, "*** SITELOCK *** %s --> %s", site,
                opts);
@@ -2005,7 +2005,7 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
       if (add_access_sitelock(player, site, AMBIGUOUS, ACS_REGISTER,
                               ACS_CREATE)) {
         write_access_file();
-        notify_format(player, T("Site %s locked"), site);
+        notify_format(player, "Site %s locked", site);
         do_log(LT_WIZ, player, NOTHING, "*** SITELOCK *** %s", site);
       }
       break;
@@ -2016,7 +2016,7 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
       }
       if (add_access_sitelock(player, site, AMBIGUOUS, 0, ACS_CREATE)) {
         write_access_file();
-        notify_format(player, T("Site %s locked"), site);
+        notify_format(player, "Site %s locked", site);
         do_log(LT_WIZ, player, NOTHING, "*** SITELOCK *** %s", site);
       }
       break;
@@ -2027,7 +2027,7 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
       }
       if (add_access_sitelock(player, site, AMBIGUOUS, 0, ACS_DEFAULT)) {
         write_access_file();
-        notify_format(player, T("Site %s banned"), site);
+        notify_format(player, "Site %s banned", site);
         do_log(LT_WIZ, player, NOTHING, "*** SITELOCK *** %s", site);
       }
       break;
@@ -2064,7 +2064,7 @@ do_sitelock(dbref player, const char *site, const char *opts, const char *who,
       }
       if (n > 0)
         write_access_file();
-      notify_format(player, T("%d sitelocks removed."), n);
+      notify_format(player, "%d sitelocks removed.", n);
       break;
     }
     }
@@ -2086,7 +2086,7 @@ do_sitelock_name(dbref player, const char *name)
   char *p;
 
   if (!Wizard(player)) {
-    notify(player, T("Your delusions of grandeur have been noted."));
+    notify(player, "Your delusions of grandeur have been noted.");
     return;
   }
 
@@ -2095,9 +2095,9 @@ do_sitelock_name(dbref player, const char *name)
   if (!name || !*name) {
     /* List bad names */
     if ((fp = fopen(NAMES_FILE, FOPEN_READ)) == NULL) {
-      notify(player, T("Unable to open names file."));
+      notify(player, "Unable to open names file.");
     } else {
-      notify(player, T("Any name matching these wildcard patterns is banned:"));
+      notify(player, "Any name matching these wildcard patterns is banned:");
       while (fgets(buffer, sizeof buffer, fp)) {
         if ((p = strchr(buffer, '\r')) != NULL)
           *p = '\0';
@@ -2110,7 +2110,7 @@ do_sitelock_name(dbref player, const char *name)
   } else if (name[0] == '!') { /* Delete a name */
     if ((fp = fopen(NAMES_FILE, FOPEN_READ)) != NULL) {
       if ((fptmp = fopen("tmp.tmp", FOPEN_WRITE)) == NULL) {
-        notify(player, T("Unable to delete name."));
+        notify(player, "Unable to delete name.");
         fclose(fp);
       } else {
         while (fgets(buffer, sizeof buffer, fp)) {
@@ -2128,18 +2128,18 @@ do_sitelock_name(dbref player, const char *name)
         fclose(fp);
         fclose(fptmp);
         if (rename_file("tmp.tmp", NAMES_FILE) == 0) {
-          notify(player, T("Name removed."));
+          notify(player, "Name removed.");
           do_log(LT_WIZ, player, NOTHING, "*** UNLOCKED NAME *** %s", name + 1);
         } else {
-          notify(player, T("Unable to delete name."));
+          notify(player, "Unable to delete name.");
         }
       }
     } else
-      notify(player, T("Unable to delete name."));
+      notify(player, "Unable to delete name.");
   } else { /* Add a name */
     if ((fp = fopen(NAMES_FILE, FOPEN_READ)) != NULL) {
       if ((fptmp = fopen("tmp.tmp", FOPEN_WRITE)) == NULL) {
-        notify(player, T("Unable to lock name."));
+        notify(player, "Unable to lock name.");
       } else {
         /* Read the names file, looking for #NAME and writing it
            without the commenting #. Otherwise, add the new name
@@ -2168,10 +2168,10 @@ do_sitelock_name(dbref player, const char *name)
         fclose(fptmp);
 
         if (rename_file("tmp.tmp", NAMES_FILE) == 0) {
-          notify_format(player, T("Name %s locked."), name);
+          notify_format(player, "Name %s locked.", name);
           do_log(LT_WIZ, player, NOTHING, "*** NAMELOCK *** %s", name);
         } else
-          notify(player, T("Unable to lock name."));
+          notify(player, "Unable to lock name.");
       }
     }
   }
@@ -2294,12 +2294,12 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
   else
     spec->owner = lookup_player(owner);
   if (spec->owner == NOTHING) {
-    notify(player, T("Unknown owner."));
+    notify(player, "Unknown owner.");
     return -1;
   }
   /* An odd number of search classes is invalid. */
   if (nargs % 2) {
-    notify(player, T("Invalid search class+restriction format."));
+    notify(player, "Invalid search class+restriction format.");
     return -1;
   }
 
@@ -2367,7 +2367,7 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
       } else if (strcasecmp("garbage", restriction) == 0) {
         spec->type = TYPE_GARBAGE;
       } else {
-        notify(player, T("Unknown type."));
+        notify(player, "Unknown type.");
         return -1;
       }
     } else if (string_prefix("things", class) ||
@@ -2388,13 +2388,13 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
     } else if (strcasecmp("start", class) == 0) {
       spec->start = parse_integer(restriction);
       if (spec->start < 1) {
-        notify(player, T("Invalid start index"));
+        notify(player, "Invalid start index");
         return -1;
       }
     } else if (strcasecmp("count", class) == 0) {
       spec->count = parse_integer(restriction);
       if (spec->count < 1) {
-        notify(player, T("Invalid count index"));
+        notify(player, "Invalid count index");
         return -1;
       }
     } else if (strcasecmp("parent", class) == 0) {
@@ -2403,12 +2403,12 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
         continue;
       }
       if (!is_objid(restriction)) {
-        notify(player, T("Unknown parent."));
+        notify(player, "Unknown parent.");
         return -1;
       }
       spec->parent = parse_objid(restriction);
       if (!GoodObject(spec->parent)) {
-        notify(player, T("Unknown parent."));
+        notify(player, "Unknown parent.");
         return -1;
       }
     } else if (strcasecmp("zone", class) == 0) {
@@ -2417,18 +2417,18 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
         continue;
       }
       if (!is_objid(restriction)) {
-        notify(player, T("Unknown zone."));
+        notify(player, "Unknown zone.");
         return -1;
       }
       spec->zone = parse_objid(restriction);
       if (!GoodObject(spec->zone)) {
-        notify(player, T("Unknown zone."));
+        notify(player, "Unknown zone.");
         return -1;
       }
     } else if (strcasecmp("elock", class) == 0) {
       spec->lock = parse_boolexp(player, restriction, "Search");
       if (spec->lock == TRUE_BOOLEXP) {
-        notify(player, T("I don't understand that key."));
+        notify(player, "I don't understand that key.");
         return -1;
       }
     } else if (strcasecmp("eval", class) == 0) {
@@ -2453,26 +2453,26 @@ fill_search_spec(dbref player, const char *owner, int nargs, const char **args,
     } else if (string_prefix("powers", class)) {
       /* Handle the checking later.  */
       if (!restriction || !*restriction) {
-        notify(player, T("You must give a list of power names."));
+        notify(player, "You must give a list of power names.");
         return -1;
       }
       strcpy(spec->powers, restriction);
     } else if (string_prefix("flags", class)) {
       /* Handle the checking later.  */
       if (!restriction || !*restriction) {
-        notify(player, T("You must give a string of flag characters."));
+        notify(player, "You must give a string of flag characters.");
         return -1;
       }
       strcpy(spec->flags, restriction);
     } else if (string_prefix("lflags", class)) {
       /* Handle the checking later.  */
       if (!restriction || !*restriction) {
-        notify(player, T("You must give a list of flag names."));
+        notify(player, "You must give a list of flag names.");
         return -1;
       }
       strcpy(spec->lflags, restriction);
     } else {
-      notify(player, T("Unknown search class."));
+      notify(player, "Unknown search class.");
       return -1;
     }
   }
@@ -2516,7 +2516,7 @@ raw_search(dbref player, struct search_spec *spec, dbref **result,
   if (((spec->lock != TRUE_BOOLEXP) && is_eval_lock(spec->lock)) ||
       spec->cmdstring[0] || spec->listenstring[0] || spec->eval[0]) {
     if (!payfor(player, FIND_COST)) {
-      notify_format(player, T("Searches cost %d %s."), FIND_COST,
+      notify_format(player, "Searches cost %d %s.", FIND_COST,
                     ((FIND_COST == 1) ? MONEY : MONIES));
       if (spec->lock != TRUE_BOOLEXP)
         free_boolexp(spec->lock);
@@ -2600,7 +2600,7 @@ raw_search(dbref player, struct search_spec *spec, dbref **result,
                                PE_DEFAULT, PT_DEFAULT, pe_info);
       mush_free(ebuf1, "replace_string.buff");
       if (per) {
-        notify_format(player, T("CPU usage exceeded during #%d."), n);
+        notify_format(player, "CPU usage exceeded during #%d.", n);
         goto exit_sequence;
       }
       *bp = '\0';
