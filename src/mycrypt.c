@@ -122,7 +122,7 @@ safe_hash_byname(const char *algo, const char *plaintext, int len, char *buff,
   dgst = lookup_bcrypt_algo(algo);
   if (!dgst) {
     if (inplace_err)
-      safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+      safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     else
       do_rawlog(LT_ERR, "safe_hash_byname: Unknown password hash function: %s",
                 algo);
@@ -131,7 +131,7 @@ safe_hash_byname(const char *algo, const char *plaintext, int len, char *buff,
 
   if (BCryptOpenAlgorithmProvider(&balgo, dgst, NULL, 0) != STATUS_SUCCESS) {
     if (inplace_err)
-      safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+      safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     else
       do_rawlog(LT_ERR, "safe_hash_byname: Unknown password hash function: %s",
                 algo);
@@ -139,7 +139,7 @@ safe_hash_byname(const char *algo, const char *plaintext, int len, char *buff,
   }
   if (BCryptCreateHash(balgo, &hfun, NULL, 0, NULL, 0, 0) != STATUS_SUCCESS) {
     if (inplace_err)
-      safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+      safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     else
       do_rawlog(LT_ERR, "safe_hash_byname: Unknown password hash function: %s",
                 algo);
@@ -149,7 +149,7 @@ safe_hash_byname(const char *algo, const char *plaintext, int len, char *buff,
   if (BCryptGetProperty(balgo, BCRYPT_HASH_LENGTH, (PBYTE) &hashlen,
                         sizeof(hashlen), &cbhash, 0) != STATUS_SUCCESS) {
     if (inplace_err)
-      safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+      safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     else
       do_rawlog(LT_ERR, "safe_hash_byname: Unknown password hash function: %s",
                 algo);
@@ -175,7 +175,7 @@ safe_hash_byname(const char *algo, const char *plaintext, int len, char *buff,
   md = EVP_get_digestbyname(algo);
   if (!md) {
     if (inplace_err)
-      safe_str(T("#-1 UNSUPPORTED DIGEST TYPE"), buff, bp);
+      safe_str("#-1 UNSUPPORTED DIGEST TYPE", buff, bp);
     else
       do_rawlog(LT_ERR, "safe_hash_byname: Unknown password hash function: %s",
                 algo);
