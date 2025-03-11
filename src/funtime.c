@@ -79,7 +79,7 @@ FUNCTION(fun_timefmt)
       if (args[0][n] == '$')
         args[0][n] = '%';
       else if (!valid_timefmt_codes[args[0][n]]) {
-        safe_format(buff, bp, T("#-1 INVALID ESCAPE CODE '$%c'"),
+        safe_format(buff, bp, "#-1 INVALID ESCAPE CODE '$%c'",
                     args[0][n] ? args[0][n] : ' ');
         return;
       }
@@ -88,7 +88,7 @@ FUNCTION(fun_timefmt)
 
   if (nargs == 3 && *args[2]) {
     if (!parse_timezone_arg(args[2], tt, &res)) {
-      safe_str(T("#-1 INVALID TIME ZONE"), buff, bp);
+      safe_str("#-1 INVALID TIME ZONE", buff, bp);
       return;
     }
 
@@ -118,7 +118,7 @@ FUNCTION(fun_timefmt)
      * trying to figure out which of the two cases happened, just
      * return an empty string.
      */
-    safe_str(T("#-1 COULDN'T FORMAT TIME"), buff, bp);
+    safe_str("#-1 COULDN'T FORMAT TIME", buff, bp);
   } else {
     for (n = 0; n < len; n++)
       if (s[n] == '%')
@@ -143,7 +143,7 @@ FUNCTION(fun_time)
   if (nargs == 1) {
     struct tz_result res;
     if (!parse_timezone_arg(args[0], mytime, &res)) {
-      safe_str(T("#-1 INVALID TIME ZONE"), buff, bp);
+      safe_str("#-1 INVALID TIME ZONE", buff, bp);
       return;
     }
     if (res.tz_attr_missing)
@@ -193,7 +193,7 @@ FUNCTION(fun_convsecs)
     struct tz_result res;
 
     if (!parse_timezone_arg(args[1], tt, &res)) {
-      safe_str(T("#-1 INVALID TIME ZONE"), buff, bp);
+      safe_str("#-1 INVALID TIME ZONE", buff, bp);
       return;
     }
     if (res.tz_attr_missing)
@@ -410,7 +410,7 @@ FUNCTION(fun_stringsecs)
   if (etime_to_secs(args[0], &secs, 0))
     safe_integer(secs, buff, bp);
   else
-    safe_str(T("#-1 INVALID TIMESTRING"), buff, bp);
+    safe_str("#-1 INVALID TIMESTRING", buff, bp);
 }
 
 /** Convert an elapsed time string (3d 2h 1m 10s) to seconds.
@@ -716,7 +716,7 @@ FUNCTION(fun_isdaylight)
   if (nargs == 2) {
     struct tz_result res;
     if (!parse_timezone_arg(args[1], when, &res)) {
-      safe_str(T("#-1 INVALID TIME ZONE"), buff, bp);
+      safe_str("#-1 INVALID TIME ZONE", buff, bp);
       return;
     }
     save_and_set_tz(res.tz_name);
