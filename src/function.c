@@ -254,7 +254,7 @@ delim_check(char *buff, char **bp, int nfargs, char *fargs[], int sep_arg,
     if (!*fargs[sep_arg - 1])
       *sep = ' ';
     else if (strlen(fargs[sep_arg - 1]) != 1) {
-      safe_str(T("#-1 SEPARATOR MUST BE ONE CHARACTER"), buff, bp);
+      safe_str("#-1 SEPARATOR MUST BE ONE CHARACTER", buff, bp);
       return 0;
     } else
       *sep = *fargs[sep_arg - 1];
@@ -948,7 +948,7 @@ do_list_functions(dbref player, int lc, const char *type)
 {
   /* lists all built-in functions. */
   char *b = list_functions(type);
-  notify_format(player, T("Functions: %s"), lc ? strlower(b) : b);
+  notify_format(player, "Functions: %s", lc ? strlower(b) : b);
 }
 
 /** Return a list of function names.
@@ -977,7 +977,7 @@ list_functions(const char *type)
   else if (strcmp(type, "local") == 0)
     which = 0x2;
   else {
-    mush_strncpy(buff, T("#-1 INVALID ARGUMENT"), BUFFER_LEN);
+    mush_strncpy(buff, "#-1 INVALID ARGUMENT", BUFFER_LEN);
     return buff;
   }
 
@@ -1149,35 +1149,35 @@ do_function_clone(dbref player, const char *function, const char *clone)
   char realclone[BUFFER_LEN];
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   if (!function || !*function) {
-    notify(player, T("What function did you want to clone?"));
+    notify(player, "What function did you want to clone?");
     return;
   }
 
   if (!clone || !*clone) {
-    notify(player, T("What did you want the cloned function to be called?"));
+    notify(player, "What did you want the cloned function to be called?");
     return;
   }
 
   strupper_r(clone, realclone, sizeof realclone);
 
   if (any_func_hash_lookup(realclone)) {
-    notify(player, T("There's already a function with that name."));
+    notify(player, "There's already a function with that name.");
     return;
   }
 
   if (!ok_function_name(realclone)) {
-    notify(player, T("Invalid function name."));
+    notify(player, "Invalid function name.");
     return;
   }
 
   fp = builtin_func_hash_lookup(function);
   if (!fp) {
-    notify(player, T("That's not a builtin function."));
+    notify(player, "That's not a builtin function.");
     return;
   }
 
@@ -1185,7 +1185,7 @@ do_function_clone(dbref player, const char *function, const char *clone)
                      fp->minargs, fp->maxargs, (fp->flags | FN_CLONE));
   fpc->clone_template = (fp->clone_template ? fp->clone_template : fp);
 
-  notify(player, T("Function cloned."));
+  notify(player, "Function cloned.");
 }
 
 /** Add an alias to a function.
@@ -1207,13 +1207,13 @@ alias_function(dbref player, const char *function, const char *alias)
   /* Make sure the alias doesn't exist already */
   if (any_func_hash_lookup(realalias)) {
     if (player != NOTHING)
-      notify(player, T("There's already a function with that name."));
+      notify(player, "There's already a function with that name.");
     return 0;
   }
 
   if (!ok_function_name(realalias)) {
     if (player != NOTHING)
-      notify(player, T("Invalid function name."));
+      notify(player, "Invalid function name.");
     return 0;
   }
 
@@ -1221,26 +1221,26 @@ alias_function(dbref player, const char *function, const char *alias)
   fp = func_hash_lookup(function);
   if (!fp) {
     if (player != NOTHING)
-      notify(player, T("No such function."));
+      notify(player, "No such function.");
     return 0;
   }
 
   /* We can't alias @functions. Just use another @function for these */
   if (!(fp->flags & FN_BUILTIN)) {
     if (player != NOTHING)
-      notify(player, T("You cannot alias @functions."));
+      notify(player, "You cannot alias @functions.");
     return 0;
   }
   if (fp->flags & FN_CLONE) {
     if (player != NOTHING)
-      notify(player, T("You cannot alias cloned functions."));
+      notify(player, "You cannot alias cloned functions.");
     return 0;
   }
 
   func_hash_insert(realalias, fp);
 
   if (player != NOTHING)
-    notify(player, T("Alias added."));
+    notify(player, "Alias added.");
 
   return 1;
 }
@@ -1257,17 +1257,17 @@ int
 do_function_alias(dbref player, const char *function, const char *alias)
 {
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return 0;
   }
 
   if (!function || !*function) {
-    notify(player, T("What function do you want to alias?"));
+    notify(player, "What function do you want to alias?");
     return 0;
   }
 
   if (!alias || !*alias) {
-    notify(player, T("What do you want to alias the function as?"));
+    notify(player, "What do you want to alias the function as?");
     return 0;
   }
 
@@ -1426,33 +1426,33 @@ do_function_restrict(dbref player, const char *name, const char *restriction,
   char *bp = tbuf1;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   if (!name || !*name) {
-    notify(player, T("Restrict what function?"));
+    notify(player, "Restrict what function?");
     return;
   }
   if (!restriction) {
-    notify(player, T("Do what with the function?"));
+    notify(player, "Do what with the function?");
     return;
   }
   fp = builtin ? builtin_func_hash_lookup(name) : func_hash_lookup(name);
   if (!fp) {
-    notify(player, T("No such function."));
+    notify(player, "No such function.");
     return;
   }
   flags = fp->flags;
   fp->flags = apply_restrictions(flags, restriction);
   if (fp->flags & FN_BUILTIN)
-    safe_format(tbuf1, &bp, "%s %s - ", T("Builtin function"), fp->name);
+    safe_format(tbuf1, &bp, "%s %s - ", "Builtin function", fp->name);
   else
     safe_format(tbuf1, &bp, "%s #%d/%s - ", "@function", fp->where.ufun->thing,
                 fp->where.ufun->name);
   if (fp->flags == flags)
-    safe_str(T("Restrictions unchanged."), tbuf1, &bp);
+    safe_str("Restrictions unchanged.", tbuf1, &bp);
   else
-    safe_str(T("Restrictions modified."), tbuf1, &bp);
+    safe_str("Restrictions modified.", tbuf1, &bp);
   *bp = '\0';
   notify(player, tbuf1);
 }
@@ -1605,7 +1605,7 @@ do_function(dbref player, const char *name, char **argv, int preserve)
 
   if (!name || !*name) {
     if (userfn_count == 0) {
-      notify(player, T("No global user-defined functions exist."));
+      notify(player, "No global user-defined functions exist.");
       return;
     }
     if (Global_Funcs(player)) {
@@ -1616,7 +1616,7 @@ do_function(dbref player, const char *name, char **argv, int preserve)
       int n = 0;
 
       funclist = mush_calloc(userfn_count, sizeof(FUN *), "function.fp.list");
-      notify(player, T("Function Name                   Dbref #    Attrib"));
+      notify(player, "Function Name                   Dbref #    Attrib");
       for (fp = (FUN *) hash_firstentry(&htab_user_function); fp;
            fp = (FUN *) hash_nextentry(&htab_user_function)) {
         funclist[n] = fp;
@@ -1633,7 +1633,7 @@ do_function(dbref player, const char *name, char **argv, int preserve)
       const char **funcnames;
       int n = 0;
       /* just print out the list of available functions */
-      safe_str(T("User functions:"), tbuf1, &bp);
+      safe_str("User functions:", tbuf1, &bp);
       funcnames = mush_calloc(userfn_count, sizeof(char *), "function.list");
       for (fp = (FUN *) hash_firstentry(&htab_user_function); fp;
            fp = (FUN *) hash_nextentry(&htab_user_function)) {
@@ -1658,17 +1658,17 @@ do_function(dbref player, const char *name, char **argv, int preserve)
    */
 
   if (!Global_Funcs(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   if (!argv[1] || !*argv[1] || !argv[2] || !*argv[2]) {
-    notify(player, T("You must specify an object and an attribute."));
+    notify(player, "You must specify an object and an attribute.");
     return;
   }
   /* make sure the function name length is okay */
   ucname = strupper_r(name, ucnameb, sizeof ucnameb);
   if (!ok_function_name(ucname)) {
-    notify(player, T("Invalid function name."));
+    notify(player, "Invalid function name.");
     return;
   }
   /* find the object. For some measure of security, the player must
@@ -1679,11 +1679,11 @@ do_function(dbref player, const char *name, char **argv, int preserve)
     return;
   if (SAFER_UFUN) {
     if (!controls(player, thing)) {
-      notify(player, T("No permission to control object."));
+      notify(player, "No permission to control object.");
       return;
     }
   } else if (!Can_Examine(player, thing)) {
-    notify(player, T("No permission to examine object."));
+    notify(player, "No permission to examine object.");
     return;
   }
   /* we don't need to check if the attribute exists. If it doesn't,
@@ -1697,7 +1697,7 @@ do_function(dbref player, const char *name, char **argv, int preserve)
   fp = func_hash_lookup(ucname);
   if (!fp) {
     if (argv[6] && *argv[6]) {
-      notify(player, T("Expected between 1 and 5 arguments."));
+      notify(player, "Expected between 1 and 5 arguments.");
       return;
     }
     /* a completely new entry. First, insert it into general hash table */
@@ -1734,12 +1734,12 @@ do_function(dbref player, const char *name, char **argv, int preserve)
     fp->where.ufun->thing = thing;
     fp->where.ufun->name = strupper_a(argv[2], "userfn.name");
 
-    notify(player, T("Function added."));
+    notify(player, "Function added.");
     return;
   } else {
     /* we are modifying an old entry */
     if ((fp->flags & FN_BUILTIN)) {
-      notify(player, T("You cannot change that built-in function."));
+      notify(player, "You cannot change that built-in function.");
       return;
     }
     fp->where.ufun->thing = thing;
@@ -1772,7 +1772,7 @@ do_function(dbref player, const char *name, char **argv, int preserve)
     if (preserve)
       fp->flags |= FN_LOCALIZE;
 
-    notify(player, T("Function updated."));
+    notify(player, "Function updated.");
   }
 }
 
@@ -1804,29 +1804,29 @@ do_function_restore(dbref player, const char *name)
   FUN *fp;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   if (!name || !*name) {
-    notify(player, T("Restore what?"));
+    notify(player, "Restore what?");
     return;
   }
 
   fp = builtin_func_hash_lookup(name);
 
   if (!fp) {
-    notify(player, T("That's not a builtin function."));
+    notify(player, "That's not a builtin function.");
     return;
   }
 
   if (!(fp->flags & FN_OVERRIDE)) {
-    notify(player, T("That function isn't deleted!"));
+    notify(player, "That function isn't deleted!");
     return;
   }
 
   fp->flags &= ~FN_OVERRIDE;
-  notify(player, T("Restored."));
+  notify(player, "Restored.");
 
   /* Delete any @function with the same name */
   hashdelete(strupper(name), &htab_user_function);
@@ -1850,12 +1850,12 @@ do_function_delete(dbref player, const char *name)
   FUN *fp;
 
   if (!Global_Funcs(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
   fp = func_hash_lookup(name);
   if (!fp) {
-    notify(player, T("No such function."));
+    notify(player, "No such function.");
     return;
   }
   if (fp->flags & FN_BUILTIN) {
@@ -1863,7 +1863,7 @@ do_function_delete(dbref player, const char *name)
       /* Function alias */
       hashdelete(strupper(name), &htab_function);
       delete_private_vocab(fp->name, "FUNCTIONS");
-      notify(player, T("Function alias deleted."));
+      notify(player, "Function alias deleted.");
       return;
     } else if (fp->flags & FN_CLONE) {
       char safename[BUFFER_LEN];
@@ -1872,26 +1872,26 @@ do_function_delete(dbref player, const char *name)
       slab_free(function_slab, fp);
       hashdelete(safename, &htab_function);
       delete_private_vocab(safename, "FUNCTIONS");
-      notify(player, T("Function clone deleted."));
+      notify(player, "Function clone deleted.");
       return;
     }
     if (!Wizard(player)) {
-      notify(player, T("You can't delete that @function."));
+      notify(player, "You can't delete that @function.");
       return;
     }
     fp->flags |= FN_OVERRIDE;
-    notify(player, T("Function deleted."));
+    notify(player, "Function deleted.");
     return;
   }
 
   if (!controls(player, fp->where.ufun->thing)) {
-    notify(player, T("You can't delete that @function."));
+    notify(player, "You can't delete that @function.");
     return;
   }
   /* Remove it from the hash table */
   hashdelete(fp->name, &htab_user_function);
   delete_private_vocab(fp->name, "FUNCTIONS");
-  notify(player, T("Function deleted."));
+  notify(player, "Function deleted.");
 }
 
 /** Enable or disable a function.
@@ -1908,27 +1908,27 @@ do_function_toggle(dbref player, const char *name, int toggle)
   FUN *fp;
 
   if (!Wizard(player)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
   fp = func_hash_lookup(name);
   if (!fp) {
-    notify(player, T("No such function."));
+    notify(player, "No such function.");
     return;
   }
 
   if (strcasecmp(fp->name, strupper(name))) {
-    notify(player, T("You can't disable aliases."));
+    notify(player, "You can't disable aliases.");
     return;
   }
 
   if (toggle) {
     fp->flags &= ~FN_DISABLED;
-    notify(player, T("Enabled."));
+    notify(player, "Enabled.");
   } else {
     fp->flags |= FN_DISABLED;
-    notify(player, T("Disabled."));
+    notify(player, "Disabled.");
   }
 }
 
@@ -1947,7 +1947,7 @@ do_function_report(dbref player, const char *name)
 
   fp = func_hash_lookup(name);
   if (!fp) {
-    notify(player, T("No such function."));
+    notify(player, "No such function.");
     return;
   }
   notify(player, build_function_report(player, fp));
@@ -1981,7 +1981,7 @@ build_function_report(dbref player, FUN *fp)
   else
     state = "Enabled";
 
-  safe_format(buff, &bp, T("Name      : %s() (%s%s)"), fp->name, state, state2);
+  safe_format(buff, &bp, "Name      : %s() (%s%s)", fp->name, state, state2);
   safe_chr('\n', buff, &bp);
 
   for (first = 1, i = 1; func_restrictions[i].name; i += 1) {
@@ -1995,11 +1995,11 @@ build_function_report(dbref player, FUN *fp)
   }
 
   *tp = '\0';
-  safe_format(buff, &bp, T("Flags     : %s"), tbuf);
+  safe_format(buff, &bp, "Flags     : %s", tbuf);
   safe_chr('\n', buff, &bp);
 
   if (!(fp->flags & FN_BUILTIN) && Global_Funcs(player))
-    safe_format(buff, &bp, T("Location  : #%d/%s\n"), fp->where.ufun->thing,
+    safe_format(buff, &bp, "Location  : #%d/%s\n", fp->where.ufun->thing,
                 fp->where.ufun->name);
 
   maxargs = abs(fp->maxargs);
@@ -2007,17 +2007,17 @@ build_function_report(dbref player, FUN *fp)
   tp = tbuf;
 
   if (fp->maxargs < 0) {
-    safe_str(T("(Commas okay in last argument)"), tbuf, &tp);
+    safe_str("(Commas okay in last argument)", tbuf, &tp);
     *tp = '\0';
   } else
     tbuf[0] = '\0';
 
   if (fp->minargs == maxargs)
-    safe_format(buff, &bp, T("Arguments : %d %s"), fp->minargs, tbuf);
+    safe_format(buff, &bp, "Arguments : %d %s", fp->minargs, tbuf);
   else if (fp->maxargs == INT_MAX)
-    safe_format(buff, &bp, T("Arguments : At least %d %s"), fp->minargs, tbuf);
+    safe_format(buff, &bp, "Arguments : At least %d %s", fp->minargs, tbuf);
   else
-    safe_format(buff, &bp, T("Arguments : %d to %d %s"), fp->minargs, maxargs,
+    safe_format(buff, &bp, "Arguments : %d to %d %s", fp->minargs, maxargs,
                 tbuf);
   *bp = '\0';
   return buff;
