@@ -94,9 +94,9 @@ typedef enum {
   if (!qres) {                                                                 \
     if (affected_rows >= 0) {                                                  \
     } else if (!sql_connected()) {                                             \
-      safe_str(T("#-1 SQL ERROR: NO DATABASE CONNECTED"), buff, bp);           \
+      safe_str("#-1 SQL ERROR: NO DATABASE CONNECTED", buff, bp);              \
     } else {                                                                   \
-      safe_format(buff, bp, T("#-1 SQL ERROR: %s"), sql_error());              \
+      safe_format(buff, bp, "#-1 SQL ERROR: %s", sql_error());                 \
     }                                                                          \
     return;                                                                    \
   }
@@ -351,7 +351,7 @@ FUNCTION(fun_sql_escape)
   if (!sql_connected()) {
     sql_init();
     if (!sql_connected()) {
-      notify(executor, T("No SQL database connection."));
+      notify(executor, "No SQL database connection.");
       safe_str("#-1", buff, bp);
       return;
     }
@@ -412,7 +412,7 @@ FUNCTION(fun_sql_escape)
   else if (chars_written < BUFFER_LEN)
     safe_str(sql_sanitize(bigbuff), buff, bp);
   else
-    safe_str(T("#-1 TOO LONG"), buff, bp);
+    safe_str("#-1 TOO LONG", buff, bp);
 }
 
 COMMAND(cmd_mapsql)
@@ -441,7 +441,7 @@ COMMAND(cmd_mapsql)
   int queue_type = QUEUE_DEFAULT | (queue_entry->queue_type & QUEUE_EVENT);
 
   if (!arg_right || !*arg_right) {
-    notify(executor, T("What do you want to query?"));
+    notify(executor, "What do you want to query?");
     return;
   }
 
@@ -450,7 +450,7 @@ COMMAND(cmd_mapsql)
 
   s = strchr(tbuf, '/');
   if (!s) {
-    notify(executor, T("I need to know what attribute to trigger."));
+    notify(executor, "I need to know what attribute to trigger.");
     return;
   }
   *(s++) = '\0';
@@ -464,7 +464,7 @@ COMMAND(cmd_mapsql)
 
   if (!controls(executor, thing)) {
     if (spoof || !(Owns(executor, thing) && LinkOk(thing))) {
-      notify(executor, T("Permission denied."));
+      notify(executor, "Permission denied.");
       return;
     }
   }
@@ -473,7 +473,7 @@ COMMAND(cmd_mapsql)
     triggerer = enactor;
 
   if (God(thing) && !God(executor)) {
-    notify(executor, T("You can't trigger God!"));
+    notify(executor, "You can't trigger God!");
     return;
   }
 
@@ -487,11 +487,11 @@ COMMAND(cmd_mapsql)
 
   if (!qres) {
     if (affected_rows >= 0) {
-      notify_format(executor, T("SQL: %d rows affected."), affected_rows);
+      notify_format(executor, "SQL: %d rows affected.", affected_rows);
     } else if (!sql_connected()) {
-      notify(executor, T("No SQL database connection."));
+      notify(executor, "No SQL database connection.");
     } else {
-      notify_format(executor, T("SQL: Error: %s"), sql_error());
+      notify_format(executor, "SQL: Error: %s", sql_error());
     }
     return;
   }
@@ -542,7 +542,7 @@ COMMAND(cmd_mapsql)
       if (retcode == SQLITE_DONE)
         break;
       else if (retcode != SQLITE_ROW) {
-        notify_format(executor, T("SQL: Error: %s"), sqlite3_errstr(retcode));
+        notify_format(executor, "SQL: Error: %s", sqlite3_errstr(retcode));
         break;
       }
     }
@@ -606,7 +606,7 @@ COMMAND(cmd_mapsql)
       }
     } else {
       /* What to do if there are no fields? This should be an error?. */
-      /* notify_format(executor, T("Row %d: NULL"), rownum + 1); */
+      /* notify_format(executor, "Row %d: NULL", rownum + 1); */
     }
   }
   if (donotify) {
@@ -638,12 +638,12 @@ COMMAND(cmd_sql)
   int i;
 
   if (sql_platform() == SQL_PLATFORM_DISABLED) {
-    notify(executor, T("No SQL database connection."));
+    notify(executor, "No SQL database connection.");
     return;
   }
 
   if (!arg_left || !*arg_left) {
-    notify(executor, T("What do you want to query?"));
+    notify(executor, "What do you want to query?");
     return;
   }
 
@@ -651,11 +651,11 @@ COMMAND(cmd_sql)
 
   if (!qres) {
     if (affected_rows >= 0) {
-      notify_format(executor, T("SQL: %d rows affected."), affected_rows);
+      notify_format(executor, "SQL: %d rows affected.", affected_rows);
     } else if (!sql_connected()) {
-      notify(executor, T("No SQL database connection."));
+      notify(executor, "No SQL database connection.");
     } else {
-      notify_format(executor, T("SQL: Error: %s"), sql_error());
+      notify_format(executor, "SQL: Error: %s", sql_error());
     }
     return;
   }
@@ -699,7 +699,7 @@ COMMAND(cmd_sql)
       if (retcode == SQLITE_DONE)
         break;
       else if (retcode != SQLITE_ROW) {
-        notify_format(executor, T("SQL: Error: %s"), sqlite3_errstr(retcode));
+        notify_format(executor, "SQL: Error: %s", sqlite3_errstr(retcode));
         break;
       }
     }
@@ -748,7 +748,7 @@ COMMAND(cmd_sql)
             cell = tbuf;
           }
         }
-        notify_format(executor, T("Row %d, Field %s: %s"), rownum + 1, name,
+        notify_format(executor, "Row %d, Field %s: %s", rownum + 1, name,
                       (cell && *cell) ? cell : "NULL");
         if (free_cell) {
           mush_free(cell, "string");
@@ -756,7 +756,7 @@ COMMAND(cmd_sql)
         }
       }
     } else {
-      notify_format(executor, T("Row %d: NULL"), rownum + 1);
+      notify_format(executor, "Row %d: NULL", rownum + 1);
     }
   }
 
