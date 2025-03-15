@@ -91,13 +91,13 @@ quick_unparse(dbref object)
 
   switch (object) {
   case NOTHING:
-    strcpy(buff, T("*NOTHING*"));
+    strcpy(buff, "*NOTHING*");
     break;
   case AMBIGUOUS:
-    strcpy(buff, T("*VARIABLE*"));
+    strcpy(buff, "*VARIABLE*");
     break;
   case HOME:
-    strcpy(buff, T("*HOME*"));
+    strcpy(buff, "*HOME*");
     break;
   default:
     bp = buff;
@@ -169,12 +169,12 @@ start_all_logs(void)
   } else {
     fclose(fp);
     if (!freopen(ERRLOG, "a", stderr)) {
-      puts(T("Ack!  Failed reopening stderr!"));
+      puts("Ack!  Failed reopening stderr!");
       exit(1);
     }
     setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
     if (!freopen(ERRLOG, "a", stdout)) {
-      fputs(T("Ack!  Failed reopening stdout!"), stderr);
+      fputs("Ack!  Failed reopening stdout!", stderr);
       fputc('\n', stderr);
       exit(1);
     }
@@ -584,7 +584,7 @@ do_log(enum log_type logtype, dbref player, dbref object, const char *fmt, ...)
       do_rawlog_lvl(logtype, MLOG_DEBUG, "HUH: %s in %s [%s]: %s", unp1, unp2,
                     (GoodObject(Location(player)))
                       ? Name(Owner(Location(player)))
-                      : T("bad object"),
+                      : "bad object",
                     tbuf1);
     }
     break;
@@ -621,7 +621,7 @@ do_log_recall(dbref player, enum log_type type, int lines)
   } else
     nlines = INT_MAX;
 
-  notify(player, T("Begin log recall."));
+  notify(player, "Begin log recall.");
   p = NULL;
   while ((line = iter_bufferq(log->buffer, &p, &dummy_dbref, &dummy_type,
                               &dummy_ts))) {
@@ -629,7 +629,7 @@ do_log_recall(dbref player, enum log_type type, int lines)
       notify(player, line);
     nlines -= 1;
   }
-  notify(player, T("End log recall."));
+  notify(player, "End log recall.");
 }
 
 /** Wipe out a game log. This is intended for those emergencies where
@@ -648,7 +648,7 @@ do_logwipe(dbref player, enum log_type logtype, const char *pass,
   struct log_stream *logst = lookup_log(logtype);
 
   if (strcmp(pass, LOG_WIPE_PASSWD) != 0) {
-    notify(player, T("Wrong password."));
+    notify(player, "Wrong password.");
     do_log(LT_WIZ, player, NOTHING,
            "Invalid attempt to wipe the %s log, password '%s'", logst->name,
            pass);
@@ -675,10 +675,10 @@ do_logwipe(dbref player, enum log_type logtype, const char *pass,
     do_log(LT_ERR, player, NOTHING, "%s log wiped.", logst->name);
   } break;
   default:
-    notify(player, T("That is not a clearable log."));
+    notify(player, "That is not a clearable log.");
     return;
   }
-  notify(player, T("Log wiped."));
+  notify(player, "Log wiped.");
 }
 
 /** Log a message to the activity log.
@@ -745,7 +745,7 @@ notify_activity(dbref player, int num_lines, int dump)
   if (dump)
     do_rawlog(LT_ERR, "Dumping recent activity:");
   else
-    notify(player, T("GAME: Recall from activity log"));
+    notify(player, "GAME: Recall from activity log");
 
   do {
     buf = iter_bufferq(activity_bq, &p, &plr, &type, &timestamp);
@@ -777,7 +777,7 @@ notify_activity(dbref player, int num_lines, int dump)
   } while (buf);
 
   if (!dump)
-    notify(player, T("GAME: End recall"));
+    notify(player, "GAME: End recall");
 }
 
 /* Wrapper for perror */
