@@ -209,7 +209,7 @@ FUNCTION(fun_ansi)
 
   /* Populate the colors struct */
   if (define_ansi_data(&colors, codes)) {
-    safe_format(buff, bp, T("#-1 INVALID ANSI DEFINITION: %s"), codes);
+    safe_format(buff, bp, "#-1 INVALID ANSI DEFINITION: %s", codes);
     safe_chr(' ', buff, bp);
   }
 
@@ -270,7 +270,7 @@ FUNCTION(fun_colors)
 
     sqldb = get_shared_db();
     if (!sqldb) {
-      safe_str(T("#-1 SQLITE ERROR"), buff, bp);
+      safe_str("#-1 SQLITE ERROR", buff, bp);
       return;
     }
 
@@ -295,7 +295,7 @@ FUNCTION(fun_colors)
                           "colors.list.names_all");
     }
     if (!lister) {
-      safe_str(T("#-1 SQLITE ERROR"), buff, bp);
+      safe_str("#-1 SQLITE ERROR", buff, bp);
       return;
     }
 
@@ -322,13 +322,13 @@ FUNCTION(fun_colors)
     bool ansi_styles = 0;
 
     if (define_ansi_data(&ad, args[0])) {
-      safe_str(T("#-1 INVALID COLOR"), buff, bp);
+      safe_str("#-1 INVALID COLOR", buff, bp);
       return;
     }
 
     if ((!ad.fg[0] || (!ad.fg[1] && (ad.fg[0] == 'n' || ad.fg[0] == 'd'))) &&
         (!ad.bg[0] || (!ad.bg[1] && (ad.bg[0] == 'n' || ad.bg[0] == 'D')))) {
-      safe_str(T("#-1 COLORS() REQUIRES AT LEAST ONE COLOR"), buff, bp);
+      safe_str("#-1 COLORS() REQUIRES AT LEAST ONE COLOR", buff, bp);
       return;
     }
 
@@ -354,7 +354,7 @@ FUNCTION(fun_colors)
       else if (!strcmp("styles", curr))
         ansi_styles = 1;
       else {
-        safe_str(T("#-1 INVALID ARGUMENT"), buff, bp);
+        safe_str("#-1 INVALID ARGUMENT", buff, bp);
         return;
       }
     }
@@ -433,7 +433,7 @@ FUNCTION(fun_colors)
 
         sqldb = get_shared_db();
         if (!sqldb) {
-          safe_str(T("#-1 SQLITE ERROR"), buff, bp);
+          safe_str("#-1 SQLITE ERROR", buff, bp);
           return;
         }
 
@@ -441,7 +441,7 @@ FUNCTION(fun_colors)
           sqldb, "SELECT name FROM named_colors WHERE rgb = ? ORDER BY name",
           "colors.list.rgb");
         if (!finder) {
-          safe_str(T("#-1 SQLITE ERROR"), buff, bp);
+          safe_str("#-1 SQLITE ERROR", buff, bp);
           return;
         }
 
@@ -460,7 +460,7 @@ FUNCTION(fun_colors)
         sqlite3_reset(finder);
 
         if (!shown)
-          safe_str(T("#-1 NO MATCHING COLOR NAME"), buff, bp);
+          safe_str("#-1 NO MATCHING COLOR NAME", buff, bp);
       } break;
       }
     }
