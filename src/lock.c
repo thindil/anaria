@@ -630,12 +630,12 @@ check_lock_type(dbref player, dbref thing, lock_type name, bool silent)
   /* Check to see if it's a well-formed user-defined lock. */
   if (!string_prefix(name, "User:")) {
     if (!silent)
-      notify(player, T("Unknown lock type."));
+      notify(player, "Unknown lock type.");
     return NULL;
   }
   if (strchr(name, '|')) {
     if (!silent)
-      notify(player, T("The character \'|\' may not be used in lock names."));
+      notify(player, "The character \'|\' may not be used in lock names.");
     return NULL;
   }
   colon = strchr(name, ':') + 1;
@@ -643,7 +643,7 @@ check_lock_type(dbref player, dbref thing, lock_type name, bool silent)
 
   if (!good_atr_name(user_name)) {
     if (!silent)
-      notify(player, T("That is not a valid lock name."));
+      notify(player, "That is not a valid lock name.");
     return NULL;
   }
 
@@ -673,18 +673,18 @@ do_unlock(dbref player, const char *name, lock_type type)
     if ((real_type = check_lock_type(player, thing, type, 0)) != NULL) {
       if (getlock(thing, real_type) == TRUE_BOOLEXP) {
         if (!AreQuiet(player, thing))
-          notify_format(player, T("%s(%s) - %s (already) unlocked."),
+          notify_format(player, "%s(%s) - %s (already) unlocked.",
                         AName(thing, AN_SYS, NULL), unparse_dbref(thing),
                         real_type);
       } else if (delete_lock(player, thing, real_type)) {
         if (!AreQuiet(player, thing))
-          notify_format(player, T("%s(%s) - %s unlocked."),
+          notify_format(player, "%s(%s) - %s unlocked.",
                         AName(thing, AN_SYS, NULL), unparse_dbref(thing),
                         real_type);
         if (!IsPlayer(thing))
           ModTime(thing) = mudtime;
       } else
-        notify(player, T("Permission denied."));
+        notify(player, "Permission denied.");
     }
   }
 }
@@ -716,18 +716,18 @@ do_lock(dbref player, const char *name, const char *keyname, lock_type type)
   }
   switch (thing = match_result(player, name, NOTYPE, MAT_EVERYTHING)) {
   case NOTHING:
-    notify(player, T("I don't see what you want to lock!"));
+    notify(player, "I don't see what you want to lock!");
     return;
   case AMBIGUOUS:
-    notify(player, T("I don't know which one you want to lock!"));
+    notify(player, "I don't know which one you want to lock!");
     return;
   default:
     if (!controls(player, thing)) {
-      notify(player, T("You can't lock that!"));
+      notify(player, "You can't lock that!");
       return;
     }
     if (IsGarbage(thing)) {
-      notify(player, T("Why would you want to lock garbage?"));
+      notify(player, "Why would you want to lock garbage?");
       return;
     }
     break;
@@ -737,19 +737,19 @@ do_lock(dbref player, const char *name, const char *keyname, lock_type type)
 
   /* do the lock */
   if (key == TRUE_BOOLEXP) {
-    notify(player, T("I don't understand that key."));
+    notify(player, "I don't understand that key.");
   } else {
     if ((real_type = check_lock_type(player, thing, type, 0)) != NULL) {
       /* everything ok, do it */
       if (add_lock(player, thing, real_type, key, LF_DEFAULT)) {
         if (!AreQuiet(player, thing))
-          notify_format(player, T("%s(%s) - %s locked."),
+          notify_format(player, "%s(%s) - %s locked.",
                         AName(thing, AN_SYS, NULL), unparse_dbref(thing),
                         real_type);
         if (!IsPlayer(thing))
           ModTime(thing) = mudtime;
       } else {
-        notify(player, T("Permission denied."));
+        notify(player, "Permission denied.");
         /*  Done by a failed add_lock()  // free_boolexp(key); */
       }
     } else
@@ -911,7 +911,7 @@ do_lset(dbref player, char *what, char *flags)
   bool unset = 0;
 
   if ((lname = strchr(what, '/')) == NULL) {
-    notify(player, T("No lock name given."));
+    notify(player, "No lock name given.");
     return;
   }
   *lname++ = '\0';
@@ -925,18 +925,18 @@ do_lset(dbref player, char *what, char *flags)
   }
 
   if (string_to_lockflag(player, flags, &flag) < 0) {
-    notify(player, T("Unrecognized lock flag."));
+    notify(player, "Unrecognized lock flag.");
     return;
   }
 
   l = getlockstruct_noparent(thing, lname);
   if (!l || !Can_Read_Lock(player, thing, L_TYPE(l))) {
-    notify(player, T("No such lock."));
+    notify(player, "No such lock.");
     return;
   }
 
   if (!can_write_lock(player, thing, l)) {
-    notify(player, T("Permission denied."));
+    notify(player, "Permission denied.");
     return;
   }
 
@@ -947,7 +947,7 @@ do_lset(dbref player, char *what, char *flags)
 
   if (!Quiet(player) && !(Quiet(thing) && (Owner(thing) == player)))
     notify_format(player, "%s/%s - %s.", AName(thing, AN_SYS, NULL), L_TYPE(l),
-                  unset ? T("lock flags unset") : T("lock flags set"));
+                  unset ? "lock flags unset" : "lock flags set");
   if (!IsPlayer(thing))
     ModTime(thing) = mudtime;
 }
@@ -967,7 +967,7 @@ check_zone_lock(dbref player, dbref zone, int noisy)
              LF_DEFAULT);
     if (noisy) {
       notify_format(
-        player, T("Unlocked zone %s - automatically zone-locking to itself"),
+        player, "Unlocked zone %s - automatically zone-locking to itself",
         unparse_object(player, zone, AN_UNPARSE));
     }
   } else if (!noisy) {
@@ -977,13 +977,13 @@ check_zone_lock(dbref player, dbref zone, int noisy)
     if (eval_lock(PLAYER_START, zone, Zone_Lock) &&
         eval_lock(MASTER_ROOM, zone, Zone_Lock)) {
       notify_format(player,
-                    T("Zone %s really should have a more secure zone-lock."),
+                    "Zone %s really should have a more secure zone-lock.",
                     unparse_object(player, zone, AN_UNPARSE));
     } else {
       /* Probably inexact zone lock */
       notify_format(player,
-                    T("Warning: Zone %s may have loose zone lock. Lock "
-                      "zones to =player, not player"),
+                    "Warning: Zone %s may have loose zone lock. Lock "
+                      "zones to =player, not player",
                     unparse_object(player, zone, AN_UNPARSE));
     }
   }
