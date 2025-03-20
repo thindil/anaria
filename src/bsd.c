@@ -747,14 +747,6 @@ main(int argc, char **argv)
     else
       do_rawlog(LT_ERR, "Setting collate locale to %s", loc);
   }
-#ifndef DONT_TRANSLATE
-#ifdef HAVE_TEXTDOMAIN
-  textdomain("pennmush");
-#endif
-#ifdef HAVE_BINDTEXTDOMAIN
-  bindtextdomain("pennmush", "../po");
-#endif
-#endif
 
   /* Build the contexts used by PCRE2 */
   re_compile_ctx = pcre2_compile_context_create(NULL);
@@ -4405,7 +4397,7 @@ check_connect(DESC *d, const char *msg)
     return 1;
 
   if (!check_fails(d->ip)) {
-    queue_string_eol(d, "%s", T(connect_fail_limit_exceeded));
+    queue_string_eol(d, "%s", connect_fail_limit_exceeded);
     return 1;
   }
   if (string_prefixe("connect", command)) {
@@ -4543,13 +4535,13 @@ check_connect(DESC *d, const char *msg)
     case AMBIGUOUS:
       queue_string_eol(
         d, "%s",
-        T((player == NOTHING ? create_fail_bad : create_fail_preexisting)));
+        (player == NOTHING ? create_fail_bad : create_fail_preexisting));
       do_rawlog_lvl(LT_CONN, MLOG_INFO,
                     "[%d/%s/%s] Failed create for '%s' (bad name).",
                     d->descriptor, d->addr, d->ip, user);
       break;
     case HOME:
-      queue_string_eol(d, "%s", T(password_fail));
+      queue_string_eol(d, "%s", password_fail);
       do_rawlog(LT_CONN, "[%d/%s/%s] Failed create for '%s' (bad password).",
                 d->descriptor, d->addr, d->ip, user);
       break;
@@ -4592,12 +4584,12 @@ check_connect(DESC *d, const char *msg)
     }
     if ((player = email_register_player(d, user, password, d->addr, d->ip)) ==
         NOTHING) {
-      queue_string_eol(d, "%s", T(register_fail));
+      queue_string_eol(d, "%s", register_fail);
       do_rawlog_lvl(LT_CONN, MLOG_INFO,
                     "[%d/%s/%s] Failed registration for '%s'.", d->descriptor,
                     d->addr, d->ip, user);
     } else {
-      queue_string_eol(d, "%s", T(register_success));
+      queue_string_eol(d, "%s", register_success);
       do_rawlog_lvl(LT_CONN, MLOG_INFO, "[%d/%s/%s] Registered %s(#%d) to %s",
                     d->descriptor, d->addr, d->ip, Name(player), player,
                     password);
@@ -4673,7 +4665,7 @@ close_sockets(void)
   int shutlen;
   int ignoreme __attribute__((__unused__));
 
-  shutmsg = T(shutdown_message);
+  shutmsg = shutdown_message;
   shutlen = strlen(shutmsg);
 
   for (d = descriptor_list; d; d = dnext) {
@@ -6440,11 +6432,11 @@ FUNCTION(fun_xwho)
     dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!powered && victim != executor) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     if (!Priv_Who(victim))
@@ -6453,14 +6445,14 @@ FUNCTION(fun_xwho)
 
   if (!is_strict_integer(args[firstnum]) ||
       !is_strict_integer(args[firstnum + 1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   start = parse_integer(args[firstnum]);
   count = parse_integer(args[firstnum + 1]);
 
   if (start < 1 || count < 1) {
-    safe_str(T(e_argrange), buff, bp);
+    safe_str(e_argrange, buff, bp);
     return;
   }
 
@@ -6498,11 +6490,11 @@ FUNCTION(fun_nwho)
     dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!powered && victim != executor) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     if (!Priv_Who(victim))
@@ -6533,11 +6525,11 @@ FUNCTION(fun_lwho)
     dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!powered && victim != executor) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     if (!Priv_Who(victim))
@@ -6558,7 +6550,7 @@ FUNCTION(fun_lwho)
       return;
     }
     if (offline && !powered) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
   }
@@ -6822,11 +6814,11 @@ FUNCTION(fun_zwho)
     victim = executor;
   } else if ((nargs == 2) && powered) {
     if ((victim = match_thing(executor, args[1])) == 0) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     }
   } else {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -6835,7 +6827,7 @@ FUNCTION(fun_zwho)
        !eval_lock_with(victim, zone, Zone_Lock, pe_info))) {
     if (GoodObject(zone))
       fail_lock(victim, zone, Zone_Lock, NULL, NOTHING);
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if ((getlock(zone, Zone_Lock) == TRUE_BOOLEXP) ||
@@ -6962,7 +6954,7 @@ FUNCTION(fun_ssl)
     if (match->player == executor || See_All(executor))
       safe_boolean(is_ssl_desc(match), buff, bp);
     else
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
   } else
     safe_str("#-1 NOT CONNECTED", buff, bp);
 }
@@ -7074,7 +7066,7 @@ FUNCTION(fun_lports)
   int offline = 0;
 
   if (!Priv_Who(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -7083,7 +7075,7 @@ FUNCTION(fun_lports)
     dbref victim;
     if ((victim = noisy_match_result(executor, args[0], NOTYPE,
                                      MAT_EVERYTHING)) == NOTHING) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!Priv_Who(victim))
@@ -7104,7 +7096,7 @@ FUNCTION(fun_lports)
       return;
     }
     if (offline && !powered) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
   }
