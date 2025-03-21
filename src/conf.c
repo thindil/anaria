@@ -1572,7 +1572,7 @@ do_config_list(dbref player, const char *type, int lc)
     /* Look up the type in the group table */
     int found = 0;
     for (cgp = confgroups; cgp->name; cgp++) {
-      if (string_prefixe(T(cgp->name), type) &&
+      if (string_prefixe(cgp->name, type) &&
           Can_View_Config_Group(player, cgp)) {
         found = 1;
         break;
@@ -1623,7 +1623,7 @@ do_config_list(dbref player, const char *type, int lc)
         notify(player, "I only know the following types of options:");
         for (cgp = confgroups; cgp->name; cgp++) {
           if (Can_View_Config_Group(player, cgp))
-            notify_format(player, " %-15s %s", T(cgp->name), cgp->desc);
+            notify_format(player, " %-15s %s", cgp->name, cgp->desc);
         }
       }
     } else {
@@ -1653,7 +1653,7 @@ do_config_list(dbref player, const char *type, int lc)
            "Use: @config/list <type of options> where type is one of:");
     for (cgp = confgroups; cgp->name; cgp++) {
       if (Can_View_Config_Group(player, cgp))
-        notify_format(player, " %-15s %s", T(cgp->name), cgp->desc);
+        notify_format(player, " %-15s %s", cgp->name, cgp->desc);
     }
   }
   if (SUPPORT_PUEBLO)
