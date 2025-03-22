@@ -573,7 +573,7 @@ FUNCTION(fun_connlog)
         goto error_cleanup;
       } else if (!is_strict_integer(args[idx + 1]) ||
                  !is_strict_integer(args[idx + 2])) {
-        safe_str(T(e_ints), buff, bp);
+        safe_str(e_ints, buff, bp);
         goto error_cleanup;
       }
 
@@ -606,7 +606,7 @@ FUNCTION(fun_connlog)
         safe_str("#-1 AT MISSING TIME", buff, bp);
         goto error_cleanup;
       } else if (!is_strict_integer(args[idx + 1])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         goto error_cleanup;
       }
       when = parse_integer(args[idx + 1]);
@@ -633,7 +633,7 @@ FUNCTION(fun_connlog)
         safe_str("#-1 BEFORE MISSING TIME", buff, bp);
         goto error_cleanup;
       } else if (!is_strict_integer(args[idx + 1])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         goto error_cleanup;
       }
       when = parse_integer(args[idx + 1]);
@@ -654,7 +654,7 @@ FUNCTION(fun_connlog)
         safe_str("#-1 AFTER MISSING TIME", buff, bp);
         goto error_cleanup;
       } else if (!is_strict_integer(args[idx + 1])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         goto error_cleanup;
       }
       when = parse_integer(args[idx + 1]);
@@ -803,7 +803,7 @@ FUNCTION(fun_connrecord)
   }
 
   if (!is_strict_int64(args[0])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
 
@@ -878,7 +878,7 @@ FUNCTION(fun_addrlog)
   }
 
   if (!See_All(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
