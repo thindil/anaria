@@ -1742,7 +1742,7 @@ FUNCTION(fun_pidinfo)
   bool first = true;
 
   if (!is_strict_uinteger(args[0])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
 
@@ -1755,7 +1755,7 @@ FUNCTION(fun_pidinfo)
   }
 
   if (!controls(executor, q->executor) && !LookQueue(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -1841,12 +1841,12 @@ FUNCTION(fun_lpids)
       } else {
         player = match_thing(executor, args[0]);
         if (!GoodObject(player)) {
-          safe_str(T(e_notvis), buff, bp);
+          safe_str(e_notvis, buff, bp);
           return;
         }
         if (!LookQueue(executor) &&
             !(Owns(executor, player) || controls(executor, player))) {
-          safe_str(T(e_perm), buff, bp);
+          safe_str(e_perm, buff, bp);
           return;
         }
       }
@@ -1879,11 +1879,11 @@ FUNCTION(fun_lpids)
       *attrib++ = '\0';
     thing = match_thing(executor, args[0]);
     if (!GoodObject(thing)) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!(LookQueue(executor) || (controls(executor, thing)))) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
   }
