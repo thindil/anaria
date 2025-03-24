@@ -2291,11 +2291,11 @@ FUNCTION(fun_cflags)
     }
     thing = match_thing(executor, args[1]);
     if (thing == NOTHING) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     }
     if (!Can_Examine(executor, thing)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     u = onchannel(thing, c);
@@ -2352,14 +2352,14 @@ FUNCTION(fun_cbufferadd)
   dbref victim;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   /* Person must be able to do nospoof cemits. */
   if (!command_check_byname(executor, "@cemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   /* Find the channel. */
@@ -2378,7 +2378,7 @@ FUNCTION(fun_cbufferadd)
   if (nargs == 3 && parse_boolean(args[2])) {
     /* Person must be able to do nospoof cemits. */
     if (!command_check_byname(executor, "@nscemit", pe_info)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     victim = enactor;
@@ -2393,7 +2393,7 @@ FUNCTION(fun_cbufferadd)
     return;
   default:
     if (!Chan_Can_Modify(c, executor)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
     } else if (ChanBufferQ(c) != NULL) {
       add_to_bufferq(ChanBufferQ(c), 0, victim, args[1]);
     } else {
@@ -2432,7 +2432,7 @@ FUNCTION(fun_ctitle)
   default:
     thing = match_thing(executor, args[1]);
     if (thing == NOTHING) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     }
     if (!Chan_Can_See(c, executor)) {
@@ -2446,12 +2446,12 @@ FUNCTION(fun_ctitle)
       if (can_ex || ok)
         safe_str("#-1 NOT ON CHANNEL", buff, bp);
       else
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
       return;
     }
     ok &= !Chanuser_Hide(u);
     if (!(can_ex || ok)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     if (CUtitle(u))
@@ -2486,7 +2486,7 @@ FUNCTION(fun_cstatus)
   default:
     thing = match_thing(executor, args[1]);
     if (thing == NOTHING) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     }
     if (!Chan_Can_See(c, executor)) {
@@ -3422,13 +3422,13 @@ FUNCTION(fun_clock)
     if (FUNCTION_SIDE_EFFECTS) {
       if (!command_check_byname(executor, "@clock", pe_info) ||
           fun->flags & FN_NOSIDEFX) {
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
         return;
       }
       do_chan_lock(executor, args[0], args[1], which_lock);
       return;
     } else {
-      safe_str(T(e_disabled), buff, bp);
+      safe_str(e_disabled, buff, bp);
     }
   }
 
@@ -3436,7 +3436,7 @@ FUNCTION(fun_clock)
     safe_str(unparse_boolexp(executor, lock_ptr, UB_MEREF), buff, bp);
     return;
   } else {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 }
@@ -3448,7 +3448,7 @@ FUNCTION(fun_cemit)
 
   if (fun->flags & FN_NOSIDEFX ||
       !command_check_byname(executor, flags ? "@nscemit" : "@cemit", pe_info)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (nargs < 3 || !parse_boolean(args[2])) {
@@ -3491,7 +3491,7 @@ FUNCTION(fun_crecall)
     recall_timestring = 1;
     recall_from = (time_t) mudtime - num_lines;
   } else {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   if (!args[2] || !*args[2]) {
@@ -3499,7 +3499,7 @@ FUNCTION(fun_crecall)
   } else if (is_integer(args[2])) {
     start = parse_integer(args[2]) - 1;
   } else {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
 
@@ -3510,14 +3510,14 @@ FUNCTION(fun_crecall)
     showstamp = parse_boolean(args[4]);
 
   if (num_lines < 0) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
 
   test_channel_fun(executor, name, chan, buff, bp);
   if (!Chan_Can_See(chan, executor)) {
     if (onchannel(executor, chan))
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
     else
       safe_str("#-1 NO SUCH CHANNEL", buff, bp);
     return;
@@ -3525,7 +3525,7 @@ FUNCTION(fun_crecall)
 
   u = onchannel(executor, chan);
   if (!u && !Chan_Can_Access(chan, executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
