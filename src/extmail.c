@@ -817,10 +817,10 @@ FUNCTION(fun_maillist)
     player = match_result(executor, args[0], TYPE_PLAYER,
                           MAT_ME | MAT_ABSOLUTE | MAT_PMATCH | MAT_TYPE);
     if (!GoodObject(player)) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     } else if (!controls(executor, player)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
   } else {
@@ -828,7 +828,7 @@ FUNCTION(fun_maillist)
   }
 
   if (!parse_msglist((nargs ? args[nargs - 1] : ""), &ms, player)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -1461,11 +1461,11 @@ FUNCTION(fun_mailsend)
   /* mailsend(<target>,[<subject>/]<message>) */
   if ((fun->flags & FN_NOSIDEFX) || Gagged(executor) ||
       !command_check_byname(executor, "@MAIL", pe_info))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else if (FUNCTION_SIDE_EFFECTS)
     do_mail_send(executor, args[0], args[1], 0, 1, 0);
   else
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
 }
 
 static void
@@ -2062,7 +2062,7 @@ FUNCTION(fun_folderstats)
         safe_str("#-1 NO SUCH PLAYER", buff, bp);
         return;
       } else if (!controls(executor, player)) {
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
         return;
       } else {
         count_mail(player, player_folder(player), &rc, &uc, &cc);
@@ -2078,7 +2078,7 @@ FUNCTION(fun_folderstats)
       safe_str("#-1 NO SUCH PLAYER", buff, bp);
       return;
     } else if (!controls(executor, player)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     if (!is_integer(args[1])) {
@@ -2122,7 +2122,7 @@ FUNCTION(fun_mail)
                           MAT_ME | MAT_ABSOLUTE | MAT_PMATCH | MAT_TYPE);
     if (GoodObject(player)) {
       if (!controls(executor, player)) {
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
       } else {
         count_mail(player, -1, &rc, &uc, &cc);
         safe_integer(rc, buff, bp);
