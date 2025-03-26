@@ -288,7 +288,7 @@ int_check(char *buff, char **bp, int nfargs, char *fargs[], int check_arg,
       else
         *result = def;
     else if (!is_strict_integer(fargs[check_arg - 1])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return 0;
     } else
       *result = parse_integer(fargs[check_arg - 1]);
