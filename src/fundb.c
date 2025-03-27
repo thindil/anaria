@@ -57,16 +57,16 @@ do_get_attrib(dbref executor, dbref thing, const char *attrib)
       else
         return "#-1 ATTRIBUTE LENGTH TOO LONG";
     }
-    return T(e_atrperm);
+    return e_atrperm;
   }
   a = atr_match(attrib);
   if (a) {
     if (Can_Read_Attr(executor, thing, a))
       return "";
-    return T(e_atrperm);
+    return e_atrperm;
   }
   if (!Can_Examine(executor, thing))
-    return T(e_atrperm);
+    return e_atrperm;
   return "";
 }
 
@@ -132,7 +132,7 @@ FUNCTION(fun_nattr)
 
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
 
@@ -157,7 +157,7 @@ FUNCTION(fun_lattr)
 
   if (strchr(called_as, 'X')) {
     if (!is_strict_integer(args[1]) || !is_strict_integer(args[2])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
 
@@ -165,7 +165,7 @@ FUNCTION(fun_lattr)
     lh.count = parse_integer(args[2]);
 
     if (lh.start < 1 || lh.count < 1) {
-      safe_str(T(e_argrange), buff, bp);
+      safe_str(e_argrange, buff, bp);
       return;
     }
 
@@ -191,7 +191,7 @@ FUNCTION(fun_lattr)
 
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   lh.first = 1;
@@ -232,7 +232,7 @@ FUNCTION(fun_hasattr)
 
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   if (strchr(called_as, 'P')) {
@@ -253,7 +253,7 @@ FUNCTION(fun_hasattr)
       safe_chr('1', buff, bp);
     return;
   } else if (a || !Can_Examine(executor, thing)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   safe_chr('0', buff, bp);
@@ -273,7 +273,7 @@ FUNCTION(fun_get)
   *s++ = '\0';
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   safe_str(do_get_attrib(executor, thing, s), buff, bp);
@@ -289,7 +289,7 @@ FUNCTION(fun_xget)
 
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   safe_str(do_get_attrib(executor, thing, args[1]), buff, bp);
@@ -343,13 +343,13 @@ FUNCTION(fun_eval)
 
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   a = atr_get(thing, strupper_r(args[1], tmp, sizeof tmp));
   if (a && Can_Read_Attr(executor, thing, a)) {
     if (!CanEvalAttr(executor, thing, a)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     tp = tbuf = safe_atr_value(a, "fun_eval.attr_value");
@@ -358,7 +358,7 @@ FUNCTION(fun_eval)
     mush_free(tbuf, "fun_eval.attr_value");
     return;
   } else if (a || !Can_Examine(executor, thing)) {
-    safe_str(T(e_atrperm), buff, bp);
+    safe_str(e_atrperm, buff, bp);
     return;
   }
   return;
@@ -383,13 +383,13 @@ FUNCTION(fun_get_eval)
   *s++ = '\0';
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   a = atr_get(thing, strupper_r(s, tmp, sizeof tmp));
   if (a && Can_Read_Attr(executor, thing, a)) {
     if (!CanEvalAttr(executor, thing, a)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     tp = tbuf = safe_atr_value(a, "fun_eval.attr_value");
@@ -398,7 +398,7 @@ FUNCTION(fun_get_eval)
     mush_free(tbuf, "fun_eval.attr_value");
     return;
   } else if (a || !Can_Examine(executor, thing)) {
-    safe_str(T(e_atrperm), buff, bp);
+    safe_str(e_atrperm, buff, bp);
     return;
   }
   return;
@@ -425,7 +425,7 @@ FUNCTION(fun_edefault)
   parse_attrib(executor, mstr, &thing, &attrib);
   if (GoodObject(thing) && attrib && Can_Read_Attr(executor, thing, attrib)) {
     if (!CanEvalAttr(executor, thing, attrib)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     /* Ok, we've got it */
@@ -498,7 +498,7 @@ FUNCTION(fun_v)
   if (is_strict_integer(args[0])) {
     c = parse_integer(args[0]);
     if (c < 0 || c >= MAX_STACK_ARGS) {
-      safe_str(T(e_range), buff, bp);
+      safe_str(e_range, buff, bp);
     } else {
       s = PE_Get_Env(pe_info, c);
       if (s)
@@ -523,7 +523,7 @@ FUNCTION(fun_flags)
     *p++ = '\0';
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   if (p) {
@@ -555,7 +555,7 @@ FUNCTION(fun_lflags)
     *p++ = '\0';
   thing = match_thing(executor, args[0]);
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   if (p) {
@@ -583,7 +583,7 @@ FUNCTION(fun_haspower)
 
   it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   safe_boolean(sees_flag("POWER", executor, it, args[1]), buff, bp);
@@ -601,12 +601,12 @@ FUNCTION(fun_powers)
 
   if (nargs == 2) {
     if (!FUNCTION_SIDE_EFFECTS) {
-      safe_str(T(e_disabled), buff, bp);
+      safe_str(e_disabled, buff, bp);
       return;
     }
     if (fun->flags & FN_NOSIDEFX ||
         !command_check_byname(executor, "@power", pe_info)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
 
@@ -615,7 +615,7 @@ FUNCTION(fun_powers)
   }
   it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   safe_str(power_description(executor, it), buff, bp);
@@ -640,7 +640,7 @@ FUNCTION(fun_rnum)
     switch (thing = match_result(place, name, NOTYPE,
                                  MAT_POSSESSION | MAT_CARRIED_EXIT)) {
     case NOTHING:
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       break;
     case AMBIGUOUS:
       safe_str("#-2", buff, bp);
@@ -799,13 +799,13 @@ FUNCTION(fun_dbwalker)
     switch (*(ptr++)) {
     case 'X':
       if (!is_strict_integer(args[1]) || !is_strict_integer(args[2])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         return;
       }
       start = parse_integer(args[1]);
       count = parse_integer(args[2]);
       if (start < 1 || count < 1) {
-        safe_str(T(e_argrange), buff, bp);
+        safe_str(e_argrange, buff, bp);
         return;
       }
       break;
@@ -931,7 +931,7 @@ FUNCTION(fun_controls)
   }
   if (!(controls(executor, it) || controls(executor, thing) ||
         See_All(executor))) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   } else if (attrname) {
     char tmp[BUFFER_LEN];
     if (!good_atr_name(strupper_r(attrname, tmp, sizeof tmp))) {
@@ -964,7 +964,7 @@ FUNCTION(fun_visible)
   char *name;
 
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   if ((name = strchr(args[1], '/')))
@@ -993,7 +993,7 @@ FUNCTION(fun_type)
   if (!GoodObject(it))
     it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
 
@@ -1037,7 +1037,7 @@ FUNCTION(fun_hasflag)
   } else {
     thing = match_thing(executor, args[0]);
     if (!GoodObject(thing))
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
     else
       safe_boolean(sees_flag("FLAG", executor, thing, args[1]), buff, bp);
   }
@@ -1056,7 +1056,7 @@ FUNCTION(fun_hastype)
   if (!GoodObject(it))
     it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   s = trim_space_sep(args[1], ' ');
@@ -1201,7 +1201,7 @@ FUNCTION(fun_locks)
   thing = match_thing(executor, args[0]);
 
   if (!GoodObject(thing)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
 
@@ -1242,7 +1242,7 @@ FUNCTION(fun_lockflags)
 
   it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   ltype = get_locktype(p);
@@ -1276,7 +1276,7 @@ FUNCTION(fun_lockowner)
 
   it = match_thing(executor, args[0]);
   if (!GoodObject(it)) {
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
     return;
   }
   ltype = get_locktype(p);
@@ -1295,12 +1295,12 @@ FUNCTION(fun_lockowner)
 FUNCTION(fun_lset)
 {
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
   if (fun->flags & FN_NOSIDEFX ||
       !command_check_byname(executor, "@lset", pe_info)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_lset(executor, args[0], args[1]);
@@ -1321,12 +1321,12 @@ FUNCTION(fun_lock)
 
   if (nargs == 2) {
     if (!FUNCTION_SIDE_EFFECTS) {
-      safe_str(T(e_disabled), buff, bp);
+      safe_str(e_disabled, buff, bp);
       return;
     }
     if (fun->flags & FN_NOSIDEFX ||
         !command_check_byname(executor, "@lock", pe_info)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     do_lock(executor, args[0], args[1], ltype);
@@ -1446,7 +1446,7 @@ FUNCTION(fun_findable)
     safe_str("#-1 ARG2 NOT FOUND", buff, bp);
   else if (!See_All(executor) && !controls(executor, obj) &&
            !controls(executor, victim))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else
     safe_boolean(Can_Locate(obj, victim), buff, bp);
 }
@@ -1471,7 +1471,7 @@ FUNCTION(fun_objid)
     safe_chr(':', buff, bp);
     safe_integer(CreTime(it), buff, bp);
   } else
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
 }
 
 /* ARGSUSED */
@@ -1484,7 +1484,7 @@ FUNCTION(fun_ctime)
     utc = parse_boolean(args[1]);
 
   if (!GoodObject(it) || IsGarbage(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else
     safe_str(show_time(CreTime(it), utc), buff, bp);
 }
@@ -1494,7 +1494,7 @@ FUNCTION(fun_csecs)
   dbref it = match_thing(executor, args[0]);
 
   if (!GoodObject(it) || IsGarbage(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else
     safe_integer((intmax_t) CreTime(it), buff, bp);
 }
@@ -1509,9 +1509,9 @@ FUNCTION(fun_mtime)
     utc = parse_boolean(args[1]);
 
   if (!GoodObject(it) || IsGarbage(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else if (!Can_Examine(executor, it) || IsPlayer(it))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else
     safe_str(show_time(ModTime(it), utc), buff, bp);
 }
@@ -1521,9 +1521,9 @@ FUNCTION(fun_msecs)
 {
   dbref it = match_thing(executor, args[0]);
   if (!GoodObject(it) || IsGarbage(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else if (!Can_Examine(executor, it) || IsPlayer(it))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else
     safe_integer((intmax_t) ModTime(it), buff, bp);
 }
@@ -1546,9 +1546,9 @@ FUNCTION(fun_room)
   dbref it = match_thing(executor, args[0]);
 
   if (!GoodObject(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else if (!Can_Locate(executor, it))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else {
     dbref room = absolute_room(it);
     if (!GoodObject(room)) {
@@ -1571,9 +1571,9 @@ FUNCTION(fun_rloc)
     deep = 0;
 
   if (!GoodObject(it))
-    safe_str(T(e_notvis), buff, bp);
+    safe_str(e_notvis, buff, bp);
   else if (!Can_Locate(executor, it))
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
   else {
     int i;
     for (i = 0; i < deep; i++) {
@@ -1593,12 +1593,12 @@ FUNCTION(fun_zone)
 
   if (nargs == 2) {
     if (!FUNCTION_SIDE_EFFECTS) {
-      safe_str(T(e_disabled), buff, bp);
+      safe_str(e_disabled, buff, bp);
       return;
     }
     if (fun->flags & FN_NOSIDEFX ||
         !command_check_byname(executor, "@chzone", pe_info)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     (void) do_chzone(executor, args[0], args[1], 1, 0, pe_info);
