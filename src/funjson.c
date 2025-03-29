@@ -188,7 +188,7 @@ FUNCTION(fun_json_query)
         goto err;
       }
       if (cJSON_IsArray(curr) && !is_strict_integer(args[path])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         curr = NULL;
         goto err;
       }
