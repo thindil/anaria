@@ -1031,13 +1031,13 @@ FUNCTION(fun_lnum)
   char *cp;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   end = parse_number(args[0]);
   if (nargs > 1) {
     if (!is_number(args[1])) {
-      safe_str(T(e_num), buff, bp);
+      safe_str(e_num, buff, bp);
       return;
     }
     if (nargs > 3 && is_number(args[3])) {
@@ -1176,7 +1176,7 @@ FUNCTION(fun_randword)
     separg = 3;
     if (nargs > 1) {
       if (args[1] && *args[1] && !is_strict_integer(args[1])) {
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         return;
       }
       randcount = parse_integer(args[1]);
@@ -1505,7 +1505,7 @@ FUNCTION(fun_wordpos)
   char sep;
 
   if (!is_integer(args[1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   charpos = parse_integer(args[1]);
@@ -1552,11 +1552,11 @@ FUNCTION(fun_extract)
     /* find_list_position does an is_integer check, but we
      * duplicate it here so we can return e_ints */
     if (!is_integer(args[1])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     if (nargs > 2 && !is_integer(args[2])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
   }
@@ -1684,7 +1684,7 @@ FUNCTION(fun_index)
   char *s, *p;
 
   if (!is_integer(args[2]) || !is_integer(args[3])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   s = args[0];
@@ -2165,7 +2165,7 @@ FUNCTION(fun_ibreak)
 
   if (nargs && args[0] && *args[0]) {
     if (!is_strict_integer(args[0])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     i = parse_integer(args[0]);
@@ -2175,7 +2175,7 @@ FUNCTION(fun_ibreak)
     return;
 
   if (i < 0 || i > maxlev) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -2203,14 +2203,14 @@ FUNCTION(fun_itext)
     i = maxlev;
   } else {
     if (!is_strict_integer(args[0])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     i = parse_integer(args[0]);
   }
 
   if (i < 0 || i > maxlev) {
-    safe_str(T(e_argrange), buff, bp);
+    safe_str(e_argrange, buff, bp);
     return;
   }
 
@@ -2227,14 +2227,14 @@ FUNCTION(fun_inum)
     i = maxlev;
   } else {
     if (!is_strict_integer(args[0])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     i = parse_integer(args[0]);
   }
 
   if (i < 0 || i > maxlev) {
-    safe_str(T(e_argrange), buff, bp);
+    safe_str(e_argrange, buff, bp);
     return;
   }
 
@@ -2263,7 +2263,7 @@ FUNCTION(fun_step)
   int nptrs, i;
 
   if (!is_integer(args[2])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
 
@@ -2494,7 +2494,7 @@ FUNCTION(fun_table)
 
   if (nargs > 2) {
     if (!is_integer(args[2])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     line_length = parse_integer(args[2]);
@@ -2507,7 +2507,7 @@ FUNCTION(fun_table)
       aligntype = *(fwidth++);
     }
     if (!is_integer(fwidth)) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     field_width = parse_integer(fwidth);
@@ -2972,7 +2972,7 @@ FUNCTION(fun_regmatch)
 
     if (!ValidQregName(regname)) {
       if (regname[0] != '-' || regname[1]) {
-        safe_str(T(e_badregname), buff, bp);
+        safe_str(e_badregname, buff, bp);
       }
       continue;
     }
