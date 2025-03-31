@@ -168,7 +168,7 @@ FUNCTION(fun_ctu)
 {
   NVAL angle;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
 
@@ -224,7 +224,7 @@ FUNCTION(fun_sign)
   NVAL x;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   x = parse_number(args[0]);
@@ -240,7 +240,7 @@ FUNCTION(fun_sign)
 FUNCTION(fun_shl)
 {
   if (!is_uival(args[0]) || !is_uival(args[1])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
   safe_uinteger(parse_uival(args[0]) << parse_uival(args[1]), buff, bp);
@@ -250,7 +250,7 @@ FUNCTION(fun_shl)
 FUNCTION(fun_shr)
 {
   if (!is_uival(args[0]) || !is_uival(args[1])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
   safe_uinteger(parse_uival(args[0]) >> parse_uival(args[1]), buff, bp);
@@ -291,7 +291,7 @@ FUNCTION(fun_inc)
   /* p now points to the last non-numeric character in the string */
   if (p == args[0] && (isdigit(*p) || (*p == '-'))) {
     /* Special case - it's all digits, but out of range. */
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -338,7 +338,7 @@ FUNCTION(fun_dec)
   /* p now points to the last non-numeric character in the string */
   if (p == args[0] && (isdigit(*p) || (*p == '-'))) {
     /* Special case - it's all digits, but out of range. */
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   /* Move it to the first numeric character */
@@ -375,7 +375,7 @@ FUNCTION(fun_remainder) { math_remainder(args, nargs, buff, bp); }
 FUNCTION(fun_abs)
 {
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   safe_number(fabs(parse_number(args[0])), buff, bp);
@@ -832,7 +832,7 @@ FUNCTION(fun_fmod)
 {
   NVAL x, y, m;
   if (!is_strict_number(args[0]) || !is_strict_number(args[1])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   y = parse_number(args[1]);
@@ -852,7 +852,7 @@ FUNCTION(fun_fmod)
 #ifdef HAVE_FETESTEXCEPT
   if (errno ||
       fetestexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #endif
@@ -864,7 +864,7 @@ FUNCTION(fun_fmod)
 FUNCTION(fun_floor)
 {
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   safe_number(floor(parse_number(args[0])), buff, bp);
@@ -874,7 +874,7 @@ FUNCTION(fun_floor)
 FUNCTION(fun_ceil)
 {
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   safe_number(ceil(parse_number(args[0])), buff, bp);
@@ -889,14 +889,14 @@ FUNCTION(fun_round)
   bool pad = 0;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   } else
     n = parse_number(args[0]);
 
   if (nargs >= 2) {
     if (!is_uinteger(args[1])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     places = parse_uinteger(args[1]);
@@ -943,7 +943,7 @@ FUNCTION(fun_sin)
 {
   NVAL angle, s;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   angle = angle_to_rad(parse_number(args[0]), args[1]);
@@ -958,7 +958,7 @@ FUNCTION(fun_sin)
 #ifdef HAVE_FETESTEXCEPT
   if (errno ||
       fetestexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #endif
@@ -971,12 +971,12 @@ FUNCTION(fun_asin)
 {
   NVAL num;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   num = parse_number(args[0]);
   if ((num < -1) || (num > 1)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   safe_number(rad_to_angle(asin(num), args[1]), buff, bp);
@@ -987,7 +987,7 @@ FUNCTION(fun_cos)
 {
   NVAL angle, c;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   angle = angle_to_rad(parse_number(args[0]), args[1]);
@@ -1002,7 +1002,7 @@ FUNCTION(fun_cos)
 #ifdef HAVE_FETESTEXCEPT
   if (errno ||
       fetestexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #endif
@@ -1015,12 +1015,12 @@ FUNCTION(fun_acos)
 {
   NVAL num;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   num = parse_number(args[0]);
   if ((num < -1) || (num > 1)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   safe_number(rad_to_angle(acos(num), args[1]), buff, bp);
@@ -1031,14 +1031,14 @@ FUNCTION(fun_tan)
 {
   NVAL angle, t;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   angle = angle_to_rad(parse_number(args[0]), args[1]);
 
   if (fmod(fabs(angle), M_PI_2) == 0.0 && fmod(fabs(angle), M_PI) != 0.0) {
     /* To infinity and beyond! */
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #ifdef HAVE_FECLEAREXCEPT
@@ -1051,7 +1051,7 @@ FUNCTION(fun_tan)
 #ifdef HAVE_FETESTEXCEPT
   if (errno ||
       fetestexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #endif
@@ -1064,7 +1064,7 @@ FUNCTION(fun_atan)
 {
   NVAL angle;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   angle = parse_number(args[0]);
@@ -1076,7 +1076,7 @@ FUNCTION(fun_atan2)
 {
   NVAL x, y;
   if (!is_number(args[0]) || !is_number(args[1])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   x = parse_number(args[0]);
@@ -1093,7 +1093,7 @@ FUNCTION(fun_e)
   }
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   safe_number(exp(parse_number(args[0])), buff, bp);
@@ -1105,7 +1105,7 @@ FUNCTION(fun_power)
   NVAL num, m, p;
 
   if (!is_number(args[0]) || !is_number(args[1])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   num = parse_number(args[0]);
@@ -1121,7 +1121,7 @@ FUNCTION(fun_power)
 #ifdef HAVE_FETESTEXCEPT
   if (errno ||
       fetestexcept(FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #endif
@@ -1134,13 +1134,13 @@ FUNCTION(fun_ln)
 {
   NVAL num;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   num = parse_number(args[0]);
 
   if (num < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   safe_number(log(num), buff, bp);
@@ -1161,13 +1161,13 @@ FUNCTION(fun_log)
   NVAL num;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   num = parse_number(args[0]);
 
   if (num < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   if (nargs == 2) {
@@ -1177,7 +1177,7 @@ FUNCTION(fun_log)
       if (args[1][0] == 'e' && args[1][1] == '\0') {
         base_is_e = true;
       } else {
-        safe_str(T(e_nums), buff, bp);
+        safe_str(e_nums, buff, bp);
         return;
       }
     } else
@@ -1202,7 +1202,7 @@ FUNCTION(fun_sqrt)
 {
   NVAL num;
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   num = parse_number(args[0]);
@@ -1220,11 +1220,11 @@ FUNCTION(fun_root)
   int sign = 0;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
   if (!is_integer(args[1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   x = parse_number(args[0]);
@@ -1367,7 +1367,7 @@ FUNCTION(fun_fraction)
   NVAL n;
 
   if (!is_number(args[0])) {
-    safe_str(T(e_num), buff, bp);
+    safe_str(e_num, buff, bp);
     return;
   }
 
@@ -1649,18 +1649,18 @@ FUNCTION(fun_spellnum)
     if (*pnumber == '.') {
       if (ordinal_mode) {
         /* Only integers may be ordinalized */
-        safe_str(T(e_int), buff, bp);
+        safe_str(e_int, buff, bp);
         return;
       }
       if (dot) {
-        safe_str(T(e_num), buff, bp);
+        safe_str(e_num, buff, bp);
         return;
       }
       dot = 1;         /* allow only 1 dot in a number */
       *pnumber = '\0'; /* devide the string */
       pnum2 = pnumber + 1;
     } else if (!isdigit(*pnumber)) {
-      safe_str(T(e_num), buff, bp);
+      safe_str(e_num, buff, bp);
       return;
     }
     pnumber++;
@@ -1673,7 +1673,7 @@ FUNCTION(fun_spellnum)
 
   /* Max number is 999,999,999,999,999.999,999,999,999 */
   if (len1 > 15 || len2 > 14) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -1734,7 +1734,7 @@ FUNCTION(fun_bound)
 {
   if (!is_number(args[0]) || !is_number(args[1]) ||
       (nargs == 3 && !is_number(args[2]))) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
 
@@ -1752,7 +1752,7 @@ FUNCTION(fun_bnand)
 {
   UIVAL retval;
   if (!is_uival(args[0]) || !is_uival(args[1])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
   retval = parse_uival(args[0]) & (~parse_uival(args[1]));
@@ -1766,7 +1766,7 @@ FUNCTION(fun_bxor) { math_bxor(args, nargs, buff, bp); }
 FUNCTION(fun_bnot)
 {
   if (!is_uival(args[0])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   safe_uinteger(~parse_uival(args[0]), buff, bp);
