@@ -1870,7 +1870,7 @@ FUNCTION(fun_baseconv)
   const signed char *tobase = to_base_36;
 
   if (!(is_integer(args[1]) && is_integer(args[2]))) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
 
@@ -1950,7 +1950,7 @@ MATH_FUNC(math_add)
 
   for (n = 0; n < nptr; n++) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     result += parse_number(ptr[n]);
@@ -1991,7 +1991,7 @@ MATH_FUNC(math_sub)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
 
@@ -1999,7 +1999,7 @@ MATH_FUNC(math_sub)
 
   for (n = 1; n < nptr; n++) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     result -= parse_number(ptr[n]);
@@ -2019,14 +2019,14 @@ MATH_FUNC(math_mul)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   result = parse_number(ptr[0]);
 
   for (n = 1; n < nptr; n++) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     result *= parse_number(ptr[n]);
@@ -2045,7 +2045,7 @@ MATH_FUNC(math_min)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   result = parse_number(ptr[0]);
@@ -2053,7 +2053,7 @@ MATH_FUNC(math_min)
   for (n = 1; n < nptr; n++) {
     NVAL test;
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     test = parse_number(ptr[n]);
@@ -2073,7 +2073,7 @@ MATH_FUNC(math_max)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   result = parse_number(ptr[0]);
@@ -2081,7 +2081,7 @@ MATH_FUNC(math_max)
   for (n = 1; n < nptr; n++) {
     NVAL test;
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     test = parse_number(ptr[n]);
@@ -2102,7 +2102,7 @@ MATH_FUNC(math_mean)
 
   for (n = 0; n < nptr; n++) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     result += parse_number(ptr[n]);
@@ -2124,7 +2124,7 @@ MATH_FUNC(math_div)
   }
 
   if (!is_ival(ptr[0])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   divresult = parse_ival(ptr[0]);
@@ -2134,7 +2134,7 @@ MATH_FUNC(math_div)
     lldiv_t q;
 
     if (!is_ival(ptr[n])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     temp = parse_ival(ptr[n]);
@@ -2167,7 +2167,7 @@ MATH_FUNC(math_floordiv)
   }
 
   if (!is_ival(ptr[0])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   divresult = parse_ival(ptr[0]);
@@ -2175,7 +2175,7 @@ MATH_FUNC(math_floordiv)
   for (n = 1; n < nptr; n++) {
     IVAL temp;
     if (!is_ival(ptr[n])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     temp = parse_ival(ptr[n]);
@@ -2217,7 +2217,7 @@ MATH_FUNC(math_fdiv)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   result = parse_number(ptr[0]);
@@ -2225,7 +2225,7 @@ MATH_FUNC(math_fdiv)
   for (n = 1; n < nptr; n++) {
     NVAL temp;
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     temp = parse_number(ptr[n]);
@@ -2252,7 +2252,7 @@ MATH_FUNC(math_modulo)
   }
 
   if (!is_ival(ptr[0])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   divresult = parse_ival(ptr[0]);
@@ -2260,7 +2260,7 @@ MATH_FUNC(math_modulo)
   for (n = 1; n < nptr; n++) {
     IVAL temp;
     if (!is_ival(ptr[n])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     temp = parse_ival(ptr[n]);
@@ -2302,7 +2302,7 @@ MATH_FUNC(math_remainder)
   }
 
   if (!is_ival(ptr[0])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   divresult = parse_ival(ptr[0]);
@@ -2312,7 +2312,7 @@ MATH_FUNC(math_remainder)
     lldiv_t r;
 
     if (!is_ival(ptr[n])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     temp = parse_ival(ptr[n]);
@@ -2344,7 +2344,7 @@ MATH_FUNC(math_band)
   }
 
   if (!is_uival(ptr[0])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
 
@@ -2352,7 +2352,7 @@ MATH_FUNC(math_band)
 
   for (n = 1; n < nptr; n++) {
     if (!is_uival(ptr[n])) {
-      safe_str(T(e_uints), buff, bp);
+      safe_str(e_uints, buff, bp);
       return;
     }
     bretval &= parse_uival(ptr[n]);
@@ -2371,7 +2371,7 @@ MATH_FUNC(math_bor)
   }
 
   if (!is_uival(ptr[0])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
 
@@ -2379,7 +2379,7 @@ MATH_FUNC(math_bor)
 
   for (n = 1; n < nptr; n++) {
     if (!is_uival(ptr[n])) {
-      safe_str(T(e_uints), buff, bp);
+      safe_str(e_uints, buff, bp);
       return;
     }
     bretval |= parse_uival(ptr[n]);
@@ -2398,7 +2398,7 @@ MATH_FUNC(math_bxor)
   }
 
   if (!is_uival(ptr[0])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
 
@@ -2406,7 +2406,7 @@ MATH_FUNC(math_bxor)
 
   for (n = 1; n < nptr; n++) {
     if (!is_uival(ptr[n])) {
-      safe_str(T(e_uints), buff, bp);
+      safe_str(e_uints, buff, bp);
       return;
     }
     bretval ^= parse_uival(ptr[n]);
@@ -2503,13 +2503,13 @@ lmathcomp(char **ptr, int nptr, char *buff, char **bp, int eqokay, int isgt)
   }
 
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   prev = parse_number(ptr[0]);
   for (n = 1; n < nptr; n++, prev = next) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     next = parse_number(ptr[n]);
@@ -2541,13 +2541,13 @@ MATH_FUNC(math_neq)
   }
 
   if (!is_number(ptr[1])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   prev = parse_number(ptr[0]);
   for (n = 1; n < nptr; n++, prev = next) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     next = parse_number(ptr[n]);
@@ -2593,7 +2593,7 @@ MATH_FUNC(math_median)
 
   for (n = 0; n < nptr; n++) {
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       mush_free(numbers, "number_array");
       return;
     }
@@ -2615,7 +2615,7 @@ MATH_FUNC(math_stddev)
     return;
   }
   if (!is_number(ptr[0])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   m = parse_number(ptr[0]);
@@ -2624,7 +2624,7 @@ MATH_FUNC(math_stddev)
     om = m;
     os = s;
     if (!is_number(ptr[n])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     v = parse_number(ptr[n]);
@@ -2646,7 +2646,7 @@ MATH_FUNC(math_dist2d)
 
   if (!is_number(ptr[0]) || !is_number(ptr[1]) || !is_number(ptr[2]) ||
       !is_number(ptr[3])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   d1 = parse_number(ptr[0]) - parse_number(ptr[2]);
@@ -2669,7 +2669,7 @@ MATH_FUNC(math_dist3d)
 
   if (!is_number(ptr[0]) || !is_number(ptr[1]) || !is_number(ptr[2]) ||
       !is_number(ptr[3]) || !is_number(ptr[4]) || !is_number(ptr[5])) {
-    safe_str(T(e_nums), buff, bp);
+    safe_str(e_nums, buff, bp);
     return;
   }
   d1 = parse_number(ptr[0]) - parse_number(ptr[3]);
