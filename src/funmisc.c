@@ -140,13 +140,13 @@ FUNCTION(fun_pemit)
   int flags = PEMIT_LIST | PEMIT_SILENT;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nspemit" : "@pemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (ns)
@@ -204,13 +204,13 @@ FUNCTION(fun_oemit)
   int flags = ns ? PEMIT_SPOOF : 0;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nsoemit" : "@oemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_oemit_list(executor, executor, args[0], args[1], flags, NULL, pe_info);
@@ -223,13 +223,13 @@ FUNCTION(fun_emit)
   int flags = ns ? PEMIT_SPOOF : 0;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nsemit" : "@emit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_emit(executor, executor, args[0], flags, pe_info);
@@ -245,13 +245,13 @@ FUNCTION(fun_remit)
     flags |= PEMIT_SPOOF;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nsremit" : "@remit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_remit(executor, executor, args[0], args[1], flags, NULL, pe_info);
@@ -264,13 +264,13 @@ FUNCTION(fun_lemit)
   int flags = ns ? PEMIT_SPOOF : 0;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nslemit" : "@lemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_lemit(executor, executor, args[0], flags, pe_info);
@@ -283,13 +283,13 @@ FUNCTION(fun_zemit)
   int flags = ns ? PEMIT_SPOOF : 0;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nszemit" : "@zemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   do_zemit(executor, args[0], args[1], flags);
@@ -302,13 +302,13 @@ FUNCTION(fun_prompt)
   int flags = PEMIT_LIST | PEMIT_PROMPT;
 
   if (!FUNCTION_SIDE_EFFECTS) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
 
   if (!command_check_byname(executor, ns ? "@nspemit" : "@pemit", pe_info) ||
       fun->flags & FN_NOSIDEFX) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (ns)
@@ -334,12 +334,12 @@ FUNCTION(fun_setq)
     if (ValidQregName(args[n])) {
       if (!PE_Setq(pe_info, args[n], args[n + 1])) {
         if (!invalid)
-          safe_str(T(e_toomanyregs), buff, bp);
+          safe_str(e_toomanyregs, buff, bp);
         invalid = 1;
       }
     } else {
       if (!invalid)
-        safe_str(T(e_badregname), buff, bp);
+        safe_str(e_badregname, buff, bp);
       invalid = 1;
     }
   }
@@ -383,7 +383,7 @@ FUNCTION(fun_letq)
       *nbp = '\0';
 
       if (!ValidQregName(nbuf)) {
-        safe_str(T(e_badregname), buff, bp);
+        safe_str(e_badregname, buff, bp);
         goto cleanup;
       }
 
@@ -730,7 +730,7 @@ FUNCTION(fun_r)
     if (ValidQregName(args[0]))
       safe_str(PE_Getq(pe_info, args[0]), buff, bp);
     else
-      safe_str(T(e_badregname), buff, bp);
+      safe_str(e_badregname, buff, bp);
     break;
   case PE_REGS_ARG:
     s = pi_regs_get_env(pe_info, args[0]);
@@ -749,13 +749,13 @@ FUNCTION(fun_r)
     if ((*args[0] == 'l' || *args[0] == 'L') && !args[0][1])
       level = total;
     else if (!is_strict_number(args[0])) {
-      safe_str(T(e_badregname), buff, bp);
+      safe_str(e_badregname, buff, bp);
       return;
     } else {
       level = parse_integer(args[0]);
     }
     if (level < 0 || level > total) {
-      safe_str(T(e_argrange), buff, bp);
+      safe_str(e_argrange, buff, bp);
     } else {
       if (type == PE_REGS_ITER)
         safe_str(PE_Get_Itext(pe_info, level), buff, bp);
@@ -787,14 +787,14 @@ FUNCTION(fun_rand)
   /* Otherwise, an integer in a user-supplied range */
 
   if (!is_strict_integer(args[0])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   if (nargs == 1) {
     low = lowint = 0;
     highint = parse_integer(args[0]);
     if (highint == 0) {
-      safe_str(T(e_range), buff, bp);
+      safe_str(e_range, buff, bp);
       return;
     } else if (highint < 0) {
       high = offset = (highint * -1);
@@ -805,7 +805,7 @@ FUNCTION(fun_rand)
     high -= 1;
   } else {
     if (!is_strict_integer(args[1])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     lowint = parse_integer(args[0]);
@@ -838,7 +838,7 @@ FUNCTION(fun_die)
   int show_all = 0;
 
   if (!is_uinteger(args[0]) || !is_uinteger(args[1])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
   n = parse_uinteger(args[0]);
@@ -976,12 +976,12 @@ FUNCTION(fun_stext)
   } else if (is_strict_integer(args[0])) {
     i = parse_integer(args[0]);
   } else {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
 
   if (i < 0 || i > maxlev) {
-    safe_str(T(e_argrange), buff, bp);
+    safe_str(e_argrange, buff, bp);
     return;
   }
   safe_str(PE_Get_Stext(pe_info, i), buff, bp);
@@ -1344,7 +1344,7 @@ FUNCTION(fun_scan)
     if (arglens[0]) {
       thing = match_thing(executor, args[0]);
       if (!GoodObject(thing)) {
-        safe_str(T(e_notvis), buff, bp);
+        safe_str(e_notvis, buff, bp);
         return;
       }
     }
@@ -1493,12 +1493,12 @@ FUNCTION(fun_benchmark)
   dbref thing = NOTHING;
 
   if (!is_number(args[1])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   n = parse_number(args[1]);
   if (n < 1) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
 
