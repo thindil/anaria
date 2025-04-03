@@ -188,7 +188,7 @@ FUNCTION(fun_subj)
 
   thing = match_thing(executor, args[0]);
   if (thing == NOTHING) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   safe_str(subj[get_gender(thing)], buff, bp);
@@ -201,7 +201,7 @@ FUNCTION(fun_poss)
 
   thing = match_thing(executor, args[0]);
   if (thing == NOTHING) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   safe_str(poss[get_gender(thing)], buff, bp);
@@ -214,7 +214,7 @@ FUNCTION(fun_obj)
 
   thing = match_thing(executor, args[0]);
   if (thing == NOTHING) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   safe_str(obj[get_gender(thing)], buff, bp);
@@ -227,7 +227,7 @@ FUNCTION(fun_aposs)
 
   thing = match_thing(executor, args[0]);
   if (thing == NOTHING) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   safe_str(absp[get_gender(thing)], buff, bp);
@@ -269,7 +269,7 @@ FUNCTION(fun_mid)
   int pos, len;
 
   if (!is_integer(args[1]) || !is_integer(args[2])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
 
@@ -278,7 +278,7 @@ FUNCTION(fun_mid)
   len = parse_integer(args[2]);
 
   if (pos < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     free_ansi_string(as);
     return;
   }
@@ -301,13 +301,13 @@ FUNCTION(fun_left)
   ansi_string *as;
 
   if (!is_integer(args[1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   len = parse_integer(args[1]);
 
   if (len < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -323,13 +323,13 @@ FUNCTION(fun_right)
   ansi_string *as;
 
   if (!is_integer(args[1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   len = parse_integer(args[1]);
 
   if (len < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -348,7 +348,7 @@ FUNCTION(fun_delete)
   int pos, num;
 
   if (!is_integer(args[1]) || !is_integer(args[2])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
 
@@ -356,7 +356,7 @@ FUNCTION(fun_delete)
   num = parse_integer(args[2]);
 
   if (pos < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
@@ -388,13 +388,13 @@ FUNCTION(fun_str_rep_or_ins)
   bool inserting = 1;
 
   if (!is_integer(args[1])) {
-    safe_str(T(e_ints), buff, bp);
+    safe_str(e_ints, buff, bp);
     return;
   }
   start = parse_integer(args[1]);
 
   if (start < 0) {
-    safe_str(T(e_argrange), buff, bp);
+    safe_str(e_argrange, buff, bp);
     return;
   }
 
@@ -402,12 +402,12 @@ FUNCTION(fun_str_rep_or_ins)
     /* strreplace - arg 2 is a length, arg
      * 3 is the string to add */
     if (!is_integer(args[2])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     len = parse_integer(args[2]);
     if (len < 0) {
-      safe_str(T(e_argrange), buff, bp);
+      safe_str(e_argrange, buff, bp);
       return;
     }
     srcarg = 3;
@@ -474,7 +474,7 @@ FUNCTION(fun_comp)
   }
   case 'N': /* Integers */
     if (!is_strict_integer(args[0]) || !is_strict_integer(args[1])) {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
     safe_integer(comp_gencomp(executor, args[0], args[1], NUMERIC_LIST), buff,
@@ -482,7 +482,7 @@ FUNCTION(fun_comp)
     return;
   case 'F':
     if (!is_strict_number(args[0]) || !is_strict_number(args[1])) {
-      safe_str(T(e_nums), buff, bp);
+      safe_str(e_nums, buff, bp);
       return;
     }
     safe_integer(comp_gencomp(executor, args[0], args[1], FLOAT_LIST), buff,
@@ -562,7 +562,7 @@ FUNCTION(fun_strmatch)
         if (ValidQregName(qregs[i])) {
           PE_Setq(pe_info, qregs[i], ret[i]);
         } else if (qregs[i][0] != '-' || qregs[i][1]) {
-          safe_str(T(e_badregname), buff, bp);
+          safe_str(e_badregname, buff, bp);
         }
       }
     }
@@ -840,7 +840,7 @@ FUNCTION(fun_repeat)
   char *ap;
 
   if (!is_integer(args[1])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   times = parse_integer(args[1]);
@@ -919,7 +919,7 @@ FUNCTION(fun_ljust)
   char fillstr[BUFFER_LEN], *fp;
 
   if (!is_uinteger(args[1])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   len = ansi_strlen(args[0]);
@@ -980,7 +980,7 @@ FUNCTION(fun_rjust)
   char fillstr[BUFFER_LEN], *fp;
 
   if (!is_uinteger(args[1])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   len = ansi_strlen(args[0]);
@@ -1040,7 +1040,7 @@ FUNCTION(fun_center)
   ansi_string *as;
 
   if (!is_uinteger(args[1])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   width = parse_uinteger(args[1]);
@@ -1394,7 +1394,7 @@ FUNCTION(fun_space)
   size_t s;
 
   if (!is_strict_uinteger(args[0])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   s = parse_uinteger(args[0]);
@@ -1414,7 +1414,7 @@ FUNCTION(fun_beep)
 
   if (nargs) {
     if (!is_integer(args[0])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     k = parse_integer(args[0]);
@@ -1422,7 +1422,7 @@ FUNCTION(fun_beep)
     k = 1;
 
   if ((k <= 0) || (k > 5)) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
   safe_fill(BEEP_CHAR, k, buff, bp);
@@ -1451,7 +1451,7 @@ FUNCTION(fun_chr)
   int c;
 
   if (!is_strict_uinteger(args[0])) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
   c = parse_integer(args[0]);
@@ -2195,7 +2195,7 @@ FUNCTION(fun_speak)
   } else {
     speaker = match_thing(executor, args[0]);
     if (speaker == NOTHING || speaker == AMBIGUOUS) {
-      safe_str(T(e_match), buff, bp);
+      safe_str(e_match, buff, bp);
       return;
     }
     speaker_str = unparse_dbref(speaker);
@@ -2217,7 +2217,7 @@ FUNCTION(fun_speak)
       /* we have a transform attr */
       transform = 1;
       if (!fetch_ufun_attrib(args[3], executor, &transufun, UFUN_DEFAULT)) {
-        safe_str(T(e_atrperm), buff, bp);
+        safe_str(e_atrperm, buff, bp);
         return;
       }
       if (nargs > 4) {
@@ -2225,7 +2225,7 @@ FUNCTION(fun_speak)
           /* we have an attr to use when transform returns an empty string */
           null = 1;
           if (!fetch_ufun_attrib(args[4], executor, &nullufun, UFUN_DEFAULT)) {
-            safe_str(T(e_atrperm), buff, bp);
+            safe_str(e_atrperm, buff, bp);
             return;
           }
         }
@@ -2393,7 +2393,7 @@ FUNCTION(fun_render)
       if (Can_Nspemit(executor)) {
         flags |= MSG_XTERM256;
       } else {
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
         return;
       }
     } else if (string_prefix("noaccents", word))
