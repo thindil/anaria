@@ -49,12 +49,12 @@ FUNCTION(fun_timefmt)
   if (nargs >= 2 && args[1] && *args[1]) {
 
     if (!is_integer(args[1])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     tt = parse_integer(args[1]);
     if (errno == ERANGE) {
-      safe_str(T(e_range), buff, bp);
+      safe_str(e_range, buff, bp);
       return;
     }
 #ifndef HAVE_GETDATE
@@ -62,7 +62,7 @@ FUNCTION(fun_timefmt)
      * so we can't assign an unsigned int to it safely
      */
     if (tt < 0) {
-      safe_str(T(e_uint), buff, bp);
+      safe_str(e_uint, buff, bp);
       return;
     }
 #endif
@@ -172,17 +172,17 @@ FUNCTION(fun_convsecs)
   bool utc = 0;
 
   if (!is_integer(args[0])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
   tt = parse_integer(args[0]);
   if (errno == ERANGE) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 #ifndef HAVE_GETDATE
   if (tt < 0) {
-    safe_str(T(e_uint), buff, bp);
+    safe_str(e_uint, buff, bp);
     return;
   }
 #endif
@@ -361,25 +361,25 @@ FUNCTION(fun_etime)
   char tbuf[BUFFER_LEN];
 
   if (!is_integer(args[0])) {
-    safe_str(T(e_int), buff, bp);
+    safe_str(e_int, buff, bp);
     return;
   }
 
   secs = parse_integer(args[0]);
   if (errno == ERANGE || secs < 0) {
-    safe_str(T(e_range), buff, bp);
+    safe_str(e_range, buff, bp);
     return;
   }
 
   if (nargs == 2) {
     if (!is_integer(args[1])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
 
     len = parse_integer(args[1]);
     if (len > BUFFER_LEN - 1 || len < 0) {
-      safe_str(T(e_range), buff, bp);
+      safe_str(e_range, buff, bp);
       return;
     }
   } else
@@ -485,14 +485,14 @@ FUNCTION(fun_timestring)
   unsigned int days, hours, mins;
 
   if (!is_uinteger(args[0])) {
-    safe_str(T(e_uints), buff, bp);
+    safe_str(e_uints, buff, bp);
     return;
   }
   if (nargs == 1)
     pad = 0;
   else {
     if (!is_uinteger(args[1])) {
-      safe_str(T(e_uints), buff, bp);
+      safe_str(e_uints, buff, bp);
       return;
     }
     pad = parse_uinteger(args[1]);
@@ -697,17 +697,17 @@ FUNCTION(fun_isdaylight)
 
   if (nargs >= 1 && args[0] && *args[0]) {
     if (!is_integer(args[0])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     when = parse_integer(args[0]);
     if (errno == ERANGE) {
-      safe_str(T(e_range), buff, bp);
+      safe_str(e_range, buff, bp);
       return;
     }
 #ifndef HAVE_GETDATE
     if (when < 0) {
-      safe_str(T(e_uint), buff, bp);
+      safe_str(e_uint, buff, bp);
       return;
     }
 #endif
