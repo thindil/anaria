@@ -59,12 +59,12 @@ FUNCTION(fun_fn)
     *ap++ = '\0';
     as = match_thing(executor, tbuf);
     if (as == NOTHING) {
-      safe_str(T(e_notvis), buff, bp);
+      safe_str(e_notvis, buff, bp);
       return;
     }
     if (!(!FUNCTION_SIDE_EFFECTS && See_All(executor)) &&
         !controls(executor, as)) {
-      safe_str(T(e_perm), buff, bp);
+      safe_str(e_perm, buff, bp);
       return;
     }
     eflags |= PE_NODEBUG;
@@ -222,7 +222,7 @@ FUNCTION(fun_ufun)
   }
 
   if (!fetch_ufun_attrib(args[0], executor, &ufun, flags)) {
-    safe_str(T(ufun.errmess), buff, bp);
+    safe_str(ufun.errmess, buff, bp);
     return;
   }
 
@@ -383,7 +383,7 @@ FUNCTION(fun_zfun)
   *rp = '\0';
   /* find the user function attribute */
   if (!fetch_ufun_attrib(rbuff, executor, &ufun, UFUN_OBJECT)) {
-    safe_str(T(ufun.errmess), buff, bp);
+    safe_str(ufun.errmess, buff, bp);
     return;
   }
 
