@@ -1142,7 +1142,7 @@ FUNCTION(fun_textfile)
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -1177,7 +1177,7 @@ FUNCTION(fun_textentries)
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (nargs > 2)
@@ -1207,7 +1207,7 @@ FUNCTION(fun_textsearch)
     return;
   }
   if (h->admin && !Hasprivs(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (nargs > 2)
@@ -1838,7 +1838,7 @@ FUNCTION(fun_suggest)
 
   if (nargs == 4) {
     if (!is_integer(args[3])) {
-      safe_str(T(e_int), buff, bp);
+      safe_str(e_int, buff, bp);
       return;
     }
     top = parse_integer(args[3]);
