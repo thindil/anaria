@@ -340,14 +340,14 @@ FUNCTION(fun_malias)
           safe_dbref(m->members[i], buff, bp);
         }
       } else {
-        safe_str(T(e_perm), buff, bp);
+        safe_str(e_perm, buff, bp);
       }
       return;
     } else {
       /* Perhaps it's a delimiter? */
       if (arglens[0] > 1) {
         /* Oops, not if it's longer than one character */
-        safe_str(T(e_match), buff, bp);
+        safe_str(e_match, buff, bp);
         return;
       }
       if (!delim_check(buff, bp, nargs, args, 1, &sep))
