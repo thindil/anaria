@@ -2128,7 +2128,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
   if (CALL_LIMIT && (pe_info->call_depth++ > CALL_LIMIT)) {
     const char *e_msg;
     size_t e_len;
-    e_msg = T(e_call);
+    e_msg = e_call;
     e_len = strlen(e_msg);
     if ((buff + e_len > *bp) || strcmp(e_msg, *bp - e_len))
       safe_strl(e_msg, e_len, buff, bp);
@@ -2437,7 +2437,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
             safe_chr(':', buff, bp);
             safe_integer(CreTime(enactor), buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case '?': /* function limits */
@@ -2453,7 +2453,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
           if (GoodObject(enactor)) {
             safe_str(accented_name(enactor), buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case '+': /* argument count */
@@ -2488,7 +2488,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
               gender = get_gender(enactor);
             safe_str(absp[gender], buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case 'B':
@@ -2512,17 +2512,17 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
               break;
             }
             if (!isdigit(nextc)) {
-              safe_str(T(e_int), buff, bp);
+              safe_str(e_int, buff, bp);
               break;
             }
             inum_this = nextc - '0';
             if (inum_this < 0 || inum_this > itmp) {
-              safe_str(T(e_argrange), buff, bp);
+              safe_str(e_argrange, buff, bp);
             } else {
               safe_str(PE_Get_Itext(pe_info, inum_this), buff, bp);
             }
           } else {
-            safe_str(T(e_argrange), buff, bp);
+            safe_str(e_argrange, buff, bp);
           }
           break;
         case '$':
@@ -2535,18 +2535,18 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
             if (nextc == 'l' || nextc == 'L') {
               inum_this = itmp;
             } else if (!isdigit(nextc)) {
-              safe_str(T(e_int), buff, bp);
+              safe_str(e_int, buff, bp);
               break;
             } else {
               inum_this = nextc - '0';
             }
             if (inum_this < 0 || inum_this > itmp) {
-              safe_str(T(e_argrange), buff, bp);
+              safe_str(e_argrange, buff, bp);
             } else {
               safe_str(PE_Get_Stext(pe_info, inum_this), buff, bp);
             }
           } else {
-            safe_str(T(e_argrange), buff, bp);
+            safe_str(e_argrange, buff, bp);
           }
           break;
         case 'U':
@@ -2568,7 +2568,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
           if (GoodObject(enactor)) {
             safe_str(Name(enactor), buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case 'k':
@@ -2576,7 +2576,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
           if (GoodObject(enactor))
             safe_str(ansi_name(enactor, 0, NULL, 0), buff, bp);
           else
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           break;
         case 'O':
         case 'o': /* enactor objective pronoun */
@@ -2585,7 +2585,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
               gender = get_gender(enactor);
             safe_str(obj[gender], buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case 'P':
@@ -2595,7 +2595,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
               gender = get_gender(enactor);
             safe_str(poss[gender], buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case 'Q':
@@ -2639,7 +2639,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
               gender = get_gender(enactor);
             safe_str(subj[gender], buff, bp);
           } else {
-            safe_str(T(e_notvis), buff, bp);
+            safe_str(e_notvis, buff, bp);
           }
           break;
         case 'T':
@@ -2829,7 +2829,7 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
             (global_fun_invocations >= FUNCTION_LIMIT * 5)) {
           const char *e_msg;
           size_t e_len;
-          e_msg = T(e_invoke);
+          e_msg = e_invoke;
           e_len = strlen(e_msg);
           if ((buff + e_len > *bp) || strcmp(e_msg, *bp - e_len))
             safe_strl(e_msg, e_len, buff, bp);
@@ -2962,9 +2962,9 @@ process_expression(char *buff, char **bp, char const **str, dbref executor,
          * from the functions.  Bah. */
         if (denied) {
           if (fp->flags & FN_DISABLED)
-            safe_str(T(e_disabled), buff, bp);
+            safe_str(e_disabled, buff, bp);
           else
-            safe_str(T(e_perm), buff, bp);
+            safe_str(e_perm, buff, bp);
           goto free_func_args;
         } else {
           /* If we have the right number of args, eval the function.
