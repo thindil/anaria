@@ -314,7 +314,7 @@ GENRECORD(gen_magic)
         if (GoodObject(victim)) {
           safe_str(Name(victim), buff, &bp);
         } else {
-          safe_str(T(e_notvis), buff, &bp);
+          safe_str(e_notvis, buff, &bp);
         }
         break;
       }
