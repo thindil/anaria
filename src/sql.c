@@ -339,11 +339,11 @@ FUNCTION(fun_sql_escape)
   char bigbuff[BUFFER_LEN * 2 + 1];
   int chars_written;
   if (sql_platform() == SQL_PLATFORM_DISABLED) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
   if (!Sql_Ok(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   if (!args[0] || !*args[0])
@@ -404,7 +404,7 @@ FUNCTION(fun_sql_escape)
     }
   } break;
   default:
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
   if (chars_written == 0)
@@ -788,11 +788,11 @@ FUNCTION(fun_mapsql)
   MYSQL_FIELD *fields = NULL;
 #endif
   if (sql_platform() == SQL_PLATFORM_DISABLED) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
   if (!Sql_Ok(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -975,11 +975,11 @@ FUNCTION(fun_sql)
   bool free_cell = 0;
 
   if (sql_platform() == SQL_PLATFORM_DISABLED) {
-    safe_str(T(e_disabled), buff, bp);
+    safe_str(e_disabled, buff, bp);
     return;
   }
   if (!Sql_Ok(executor)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
