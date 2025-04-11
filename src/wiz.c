@@ -1428,7 +1428,7 @@ FUNCTION(fun_lsearch)
   struct search_spec spec;
 
   if (!command_check_byname(executor, "@search", pe_info)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -1751,7 +1751,7 @@ FUNCTION(fun_entrances)
   bool prived;
 
   if (!command_check_byname(executor, "@entrances", pe_info)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
 
@@ -1811,7 +1811,7 @@ FUNCTION(fun_entrances)
     } else if (is_dbref(args[2])) {
       spec.low = parse_dbref(args[2]);
     } else {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
   }
@@ -1821,7 +1821,7 @@ FUNCTION(fun_entrances)
     } else if (is_dbref(args[3])) {
       spec.high = parse_dbref(args[3]);
     } else {
-      safe_str(T(e_ints), buff, bp);
+      safe_str(e_ints, buff, bp);
       return;
     }
   }
@@ -2215,11 +2215,11 @@ FUNCTION(fun_objmem)
     thing = noisy_match_result(executor, args[0], NOTYPE, MAT_OBJECTS);
   }
   if (!GoodObject(thing)) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   if (!Can_Examine(executor, thing)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   safe_integer(mem_usage(thing), buff, bp);
@@ -2241,11 +2241,11 @@ FUNCTION(fun_playermem)
   else
     thing = lookup_player(args[0]);
   if (!GoodObject(thing) || !IsPlayer(thing)) {
-    safe_str(T(e_match), buff, bp);
+    safe_str(e_match, buff, bp);
     return;
   }
   if (!Can_Examine(executor, thing)) {
-    safe_str(T(e_perm), buff, bp);
+    safe_str(e_perm, buff, bp);
     return;
   }
   for (j = 0; j < db_top; j++)
