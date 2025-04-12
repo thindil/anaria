@@ -16,16 +16,6 @@
 
 extern dbref orator;
 
-#if defined(HAVE_GETTEXT) && !defined(DONT_TRANSLATE)
-/** Macro for a translated string */
-#define T(str) gettext(str)
-/** Macro to note that a string has a translation but not to translate */
-#define N_(str) gettext_noop(str)
-#else
-#define T(str) str
-#define N_(str) str
-#endif
-
 char *WIN32_CDECL tprintf(const char *fmt, ...)
   __attribute__((__format__(__printf__, 1, 2), deprecated));
 
