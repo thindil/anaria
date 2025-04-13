@@ -79,7 +79,7 @@ hdrs/gitinfo.h: $(wildcard .git/HEAD .git/index)
 	fi
 	@echo "/* Built at `date +%Y%m%d%H%M%S` */" >> hdrs/gitinfo.h
 
-install: localized all
+install: all
 	@if [ -f game/netmush ]; then rm -f game/netmush; fi
 	@if [ -f game/info_slave ]; then rm -f game/info_slave; fi
 	@if [ -f game/ssl_slave ]; then rm -f game/ssl_slave; fi
@@ -94,13 +94,6 @@ netmud:
 
 access:
 	utils/make_access_cnf.sh game
-
-pennmush.pot:
-	(cd src; make ../po/pennmush.pot)
-
-localized:
-	-echo "Localizing for your locale..."
-	-(cd po; @MAKE@ localized)
 
 portmsg:
 	(cd src; @MAKE@ portmsg "CC=$(CC)" "CCFLAGS=$(CCFLAGS)" \
