@@ -188,8 +188,6 @@ typedef bool _Bool;
 
 #undef HAVE_GETSERVBYNAME
 
-#undef HAVE_GETTEXT
-
 #undef HAVE_SETITIMER
 
 #undef HAVE_FORK
@@ -418,8 +416,6 @@ typedef bool _Bool;
 #undef HAVE_STRUCT_XUCRED
 
 #undef FORCE_IPV4
-
-#undef DONT_TRANSLATE
 
 #undef INFO_SLAVE
 

@@ -457,13 +457,6 @@ if test "$enable_ipv6" = "no"; then
 AC_DEFINE(FORCE_IPV4)
 fi
 
-AC_ARG_ENABLE(nls, AS_HELP_STRING([--disable-nls],
-  [Don't use message-translation]), enable_nls=$enableval, enable_nls=no)
-
-if test "$enable_nls" = "no"; then
-AC_DEFINE(DONT_TRANSLATE)
-fi
-
 if test -n "${USING_CYGWIN}${USING_WINDOWS}"; then
    # Don't use info_slave or ssl_slave on Windows targets
    default_enable_slaves=no
@@ -557,12 +550,6 @@ if test "$enable_info_slave" = yes; then
    echo "* Info slave will be used for hostname lookups."
 else
    echo "* Hostname lookups will be done by the mush process."
-fi
-
-if test "$enable_nls" = yes -a "${ac_cv_lib_intl_gettext:+set}" = set; then
-   echo "* Translation support: Yes"
-else
-   echo "* Translation support: No"
 fi
 
 if test "$enable_ipv6" = yes; then
