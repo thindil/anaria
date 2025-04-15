@@ -7341,7 +7341,7 @@ close_ssl_connections(void)
   /* Close clients */
   DESC_ITER (d) {
     if (d->ssl) {
-      queue_string_eol(d, "%s", T(ssl_shutdown_message));
+      queue_string_eol(d, "%s", ssl_shutdown_message);
       process_output(d);
       ssl_close_connection(d->ssl);
       d->ssl = NULL;
