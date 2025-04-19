@@ -212,6 +212,3 @@ globalinstall: install
 	@echo "** Files installed in $(GLOBAL_INSTALL). Feel free to move them."
 	@echo "** You can run $(GLOBAL_INSTALL)/ln-dir.sh to create a user directory,"
 	@echo "** or symlink that to somewhere easier to run. You may wish to strip them."
-
-htmldoc:
-	cd htmldoc && make
