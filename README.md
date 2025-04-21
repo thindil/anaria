@@ -8,13 +8,16 @@ identical like PennMUSH, with some changes:
 * Fixed some issues reported by cppcheck.
 * Added a simple WebSocket client, from: https://github.com/grapenut/websockclient
 * Removed some old documentation.
+* Removed multilanguage support.
 
 The list above will be updated over time. At the moment the work is focused on
-removing unnecessary for me options, like Pueblo, multilanguage support or web
-server support (not WebSocket support). And the next stage? We will see. :)
+removing unnecessary for me options, like Pueblo or web server support (not
+WebSocket support).
 
-Currently, all changes to the project are on the same license as PennMUSH, but
-this can change over time to BSD-3 license.
+Currently, all changes to the project are on the same license as PennMUSH.
+
+**IMPORTANT:** For now, the project is on hold due to lack of time on my part.
+I may return to it later.
 
 For read the original PennMUSH README.md please look at file
 [PennREADME.md](PennREADME.md). All instructions related to PennMUSH apply to
